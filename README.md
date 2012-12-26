@@ -1,4 +1,4 @@
 checkpoint
 ==========
 
-A tool aimed to generate a listing of checksums and filedates of LARGE amounts of files. It is able to resume computation after having been aborted. Its output is suitable as input for diff.
+An incremental, recursive checksum script which also adds filedates to the listing. Designed for LARGE amounts of input files. It is resumable, which means it can continue computation where it was aborted without recomputing the existing checksums. Its output is suitable as input for diff. 
