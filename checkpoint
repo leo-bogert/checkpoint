@@ -1,0 +1,205 @@
+#!/bin/bash
+set -o pipefail	# this is absolutely critical: make pipes exit with failure if any of the involved commands fails. the default is exit status of the last command.
+set -o nounset	# exit with error upon access of unset variable
+
+declare CHECKPATH
+declare OUTPUTDIR
+declare -A OUTPUTFILES
+OUTPUTFILES[CHECKPOINT]=""
+OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]=""
+OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]=""
+OUTPUTFILES[LOG]=""
+
+# key=path of file, value=checkpoint line as it should appear in the output
+declare -A OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX	# we CANNOT store the \0 character in bash variables so we don't include the "filepath\0" prefix, we echo it to the outputfile instead.
+declare -A OUTPUT_LINES_BY_PATH_DATE_ONLY
+declare -A OUTPUT_LINES_BY_PATH_SHA256_ONLY
+
+declare ABORTED="false"
+
+fail() {
+	echo "$@" >&2
+	exit 1
+}
+
+generate_files_and_directories() {
+	( mkdir -p "$OUTPUTDIR" &&
+	( [ "$(id -u -n)" != root ] || chown root:root "$OUTPUTDIR" ) &&
+	chmod 700 "$OUTPUTDIR" &&
+ 	touch "${OUTPUTFILES[@]}" &&
+	chmod 600 "${OUTPUTFILES[@]}" ) || fail "Output dir generation failed!"
+}
+
+redirect_stderr_to_log() {
+	exec 2>> "${OUTPUTFILES[LOG]}" || fail "Redirecting stderr to ${OUTPUTFILES[LOG]} failed!"
+}
+
+trap_signals() {
+	trap "interrupt_compute" HUP INT TERM
+}
+
+set_ioniceness() {
+	ionice -c 3 -p $$ || fail "ionice failed!"
+}
+
+load_existing_checkpoint() {
+	local filepath
+	local line_without_filepath_prefix
+	local split_line
+	local -i count=-1
+	
+	while true ; do
+		{ IFS= read -r -d $'\0' filepath ; } || break
+		
+		[ $count -eq -1 ] && 
+			case "$filepath" in
+				$'This checkpoint is complete.\n'|$'This checkpoint is INCOMPLETE but can be resumed.\n') 
+					let count++
+					continue ;; # Skip the header and resume this checkpoint
+				*)
+					fail "Input file was not from checkpoint-incremental!" ;;
+			esac
+		
+		IFS= read -r line_without_filepath_prefix || fail "Line $count is incomplete!"
+		
+		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
+		
+		# new data is complete.
+		# we don't read the old format files because they are not parseable since they don't delimit the filename with zero.
+		# instead we compute their data from the new format.
+		
+		IFS=$'\t' read -r -a split_line <<< "$line_without_filepath_prefix"
+		
+		local sha="${split_line[0]}"
+		local atime="${split_line[1]}"
+		local mtime="${split_line[2]}"
+		
+		[ "$sha" != "(directory)" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$filepath"]="$sha *$filepath"
+		OUTPUT_LINES_BY_PATH_DATE_ONLY["$filepath"]="$filepath"$'\t'"$atime"$'\t'"$mtime"$'\t'	# TODO: add birth
+		
+		let count++
+	done < "${OUTPUTFILES[CHECKPOINT]}"
+	
+	echo "Loaded $count existing checkpoint datasets." >&2
+}
+
+interrupt_compute() {
+	ABORTED=true
+	echo "Aborting computation due to signal!" >&2
+}
+
+compute() {
+	cd "$CHECKPATH" || fail "cd to $CHECKPATH failed!"
+	
+	local file
+	local -i skipped=0
+	
+	# Source of this magic: http://mywiki.wooledge.org/BashFAQ/020
+	# IFS= to prevent trimming the string, ie. removing leading/trailing whitespace
+	# -r = Backslash does not act as an escape character
+	# -d = Sets the delimiter to null
+	while IFS= read -r -d $'\0' file; do
+		[ "$ABORTED" != "false" ] && break
+		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -ne 0 ] && { let skipped++ ; continue ; }
+		
+		local sha=""
+		local stat=""
+		
+		if [ -f "$file" ] ; then
+			shaoutput="$(sha256sum --binary "$file")" && read -r -a sha_array <<< "$shaoutput" || sha_array[0]="(sha256sum failed!)"
+			sha="${sha_array[0]}"
+		elif [ -d "$file" ] ; then
+			sha="(directory)"
+		elif [ ! -e "$file" ]; then
+			echo "File deleted during processing: $file" >&2
+			continue
+		else
+			fail "Unexpected type of file: $file"
+		fi
+		
+		# TODO: "Birth: %w\t"
+		stat="$(stat --printf "Access: %x\tModify: %y\t" "$file")" || stat="(stat failed!)"
+		
+		# new format
+		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]=$'\t'"$sha"$'\t'"$stat"
+		
+		# old format of date listing
+		OUTPUT_LINES_BY_PATH_DATE_ONLY["$file"]="$file"$'\t'"$stat"
+		# old format of sha listing
+		[ -f "$file" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]="$sha *$file"
+
+	done < <(find . -mount \( -type f -o -type d \) -print0)
+	
+	echo "Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation" >&2
+}
+
+write_output() {
+	# truncate files
+	> "${OUTPUTFILES[CHECKPOINT]}"
+	> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]}"
+	> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
+	
+	local file
+	for file in "${OUTPUTFILES[@]}" ; do
+ 		{ [ "$ABORTED" = "false" ] && echo -n -e "This checkpoint is complete.\n\0" || echo -n -e "This checkpoint is INCOMPLETE but can be resumed.\n\0" ; } >> "$file"
+	done
+	
+	unset file
+	local file
+	while IFS= read -r -d $'\0' file ; do
+		{
+			echo -n "$file" ;
+			echo -n -e "\0"
+			echo "${OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[$file]}" ;	# "${array[$key]}" is sufficient, quoting of the key not needed
+		} >> "${OUTPUTFILES[CHECKPOINT]}"
+		
+		# old format with date only
+		echo "${OUTPUT_LINES_BY_PATH_DATE_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]}"
+		
+		# old format with sha only
+		[ ${#OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]} -ne 0 ] && echo "${OUTPUT_LINES_BY_PATH_SHA256_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
+	done < <(
+			for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
+				echo -n "$filepath"
+				echo -n -e "\0"
+			done | sort --stable --zero-terminated
+		)
+}
+
+main() {
+	set -o errexit # exit shell upon any error
+		[ $# -eq 2 ] || fail "Syntax: checkpoint <dir to generate checkpoint for> <output dir of checkpoint files>"
+
+		local checkpath_tmp="$1"
+		local outputdir_tmp="$2"
+		
+		# strip trailing slash
+		checkpath_tmp="${checkpath_tmp%/}"
+		outputdir_tmp="${outputdir_tmp%/}"
+		# make the directories absolute
+		[[ "$checkpath_tmp" != /* ]] && checkpath_tmp="$(pwd)"/"$checkpath_tmp"
+		[[ "$outputdir_tmp" != /* ]] && outputdir_tmp="$(pwd)"/"$outputdir_tmp"
+		
+		readonly CHECKPATH="$checkpath_tmp"
+		readonly OUTPUTDIR="$outputdir_tmp"
+		OUTPUTFILES[CHECKPOINT]="$OUTPUTDIR/checkpoint.txt"
+		OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]="$OUTPUTDIR/filedates.txt"
+		OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]="$OUTPUTDIR/files.sha256"
+		OUTPUTFILES[LOG]="$OUTPUTDIR/errors.log"	
+		readonly OUTPUTFILES
+
+		[ -d "$CHECKPATH" ] || fail "Dir to generate checkpoint for does not exist or is no directory: $CHECKPATH"
+		
+	set +o errexit # don't exit upon error. this is necessary for compute() especially because some files might be deleted during our huge execution time
+		
+	generate_files_and_directories # generate output dir before writing to logfile since it resides in it
+	redirect_stderr_to_log
+	trap_signals # trap signals after starting to log so we can log them
+	set_ioniceness
+	load_existing_checkpoint
+	compute
+	# TODO: remove_inexistant_files
+	write_output
+}
+
+main "$@"
