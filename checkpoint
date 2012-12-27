@@ -75,9 +75,10 @@ load_existing_checkpoint() {
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
 		
 		# new data is complete.
-		# we don't read the old format files because they are not parseable since they don't delimit the filename with zero.
-		# instead we compute their data from the new format.
+		# we don't read the old format files. instead we compute them from the new format data.
+		# - they could never be parsed correctly because # they delimit the filename with "\n" which is a valid character in linux filenames.
 		
+		# Split the line by \t
 		IFS=$'\t' read -r -a split_line <<< "$line_without_filepath_prefix"
 		
 		local sha="${split_line[0]}"
