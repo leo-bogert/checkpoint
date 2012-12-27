@@ -29,11 +29,13 @@ fail() {
 }
 
 generate_files_and_directories() {
-	( mkdir -p "$OUTPUTDIR" &&
-	( [ "$(id -u -n)" != root ] || chown root:root "$OUTPUTDIR" ) &&
-	chmod 700 "$OUTPUTDIR" &&
- 	touch "${OUTPUTFILES[@]}" &&
-	chmod 600 "${OUTPUTFILES[@]}" ) || fail "Output dir generation failed!"
+	(
+		mkdir -p "$OUTPUTDIR" &&
+		( [ "$(id -u -n)" != root ] || chown root:root "$OUTPUTDIR" ) &&
+		chmod 700 "$OUTPUTDIR" &&
+		touch "${OUTPUTFILES[@]}" &&
+		chmod 600 "${OUTPUTFILES[@]}"
+	) || fail "Output dir generation failed!"
 }
 
 redirect_stderr_to_log() {
