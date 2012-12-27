@@ -191,14 +191,14 @@ main() {
 		[[ "$outputdir_tmp" != /* ]] && outputdir_tmp="$(pwd)"/"$outputdir_tmp"
 		
 		readonly CHECKPATH="$checkpath_tmp"
+		[ -d "$CHECKPATH" ] || fail "Dir to generate checkpoint for does not exist or is no directory: $CHECKPATH"
+		
 		readonly OUTPUTDIR="$outputdir_tmp"
 		OUTPUTFILES[CHECKPOINT]="$OUTPUTDIR/checkpoint.txt"
 		OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]="$OUTPUTDIR/filedates.txt"
 		OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]="$OUTPUTDIR/files.sha256"
 		OUTPUTFILES[LOG]="$OUTPUTDIR/errors.log"	
 		readonly OUTPUTFILES
-
-		[ -d "$CHECKPATH" ] || fail "Dir to generate checkpoint for does not exist or is no directory: $CHECKPATH"
 		
 	set +o errexit # don't exit upon error. this is necessary for compute() especially because some files might be deleted during our huge execution time
 		
