@@ -40,7 +40,7 @@ redirect_stderr_to_log() {
 }
 
 trap_signals() {
-	trap "interrupt_compute" HUP INT TERM
+	trap "interrupt_compute" HUP INT TERM  || fail "trap failed!"
 }
 
 set_ioniceness() {
