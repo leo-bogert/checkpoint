@@ -94,8 +94,7 @@ load_existing_checkpoint() {
 }
 
 interrupt_compute() {
-	ABORTED=true
-	echo "Aborting computation due to signal!" >&2
+	ABORTED=true	
 }
 
 compute() {
@@ -109,7 +108,7 @@ compute() {
 	# -r = Backslash does not act as an escape character
 	# -d = Sets the delimiter to null
 	while IFS= read -r -d $'\0' file; do
-		[ "$ABORTED" != "false" ] && break
+		[ "$ABORTED" != "false" ] && { echo "Aborting computation due to signal!" >&2 ; break ; }
 		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -ne 0 ] && { let skipped++ ; continue ; }
 		
 		local sha=""
