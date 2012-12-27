@@ -54,23 +54,31 @@ load_existing_checkpoint() {
 	local filepath
 	local line_without_filepath_prefix
 	local split_line
-	local -i count=-1
+	local -i count=0
+	
+	[ ! -s "${OUTPUTFILES[CHECKPOINT]}" ] && { echo "No existing checkpoint found, creating a fresh one..." >&2 ; return 0 ; }
 	
 	while true ; do
-		{ IFS= read -r -d $'\0' filepath ; } || break
+		# The EOF marker is a line which contains one of the entries in the "case" statement below followed by \0 and nothing else.
+		# So we should always be able to read something which is terminated by \0
+		{ IFS= read -r -d $'\0' filepath ; } || fail "End of file marker not found - Input file is incomplete!"
 		
-		[ $count -eq -1 ] && 
+		# Each line is composed of the filenmae followed by \0 followed by the checkpoint data followed by \n
+		# If the checkpoint data cannot be read, we have reached the end of file. 
+		# The "filename" should be the EOF marker then. So we check whether it is.
+		if ! IFS= read -r line_without_filepath_prefix ; then
 			case "$filepath" in
 				$'This checkpoint is complete.\n')
 					fail "Checkpoint is complete already, nothing to do. Exiting." ;;
 				$'This checkpoint is INCOMPLETE but can be resumed.\n') 
-					let count++
-					continue ;; # Skip the header and resume this checkpoint
+					break ;; # The file was complete so we can finish the loop.
 				*)
-					fail "Input file was not from checkpoint-incremental!" ;;
+ 					fail "End of file marker not found - Input file is incomplete!" ;;
 			esac
+		fi
 		
-		IFS= read -r line_without_filepath_prefix || fail "Line $count is incomplete!"
+		[[ "$line_without_filepath_prefix" = *"(sha256sum failed!)"* ]] && continue
+		[[ "$line_without_filepath_prefix" = *"(stat failed!)"* ]] && continue
 		
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
 		
@@ -143,18 +151,21 @@ compute() {
 	echo "Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation" >&2
 }
 
-write_output() {
-	# truncate files
+truncate_output() {
 	> "${OUTPUTFILES[CHECKPOINT]}"
 	> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]}"
 	> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
-	
-	local file
-	for file in "${OUTPUTFILES[@]}" ; do
- 		{ [ "$ABORTED" = "false" ] && echo -n -e "This checkpoint is complete.\n\0" || echo -n -e "This checkpoint is INCOMPLETE but can be resumed.\n\0" ; } >> "$file"
+}
+
+write_eof_marker_to_output() {
+	for outputfile in "${OUTPUTFILES[@]}" ; do
+ 		{ [ "$ABORTED" = "false" ] && echo -n -e "This checkpoint is complete.\n\0" || echo -n -e "This checkpoint is INCOMPLETE but can be resumed.\n\0" ; } >> "$outputfile"
 	done
-	
-	unset file
+}
+
+write_output() {
+	truncate_output
+
 	local file
 	while IFS= read -r -d $'\0' file ; do
 		{
@@ -174,7 +185,10 @@ write_output() {
 				echo -n -e "\0"
 			done | sort --stable --zero-terminated
 		)
+
+	write_eof_marker_to_output
 }
+
 
 main() {
 	set -o errexit # exit shell upon any error
