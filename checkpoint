@@ -158,7 +158,7 @@ write_output() {
 	local file
 	while IFS= read -r -d $'\0' file ; do
 		{
-			echo -n "$file" ;
+			echo -n "$file"
 			echo -n -e "\0"
 			echo "${OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[$file]}" ;	# "${array[$key]}" is sufficient, quoting of the key not needed
 		} >> "${OUTPUTFILES[CHECKPOINT]}"
