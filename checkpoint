@@ -61,7 +61,9 @@ load_existing_checkpoint() {
 		
 		[ $count -eq -1 ] && 
 			case "$filepath" in
-				$'This checkpoint is complete.\n'|$'This checkpoint is INCOMPLETE but can be resumed.\n') 
+				$'This checkpoint is complete.\n')
+					fail "Checkpoint is complete already, nothing to do. Exiting." ;;
+				$'This checkpoint is INCOMPLETE but can be resumed.\n') 
 					let count++
 					continue ;; # Skip the header and resume this checkpoint
 				*)
