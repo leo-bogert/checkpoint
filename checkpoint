@@ -18,9 +18,10 @@ OUTPUTFILES[LOG]=""								# the log of stderr during computation. i
 declare -A OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX	# output file OUTPUTFILES[CHECKPOINT]. we CANNOT store the \0 character in bash variables so we don't include the "filepath\0" prefix, we echo it to the outputfile instead.
 declare -A OUTPUT_LINES_BY_PATH_DATE_ONLY		# output file OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]
 declare -A OUTPUT_LINES_BY_PATH_SHA256_ONLY		# output file OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]
+
+declare ABORTED="false"							# will be set to "true" by the SIGHUP/SIGINT/SIGTERM trap to gracefully abort computation so resuming actually works
 ################################################################################################################################
 
-declare ABORTED="false"
 
 fail() {
 	echo "$@" >&2
