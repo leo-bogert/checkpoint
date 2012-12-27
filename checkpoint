@@ -2,18 +2,23 @@
 set -o pipefail	# this is absolutely critical: make pipes exit with failure if any of the involved commands fails. the default is exit status of the last command.
 set -o nounset	# exit with error upon access of unset variable
 
-declare CHECKPATH
-declare OUTPUTDIR
-declare -A OUTPUTFILES
-OUTPUTFILES[CHECKPOINT]=""
-OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]=""
-OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]=""
-OUTPUTFILES[LOG]=""
+################################################################################################################################
+# global variables
+################################################################################################################################
+declare CHECKPATH								# directory to generate checkpoint of
+declare OUTPUTDIR								# directory to place checkpoint in
+declare -A OUTPUTFILES							# files which will reside in the output directory
+OUTPUTFILES[CHECKPOINT]=""						# the checkpoint itself
+OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]=""		# an oldformat date checkpoint - for testing the script against the old reference implementation
+OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]=""		# an oldformat sha256 checkpoint - for testing the script against the old reference implementation
+OUTPUTFILES[LOG]=""								# the log of stderr during computation. i
 
+# the following associative arrays contain the output files.
 # key=path of file, value=checkpoint line as it should appear in the output
-declare -A OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX	# we CANNOT store the \0 character in bash variables so we don't include the "filepath\0" prefix, we echo it to the outputfile instead.
-declare -A OUTPUT_LINES_BY_PATH_DATE_ONLY
-declare -A OUTPUT_LINES_BY_PATH_SHA256_ONLY
+declare -A OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX	# output file OUTPUTFILES[CHECKPOINT]. we CANNOT store the \0 character in bash variables so we don't include the "filepath\0" prefix, we echo it to the outputfile instead.
+declare -A OUTPUT_LINES_BY_PATH_DATE_ONLY		# output file OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]
+declare -A OUTPUT_LINES_BY_PATH_SHA256_ONLY		# output file OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]
+################################################################################################################################
 
 declare ABORTED="false"
 
