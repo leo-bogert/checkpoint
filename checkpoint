@@ -55,6 +55,7 @@ load_existing_checkpoint() {
 	local line_without_filepath_prefix
 	local split_line
 	local -i count=0
+	local -i ignored_count=0
 	
 	[ ! -s "${OUTPUTFILES[CHECKPOINT]}" ] && { echo "No existing checkpoint found, creating a fresh one..." >&2 ; return 0 ; }
 	
@@ -77,8 +78,8 @@ load_existing_checkpoint() {
 			esac
 		fi
 		
-		[[ "$line_without_filepath_prefix" = *"(sha256sum failed!)"* ]] && continue
-		[[ "$line_without_filepath_prefix" = *"(stat failed!)"* ]] && continue
+		[[ "$line_without_filepath_prefix" = *"(sha256sum failed!)"* ]] && { let ignored_count++ ; continue ; }
+		[[ "$line_without_filepath_prefix" = *"(stat failed!)"* ]] && { let ignored_count++ ; continue ; }
 		
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
 		
@@ -100,6 +101,7 @@ load_existing_checkpoint() {
 	done < "${OUTPUTFILES[CHECKPOINT]}"
 	
 	echo "Loaded $count existing checkpoint datasets." >&2
+	echo "Ignored $ignored_count existing datasets where sha256sum or stat had failed previously." >&2
 }
 
 interrupt_compute() {
