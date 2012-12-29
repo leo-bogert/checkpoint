@@ -54,6 +54,8 @@ set_ioniceness() {
 }
 
 load_existing_checkpoint() {
+	log "Loading existing checkpoint data to resume from it ..."
+
 	local filepath
 	local line_without_filepath_prefix
 	local split_line
@@ -103,8 +105,7 @@ load_existing_checkpoint() {
 		let count++
 	done < "${OUTPUTFILES[CHECKPOINT]}"
 	
-	log "Loaded $count existing checkpoint datasets."
-	log "Ignored $ignored_count existing datasets where sha256sum or stat had failed previously."
+	log "Loaded $count existing checkpoint datasets, ignored $ignored_count existing datasets where sha256sum or stat had failed previously."
 }
 
 interrupt_compute() {
@@ -112,9 +113,13 @@ interrupt_compute() {
 }
 
 compute() {
+	log "Computing checkpoint ..."
+
 	cd "$CHECKPATH" || fail "cd to $CHECKPATH failed!"
 	
 	local file
+	local -i computed=0
+	local -i failed=0
 	local -i skipped=0
 	
 	# Source of this magic: http://mywiki.wooledge.org/BashFAQ/020
@@ -129,7 +134,7 @@ compute() {
 		local stat=""
 		
 		if [ -f "$file" ] ; then
-			shaoutput="$(sha256sum --binary "$file")" && read -r -a sha_array <<< "$shaoutput" || sha_array[0]="(sha256sum failed!)"
+			shaoutput="$(sha256sum --binary "$file")" && read -r -a sha_array <<< "$shaoutput" || { sha_array[0]="(sha256sum failed!)" ; let failed++ ; }
 			sha="${sha_array[0]}"
 		elif [ -d "$file" ] ; then
 			sha="(directory)"
@@ -141,7 +146,7 @@ compute() {
 		fi
 		
 		# TODO: "Birth: %w\t"
-		stat="$(stat --printf "Access: %x\tModify: %y\t" "$file")" || stat="(stat failed!)"
+		stat="$(stat --printf "Access: %x\tModify: %y\t" "$file")" || { stat="(stat failed!)" ; let failed++ ; }
 		
 		# new format
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]=$'\t'"$sha"$'\t'"$stat"
@@ -151,9 +156,10 @@ compute() {
 		# old format of sha listing
 		[ -f "$file" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]="$sha *$file"
 
+		let computed++
 	done < <(find . -mount \( -type f -o -type d \) -print0)
 	
-	log "Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation"
+	log "Computing finished. Computed $computed entries successfully. $failed computations failed. Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation."
 }
 
 truncate_output() {
@@ -169,8 +175,11 @@ write_eof_marker_to_output() {
 }
 
 write_output() {
+	log "Writing checkpoint to disk ..."
+
 	truncate_output
 
+	local count
 	local file
 	while IFS= read -r -d $'\0' file ; do
 		{
@@ -184,6 +193,8 @@ write_output() {
 		
 		# old format with sha only
 		[ ${#OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]} -ne 0 ] && echo "${OUTPUT_LINES_BY_PATH_SHA256_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
+
+		let count++
 	done < <(
 			for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
 				echo -n "$filepath"
@@ -192,6 +203,8 @@ write_output() {
 		)
 
 	write_eof_marker_to_output
+
+	log "Finished writing checkpoint to disk. Wrote $count entries."
 }
 
 
