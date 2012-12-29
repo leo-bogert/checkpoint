@@ -85,7 +85,7 @@ load_existing_checkpoint() {
 		
 		# new data is complete.
 		# we don't read the old format files. instead we compute them from the new format data.
-		# - they could never be parsed correctly because # they delimit the filename with "\n" which is a valid character in linux filenames.
+		# - they could never be parsed correctly because they delimit the filename with "\n" which is a valid character in linux filenames.
 		
 		# Split the line by \t
 		IFS=$'\t' read -r -a split_line <<< "$line_without_filepath_prefix"
