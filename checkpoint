@@ -63,7 +63,7 @@ load_existing_checkpoint() {
 		# So we should always be able to read something which is terminated by \0
 		{ IFS= read -r -d $'\0' filepath ; } || fail "End of file marker not found - Input file is incomplete!"
 		
-		# Each line is composed of the filenmae followed by \0 followed by the checkpoint data followed by \n
+		# Each line is composed of the filename followed by \0 followed by the checkpoint data followed by \n
 		# If the checkpoint data cannot be read, we have reached the end of file. 
 		# The "filename" should be the EOF marker then. So we check whether it is.
 		if ! IFS= read -r line_without_filepath_prefix ; then
