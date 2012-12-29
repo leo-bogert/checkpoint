@@ -22,9 +22,12 @@ declare -A OUTPUT_LINES_BY_PATH_SHA256_ONLY		# output file OUTPUTFILES[CHECKPOIN
 declare ABORTED="false"							# will be set to "true" by the SIGHUP/SIGINT/SIGTERM trap to gracefully abort computation so resuming actually works
 ################################################################################################################################
 
+log() {
+	echo "$@" >&2
+}
 
 fail() {
-	echo "$@" >&2
+	log "$@"
 	exit 1
 }
 
@@ -57,7 +60,7 @@ load_existing_checkpoint() {
 	local -i count=0
 	local -i ignored_count=0
 	
-	[ ! -s "${OUTPUTFILES[CHECKPOINT]}" ] && { echo "No existing checkpoint found, creating a fresh one..." >&2 ; return 0 ; }
+	[ ! -s "${OUTPUTFILES[CHECKPOINT]}" ] && { log "No existing checkpoint found, creating a fresh one..." ; return 0 ; }
 	
 	while true ; do
 		# The EOF marker is a line which contains one of the entries in the "case" statement below followed by \0 and nothing else.
@@ -100,8 +103,8 @@ load_existing_checkpoint() {
 		let count++
 	done < "${OUTPUTFILES[CHECKPOINT]}"
 	
-	echo "Loaded $count existing checkpoint datasets." >&2
-	echo "Ignored $ignored_count existing datasets where sha256sum or stat had failed previously." >&2
+	log "Loaded $count existing checkpoint datasets."
+	log "Ignored $ignored_count existing datasets where sha256sum or stat had failed previously."
 }
 
 interrupt_compute() {
@@ -119,7 +122,7 @@ compute() {
 	# -r = Backslash does not act as an escape character
 	# -d = Sets the delimiter to null
 	while IFS= read -r -d $'\0' file; do
-		[ "$ABORTED" != "false" ] && { echo "Aborting computation due to signal!" >&2 ; break ; }
+		[ "$ABORTED" != "false" ] && { log "Aborting computation due to signal!" ; break ; }
 		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -ne 0 ] && { let skipped++ ; continue ; }
 		
 		local sha=""
@@ -131,7 +134,7 @@ compute() {
 		elif [ -d "$file" ] ; then
 			sha="(directory)"
 		elif [ ! -e "$file" ]; then
-			echo "File deleted during processing: $file" >&2
+			log "File deleted during processing: $file"
 			continue
 		else
 			fail "Unexpected type of file: $file"
@@ -150,7 +153,7 @@ compute() {
 
 	done < <(find . -mount \( -type f -o -type d \) -print0)
 	
-	echo "Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation" >&2
+	log "Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation"
 }
 
 truncate_output() {
