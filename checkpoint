@@ -83,8 +83,8 @@ load_existing_checkpoint() {
 			esac
 		fi
 		
-		[[ "$line_without_filepath_prefix" = *"(sha256sum failed!)"* ]] && { let ignored_count++ ; continue ; }
-		[[ "$line_without_filepath_prefix" = *"(stat failed!)"* ]] && { let ignored_count++ ; continue ; }
+		[[ "$line_without_filepath_prefix" = *'(sha256sum failed!)'* ]] && { let ignored_count++ ; continue ; }
+		[[ "$line_without_filepath_prefix" = *'(stat failed!)'* ]] && { let ignored_count++ ; continue ; }
 		
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
 		
