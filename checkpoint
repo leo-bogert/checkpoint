@@ -130,6 +130,7 @@ compute() {
 		[ "$ABORTED" != "false" ] && { log "Aborting computation due to signal!" ; break ; }
 		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -ne 0 ] && { let skipped++ ; continue ; }
 		
+		local shaoutput=""
 		local sha=""
 		local stat=""
 
