@@ -132,7 +132,10 @@ compute() {
 		
 		local sha=""
 		local stat=""
-		
+
+		# Compute the sha256sum sum. Notice that we do not abort if computation fails:
+		# The script is aimed to be run on very large datasets, especially complete fileservers.
+		# Therefore, computation will take a very long time and the probability is high that a file on the system is deleted during processing.
 		if [ -f "$file" ] ; then
 			shaoutput="$(sha256sum --binary "$file")" && read -r -a sha_array <<< "$shaoutput" || { sha_array[0]="(sha256sum failed!)" ; let failed++ ; }
 			sha="${sha_array[0]}"
