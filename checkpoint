@@ -96,11 +96,10 @@ load_existing_checkpoint() {
 		IFS=$'\t' read -r -a split_line <<< "$line_without_filepath_prefix"
 		
 		local sha="${split_line[0]}"
-		local atime="${split_line[1]}"
-		local mtime="${split_line[2]}"
+		local times="${split_line[@]:1}"
 		
 		[ "$sha" != "(directory)" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$filepath"]="$sha *$filepath"
-		OUTPUT_LINES_BY_PATH_DATE_ONLY["$filepath"]="$filepath"$'\t'"$atime"$'\t'"$mtime"$'\t'	# TODO: add birth
+		OUTPUT_LINES_BY_PATH_DATE_ONLY["$filepath"]="$filepath"$'\t'"$times"$'\t'
 		
 		let count++
 	done < "${OUTPUTFILES[CHECKPOINT]}"
