@@ -62,7 +62,7 @@ load_existing_checkpoint() {
 	local -i count=0
 	local -i ignored_count=0
 	
-	[ ! -s "${OUTPUTFILES[CHECKPOINT]}" ] && { log "No existing checkpoint found, creating a fresh one..." ; return 0 ; }
+	[ -s "${OUTPUTFILES[CHECKPOINT]}" ] || { log "No existing checkpoint found, creating a fresh one..." ; return 0 ; }
 	
 	while true ; do
 		# The EOF marker is a line which contains one of the entries in the "case" statement below followed by \0 and nothing else.
@@ -83,8 +83,8 @@ load_existing_checkpoint() {
 			esac
 		fi
 		
-		[[ "$line_without_filepath_prefix" = *'(sha256sum failed!)'* ]] && { let ignored_count++ ; continue ; }
-		[[ "$line_without_filepath_prefix" = *'(stat failed!)'* ]] && { let ignored_count++ ; continue ; }
+		[[ "$line_without_filepath_prefix" != *'(sha256sum failed!)'* ]] || { let ignored_count++ ; continue ; }
+		[[ "$line_without_filepath_prefix" != *'(stat failed!)'* ]] || { let ignored_count++ ; continue ; }
 		
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
 		
@@ -127,8 +127,8 @@ compute() {
 	# -r = Backslash does not act as an escape character
 	# -d = Sets the delimiter to null
 	while IFS= read -r -d $'\0' file; do
-		[ "$ABORTED" != "false" ] && { log "Aborting computation due to signal!" ; break ; }
-		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -ne 0 ] && { let skipped++ ; continue ; }
+		[ "$ABORTED" = "false" ] || { log "Aborting computation due to signal!" ; break ; }
+		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -eq 0 ] || { let skipped++ ; continue ; }
 		
 		local shaoutput=""
 		local sha=""
@@ -222,8 +222,8 @@ main() {
 		checkpath_tmp="${checkpath_tmp%/}"
 		outputdir_tmp="${outputdir_tmp%/}"
 		# make the directories absolute
-		[[ "$checkpath_tmp" != /* ]] && checkpath_tmp="$(pwd)"/"$checkpath_tmp"
-		[[ "$outputdir_tmp" != /* ]] && outputdir_tmp="$(pwd)"/"$outputdir_tmp"
+		[[ "$checkpath_tmp" = /* ]] || checkpath_tmp="$(pwd)"/"$checkpath_tmp"
+		[[ "$outputdir_tmp" = /* ]] || outputdir_tmp="$(pwd)"/"$outputdir_tmp"
 		
 		readonly CHECKPATH="$checkpath_tmp"
 		[ -d "$CHECKPATH" ] || fail "Dir to generate checkpoint for does not exist or is no directory: $CHECKPATH"
