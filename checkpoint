@@ -180,6 +180,8 @@ write_eof_marker_to_output() {
 write_output() {
 	log "Writing checkpoint to disk ..."
 
+	set -o errexit
+
 	truncate_output
 
 	local count
@@ -206,6 +208,8 @@ write_output() {
 		)
 
 	write_eof_marker_to_output
+	
+	set +o errexit
 
 	log "Finished writing checkpoint to disk. Wrote $count entries."
 }
