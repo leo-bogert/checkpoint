@@ -182,32 +182,32 @@ write_output() {
 
 	set -o errexit
 
-	truncate_output
+		truncate_output
 
-	local count
-	local file
-	while IFS= read -r -d $'\0' file ; do
-		{
-			echo -n "$file"
-			echo -n -e "\0"
-			echo "${OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[$file]}" ;	# "${array[$key]}" is sufficient, quoting of the key not needed
-		} >> "${OUTPUTFILES[CHECKPOINT]}"
-		
-		# old format with date only
-		echo "${OUTPUT_LINES_BY_PATH_DATE_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]}"
-		
-		# old format with sha only. may not be defined for directories
-		[ ${#OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]} -ne 0 ] && echo "${OUTPUT_LINES_BY_PATH_SHA256_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
-
-		let count++
-	done < <(
-			for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
-				echo -n "$filepath"
+		local count
+		local file
+		while IFS= read -r -d $'\0' file ; do
+			{
+				echo -n "$file"
 				echo -n -e "\0"
-			done | sort --stable --zero-terminated
-		)
+				echo "${OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[$file]}" ;	# "${array[$key]}" is sufficient, quoting of the key not needed
+			} >> "${OUTPUTFILES[CHECKPOINT]}"
+			
+			# old format with date only
+			echo "${OUTPUT_LINES_BY_PATH_DATE_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]}"
+			
+			# old format with sha only. may not be defined for directories
+			[ ${#OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]} -ne 0 ] && echo "${OUTPUT_LINES_BY_PATH_SHA256_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
 
-	write_eof_marker_to_output
+			let count++
+		done < <(
+				for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
+					echo -n "$filepath"
+					echo -n -e "\0"
+				done | sort --stable --zero-terminated
+			)
+
+		write_eof_marker_to_output
 	
 	set +o errexit
 
