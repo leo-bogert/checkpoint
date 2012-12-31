@@ -144,8 +144,7 @@ compute() {
 			fail "Unexpected type of file: $file"
 		fi
 		
-		# TODO: "Birth: %w\t"
-		stat="$(stat --printf "Access: %x\tModify: %y\t" "$file")" || { stat="(stat failed!)" ; let failed++ ; }
+		stat="$(stat --printf "Birth: %w\tAccess: %x\tModify: %y\tChange: %z" "$file")" || { stat="(stat failed!)" ; let failed++ ; }
 		
 		# new format
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]=$'\t'"$sha"$'\t'"$stat"
