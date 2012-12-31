@@ -114,6 +114,7 @@ interrupt_compute() {
 compute() {
 	log "Computing checkpoint ..."
 
+	# We run find inside the target directory so the filenames in the output are relative
 	cd "$CHECKPATH" || fail "cd to $CHECKPATH failed!"
 	
 	local file
