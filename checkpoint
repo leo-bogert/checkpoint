@@ -194,7 +194,7 @@ write_output() {
 		# old format with date only
 		echo "${OUTPUT_LINES_BY_PATH_DATE_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_DATES]}"
 		
-		# old format with sha only
+		# old format with sha only. may not be defined for directories
 		[ ${#OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]} -ne 0 ] && echo "${OUTPUT_LINES_BY_PATH_SHA256_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
 
 		let count++
