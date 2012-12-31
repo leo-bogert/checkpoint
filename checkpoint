@@ -217,6 +217,7 @@ write_output() {
 
 main() {
 	set -o errexit # exit shell upon any error
+		
 		[ $# -eq 2 ] || fail "Syntax: checkpoint <dir to generate checkpoint for> <output dir of checkpoint files>"
 
 		local checkpath_tmp="$1"
