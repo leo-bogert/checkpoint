@@ -247,8 +247,8 @@ main() {
 	trap_signals # trap signals after starting to log so we can log them
 	set_ioniceness
 	load_existing_checkpoint
+	# TODO: write & call a "remove_inexistant_files" which removes files which were imported from the existing checkpoint but don't exist anymore
 	compute
-	# TODO: remove_inexistant_files
 	write_output
 }
 
