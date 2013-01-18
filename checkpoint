@@ -177,10 +177,26 @@ write_eof_marker_to_output() {
 	done
 }
 
+err_handler() {
+	fail "error at line $1" "exit code is $2"
+}
+
+enable_errexit_and_errtrace() {
+	set -o errexit
+	set -o errtrace
+	trap 'err_handler "$LINENO" "$?"' ERR
+}
+
+disable_errexit_and_errtrace() {
+	trap - ERR
+	set +o errexit
+	set +o errtrace
+}
+
 write_output() {
 	log "Writing checkpoint to disk ..."
 
-	set -o errexit
+	enable_errexit_and_errtrace
 
 		truncate_output
 
@@ -208,16 +224,16 @@ write_output() {
 			)
 
 		write_eof_marker_to_output
-	
-	set +o errexit
+
+	disable_errexit_and_errtrace
 
 	log "Finished writing checkpoint to disk. Wrote $count entries."
 }
 
 
 main() {
-	set -o errexit # exit shell upon any error
-		
+	enable_errexit_and_errtrace
+
 		[ $# -eq 2 ] || fail "Syntax: checkpoint <dir to generate checkpoint for> <output dir of checkpoint files>"
 
 		local checkpath_tmp="$1"
@@ -240,7 +256,7 @@ main() {
 		OUTPUTFILES[LOG]="$OUTPUTDIR/errors.log"	
 		readonly OUTPUTFILES
 		
-	set +o errexit # don't exit upon error. this is necessary for compute() especially because some files might be deleted during our huge execution time
+	disable_errexit_and_errtrace  # don't exit upon error. this is necessary for compute() especially because some files might be deleted during our huge execution time
 		
 	generate_files_and_directories # generate output dir before writing to logfile since it resides in it
 	redirect_stderr_to_log
