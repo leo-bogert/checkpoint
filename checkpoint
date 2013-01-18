@@ -83,8 +83,8 @@ load_existing_checkpoint() {
 			esac
 		fi
 		
-		[[ "$line_without_filepath_prefix" != *'(sha256sum failed!)'* ]] || { let ignored_count++ ; continue ; }
-		[[ "$line_without_filepath_prefix" != *'(stat failed!)'* ]] || { let ignored_count++ ; continue ; }
+		[[ "$line_without_filepath_prefix" != *'(sha256sum failed!)'* ]] || { let ++ignored_count ; continue ; }
+		[[ "$line_without_filepath_prefix" != *'(stat failed!)'* ]] || { let ++ignored_count ; continue ; }
 		
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$filepath"]="$line_without_filepath_prefix"
 		
@@ -101,7 +101,7 @@ load_existing_checkpoint() {
 		[ "$sha" != "(directory)" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$filepath"]="$sha *$filepath"
 		OUTPUT_LINES_BY_PATH_DATE_ONLY["$filepath"]="$filepath"$'\t'"$times"$'\t'
 		
-		let count++
+		let ++count
 	done < "${OUTPUTFILES[CHECKPOINT]}"
 	
 	log "Loaded $count existing checkpoint datasets, ignored $ignored_count existing datasets where sha256sum or stat had failed previously."
@@ -128,7 +128,7 @@ compute() {
 	# -d = Sets the delimiter to null
 	while IFS= read -r -d $'\0' file; do
 		[ "$ABORTED" = "false" ] || { log "Aborting computation due to signal!" ; break ; }
-		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -eq 0 ] || { let skipped++ ; continue ; }
+		[ ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]} -eq 0 ] || { let ++skipped ; continue ; }
 		
 		local shaoutput=""
 		local sha=""
@@ -138,7 +138,7 @@ compute() {
 		# The script is aimed to be run on very large datasets, especially complete fileservers.
 		# Therefore, computation will take a very long time and the probability is high that a file on the system is deleted during processing.
 		if [ -f "$file" ] ; then
-			shaoutput="$(sha256sum --binary "$file")" && read -r -a sha_array <<< "$shaoutput" || { sha_array[0]="(sha256sum failed!)" ; let failed++ ; }
+			shaoutput="$(sha256sum --binary "$file")" && read -r -a sha_array <<< "$shaoutput" || { sha_array[0]="(sha256sum failed!)" ; let ++failed ; }
 			sha="${sha_array[0]}"
 		elif [ -d "$file" ] ; then
 			sha="(directory)"
@@ -149,7 +149,7 @@ compute() {
 			fail "Unexpected type of file: $file"
 		fi
 		
-		stat="$(stat --printf "Birth: %w\tAccess: %x\tModify: %y\tChange: %z" "$file")" || { stat="(stat failed!)" ; let failed++ ; }
+		stat="$(stat --printf "Birth: %w\tAccess: %x\tModify: %y\tChange: %z" "$file")" || { stat="(stat failed!)" ; let ++failed ; }
 		
 		# new format
 		OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX["$file"]=$'\t'"$sha"$'\t'"$stat"
@@ -159,7 +159,7 @@ compute() {
 		# old format of sha listing
 		[ -f "$file" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]="$sha *$file"
 
-		let computed++
+		let ++computed
 	done < <(find . -mount \( -type f -o -type d \) -print0)
 	
 	log "Computing finished. Computed $computed entries successfully. $failed computations failed. Skipped $skipped of ${#OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]} files due to incremental computation."
@@ -200,7 +200,7 @@ write_output() {
 
 		truncate_output
 
-		local count
+		local -i count=0
 		local file
 		while IFS= read -r -d $'\0' file ; do
 			{
@@ -215,7 +215,12 @@ write_output() {
 			# old format with sha only. may not be defined for directories
 			[ ${#OUTPUT_LINES_BY_PATH_SHA256_ONLY["$file"]} -ne 0 ] && echo "${OUTPUT_LINES_BY_PATH_SHA256_ONLY[$file]}" >> "${OUTPUTFILES[CHECKPOINT_OLDFORMAT_SHA256]}"
 
-			let count++
+			# HOWTO shoot yourself in the feet with "set -o errexit" and "let":
+			# "help let" says: "If the last ARG evaluates to 0, let returns 1; let returns 0 otherwise."
+			# The return status of 1 would also apply to "let count++" since the value of $count is evaluated before the increment due to the post-increment operator and $count is initialized to 0.
+			# So we have to use pre-increment because we use "set -o errexit" and the exit failure of "let count++" would trigger it.
+			let ++count
+
 		done < <(
 				for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
 					echo -n "$filepath"
