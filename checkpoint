@@ -96,10 +96,15 @@ load_existing_checkpoint() {
 		IFS=$'\t' read -r -a split_line <<< "$line_without_filepath_prefix"
 		
 		local sha="${split_line[0]}"
-		local times="${split_line[@]:1}"
+
+		# the times array was split by tabs so we merge it to a single variable with tab as separator again
+		IFS_OLD="$IFS"
+		IFS=$'\t'	# we cannot do the "assign variable only for one command" thing because what we want to do (the following line) is not a command but an assignment itself. See "SIMPLE COMMAND EXPANSION" in bash manpage.
+		local times="${split_line[*]:1}"
+		IFS="$IFS_OLD"
 		
 		[ "$sha" != "(directory)" ] && OUTPUT_LINES_BY_PATH_SHA256_ONLY["$filepath"]="$sha *$filepath"
-		OUTPUT_LINES_BY_PATH_DATE_ONLY["$filepath"]="$filepath"$'\t'"$times"$'\t'
+		OUTPUT_LINES_BY_PATH_DATE_ONLY["$filepath"]="$filepath"$'\t'"$times"
 		
 		let ++count
 	done < "${OUTPUTFILES[CHECKPOINT]}"
