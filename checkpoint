@@ -253,8 +253,8 @@ main() {
 		[[ "$checkpath_tmp" != "/" ]] && checkpath_tmp="${checkpath_tmp%/}"
 		[[ "$outputdir_tmp" != "/" ]] && outputdir_tmp="${outputdir_tmp%/}"
 		# make the directories absolute
-		[[ "$checkpath_tmp" = /* ]] || checkpath_tmp="$(pwd)"/"$checkpath_tmp"
-		[[ "$outputdir_tmp" = /* ]] || outputdir_tmp="$(pwd)"/"$outputdir_tmp"
+		[[ "$checkpath_tmp" != /* ]] && checkpath_tmp="$(pwd)"/"$checkpath_tmp"
+		[[ "$outputdir_tmp" != /* ]] && outputdir_tmp="$(pwd)"/"$outputdir_tmp"
 		
 		readonly CHECKPATH="$checkpath_tmp"
 		[ -d "$CHECKPATH" ] || fail "Dir to generate checkpoint for does not exist or is no directory: $CHECKPATH"
