@@ -249,9 +249,9 @@ main() {
 		local checkpath_tmp="$1"
 		local outputdir_tmp="$2"
 		
-		# strip trailing slash
-		checkpath_tmp="${checkpath_tmp%/}"
-		outputdir_tmp="${outputdir_tmp%/}"
+		# strip trailing slash as long as the dir is not "/"
+		[[ "$checkpath_tmp" != "/" ]] && checkpath_tmp="${checkpath_tmp%/}"
+		[[ "$outputdir_tmp" != "/" ]] && outputdir_tmp="${outputdir_tmp%/}"
 		# make the directories absolute
 		[[ "$checkpath_tmp" = /* ]] || checkpath_tmp="$(pwd)"/"$checkpath_tmp"
 		[[ "$outputdir_tmp" = /* ]] || outputdir_tmp="$(pwd)"/"$outputdir_tmp"
