@@ -10,6 +10,8 @@ class Checkpoint:
 
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
+		if not path.isdir(self.input_dir):
+			raise IOError("Input directory does not exist!")
 		
 	class Entry:
 		path = None # The path of the file/directory in the filesystem
