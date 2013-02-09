@@ -11,6 +11,8 @@ class Checkpoint:
 	output_dir = None # The directory to which the Checkpoint will be written
 	output_files = None # An OutputFiles object which lists all files in the output directory
 
+	entries = None	# A set containing all Entry objects of this checkpoint
+
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
 		if not path.isdir(self.input_dir):
@@ -46,8 +48,6 @@ class Checkpoint:
 
 		def __eq__(self, other):
 			return self.path.__eq__(other.path)
-
-	entries = None	# All entries
 
 	def generate_files_and_directories(self):
 		if not path.isdir(self.output_dir):
