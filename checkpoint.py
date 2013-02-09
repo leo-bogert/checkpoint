@@ -3,6 +3,8 @@
 
 import argparse
 from os import path
+import os
+import stat
 
 class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
@@ -29,6 +31,14 @@ class Checkpoint:
 
 	entries = None	# All entries
 
+	def generate_files_and_directories(self):
+		if not path.isdir(self.output_dir):
+			os.makedirs(self.output_dir,0700)
+
+		if os.geteuid() == 0:
+			os.chown(self.output_dir, 0, 0)
+			os.chmod(self.output_dir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("input_directory", help="The directory for which to generate the checkpoint")
@@ -36,6 +46,7 @@ def main():
 	args = parser.parse_args()
 	
 	checkpoint = Checkpoint(args.input_directory, args.output_directory)
+	checkpoint.generate_files_and_directories()
 
 if __name__ == "__main__":
 	main()
