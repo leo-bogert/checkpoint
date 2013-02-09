@@ -9,11 +9,29 @@ import stat
 class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
 	output_dir = None # The directory to which the Checkpoint will be written
+	output_files = None # An OutputFiles object which lists all files in the output directory
 
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
 		if not path.isdir(self.input_dir):
 			raise IOError("Input directory does not exist!")
+		
+		self.output_files = OutputFiles(self.output_dir)
+
+	class OutputFiles:
+		checkpoint = None # The file to which the checkpoint will be written
+		checkpoint_oldformat_dates = None # The old format date-only checkpoint
+		checkpoint_oldformat_sha256 = None # The old format sha256-only checkpoint
+		log = None # The output log file
+		
+		def __init__(self, output_dir):
+			self.checkpoint = path.join(output_dir, "checkpoint.txt")
+			self.checkpoint_oldformat_dates = path.join(output_dir, "filedates.txt")
+			self.checkpoint_oldformat_sha256 = path.join(output_dir, "files.sha256")
+			self.log = path.join(output_dir, "errors.log")
+
+		def get_all(self):
+			return vars(self)		
 		
 	class Entry:
 		path = None # The path of the file/directory in the filesystem
