@@ -55,7 +55,18 @@ class Checkpoint:
 
 		if os.geteuid() == 0:
 			os.chown(self.output_dir, 0, 0)
-			os.chmod(self.output_dir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+		
+		os.chmod(self.output_dir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
+		for file in self.output_files.get_all().viewvalues():
+			if not path.isfile(file):
+				with open(file, "a") as f:	# create the file
+					pass
+
+			if os.geteuid() == 0:
+				os.chown(file, 0, 0)
+			os.chmod(file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+
 
 def main():
 	parser = argparse.ArgumentParser()
