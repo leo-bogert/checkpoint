@@ -18,7 +18,7 @@ class Checkpoint:
 		if not path.isdir(self.input_dir):
 			raise IOError("Input directory does not exist!")
 		
-		self.output_files = OutputFiles(self.output_dir)
+		self.output_files = Checkpoint.OutputFiles(self.output_dir)
 
 	class OutputFiles:
 		checkpoint = None # The file to which the checkpoint will be written
