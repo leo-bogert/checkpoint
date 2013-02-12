@@ -5,6 +5,8 @@ import argparse
 from os import path
 import os
 import stat
+import logging
+import sys
 
 class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
@@ -12,6 +14,8 @@ class Checkpoint:
 	output_files = None # An OutputFiles object which lists all files in the output directory
 
 	entries = None	# A set containing all Entry objects of this checkpoint
+
+	log = None # A logger object which logs to the log file and optionally to the terminal
 
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
@@ -67,15 +71,45 @@ class Checkpoint:
 				os.chown(file, 0, 0)
 			os.chmod(file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 
+	def init_logging(self, show_log_on_console = False):
+		log = logging.getLogger()
+		log.setLevel(logging.DEBUG)
+
+		format = logging.Formatter(fmt='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+
+		logfile = logging.FileHandler(self.output_files.log)
+		logfile.setLevel(logging.INFO)
+		logfile.setFormatter(format)
+		log.addHandler(logfile)
+
+		if show_log_on_console:
+			# There is no inverse "setLevel" function so we need a filter class
+			class NoStderrMessagesFilter:
+				def filter(self, record):
+					return record.levelno < logging.WARNING
+
+			stdout = logging.StreamHandler(sys.stdout)
+			stdout.setLevel(logging.DEBUG)
+			stdout.setFormatter(format)
+			stdout.addFilter(NoStderrMessagesFilter())
+			log.addHandler(stdout)
+			
+			stderr = logging.StreamHandler(sys.stderr)
+			stderr.setLevel(logging.WARNING)
+			stderr.setFormatter(format)
+			log.addHandler(stderr)
+
 
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("input_directory", help="The directory for which to generate the checkpoint")
 	parser.add_argument("output_directory", help="The directory to which the checkpoint shall be written. Will be created automatically if it does not exist")
+	parser.add_argument('--verbose', '-v', help="Not only log to the log file but also to stdout/stderr. Also, print additional debug messages which would not be written to the log file.", action='count')
 	args = parser.parse_args()
 	
 	checkpoint = Checkpoint(args.input_directory, args.output_directory)
 	checkpoint.generate_files_and_directories()
+	checkpoint.init_logging(args.verbose > 0)
 
 if __name__ == "__main__":
 	main()
