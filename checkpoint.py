@@ -34,7 +34,7 @@ class Checkpoint:
 			self.checkpoint = path.join(output_dir, "checkpoint.txt")
 			self.checkpoint_oldformat_dates = path.join(output_dir, "filedates.txt")
 			self.checkpoint_oldformat_sha256 = path.join(output_dir, "files.sha256")
-			self.log = path.join(output_dir, "errors.log")
+			self.log = path.join(output_dir, "checkpoint.log")
 
 		def get_all(self):
 			return vars(self)		
