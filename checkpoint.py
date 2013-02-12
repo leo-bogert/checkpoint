@@ -7,6 +7,8 @@ import os
 import stat
 import logging
 import sys
+import signal
+import psutil
 
 class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
@@ -16,6 +18,8 @@ class Checkpoint:
 	entries = None	# A set containing all Entry objects of this checkpoint
 
 	log = None # A logger object which logs to the log file and optionally to the terminal
+
+	abortion_requested = False	# Set to true if signal HUP/INT/TERM is received. The computation is aborted gracefully then and the progress is saved to disk.
 
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
@@ -99,6 +103,17 @@ class Checkpoint:
 			stderr.setFormatter(format)
 			log.addHandler(stderr)
 
+	def trap_signals(self):
+		signal.signal(signal.SIGHUP, self.interrupt_compute)
+		signal.signal(signal.SIGINT, self.interrupt_compute)
+		signal.signal(signal.SIGTERM, self.interrupt_compute)
+
+	def interrupt_compute(self):
+		abortion_requested = True
+
+	def set_ioniceness(self):
+		p = psutil.Process(os.getpid())
+		p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -110,6 +125,8 @@ def main():
 	checkpoint = Checkpoint(args.input_directory, args.output_directory)
 	checkpoint.generate_files_and_directories()
 	checkpoint.init_logging(args.verbose > 0)
+	checkpoint.trap_signals()
+	checkpoint.set_ioniceness()
 
 if __name__ == "__main__":
 	main()
