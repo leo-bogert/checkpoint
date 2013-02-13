@@ -21,6 +21,9 @@ class Checkpoint:
 
 	abortion_requested = False	# Set to true if signal HUP/INT/TERM is received. The computation is aborted gracefully then and the progress is saved to disk.
 
+	eof_marker = { "complete" : "This checkpoint is complete.\n\0",
+					"incomplete" : "This checkpoint is INCOMPLETE but can be resumed.\n\0" }
+	
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
 		if not path.isdir(self.input_dir):
@@ -117,6 +120,29 @@ class Checkpoint:
 		p = psutil.Process(os.getpid())
 		p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
 
+	def load_from_disk(self):
+		with open(self.output_files.checkpoint, "r") as input:
+			for line in input:
+				splitline = line.split("\0", 1)
+				
+				file = splitline[0]
+
+				if len(splitline) == 2:
+					 checkpoint_data = splitline[1]
+				else:
+					if file + "\0" == self.eof_marker["complete"]:
+						self.log.error("Checkpoint is complete already, nothing to do. Exiting.")
+						return False
+					elif file + "\0" == self.eof_marker["incomplete"]:
+						return True
+					else:
+						raise IOError("End of file marker not found - Input file is incomplete!")
+				
+				print "checkpoint_data:" + checkpoint_data
+
+			raise IOError("End of file marker not found - Input file is incomplete!")
+
+
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("input_directory", help="The directory for which to generate the checkpoint")
@@ -129,6 +155,10 @@ def main():
 	checkpoint.init_logging(args.verbose > 0)
 	checkpoint.trap_signals()
 	checkpoint.set_ioniceness()
+	if not checkpoint.load_from_disk():
+		return False # The checkpoint is complete already, nothing to do.
+
+	return True
 
 if __name__ == "__main__":
-	main()
+	sys.exit(0 if main() else 1)
