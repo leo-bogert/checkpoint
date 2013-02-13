@@ -102,6 +102,8 @@ class Checkpoint:
 			stderr.setLevel(logging.WARNING)
 			stderr.setFormatter(format)
 			log.addHandler(stderr)
+		
+		self.log = log
 
 	def trap_signals(self):
 		signal.signal(signal.SIGHUP, self.interrupt_compute)
