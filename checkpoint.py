@@ -123,7 +123,7 @@ class Checkpoint:
 		p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
 
 	def load_from_disk(self):
-	    self.log.info"Loading existing checkpoint data to resume from it ..."
+	    self.log.info("Loading existing checkpoint data to resume from it ...")
 
 		if path.getsize(self.output_files.checkpoint) == 0:
 			self.log.info("No existing checkpoint found, creating a fresh one...")
