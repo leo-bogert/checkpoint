@@ -9,6 +9,34 @@ import logging
 import sys
 import signal
 import psutil
+import subprocess
+
+# As of 2013-02-14, Python does not support reading files line-by-line with a custom line delimiter.
+# As we want to parse the output of "find -print0", this would be very useful.
+# An iterator which supports this follows, copypasted from http://bugs.python.org/issue1152248
+# TODO: As soon as Python supports this natively, use the native solution.
+def fileLineIter(inputFile,
+				inputNewline="\n",
+				outputNewline=None,
+				readSize=8192):
+	"""Like the normal file iter but you can set what string indicates newline.
+   
+	The newline string can be arbitrarily long; it need not be restricted to a
+	single character. You can also set the read size and control whether or not
+	the newline string is left on the end of the iterated lines.  Setting
+	newline to '\0' is particularly good for use with an input file created with
+	something like "os.popen('find -print0')".
+	"""
+	if outputNewline is None: outputNewline = inputNewline
+	partialLine = ''
+	while True:
+		charsJustRead = inputFile.read(readSize)
+		if not charsJustRead: break
+		partialLine += charsJustRead
+		lines = partialLine.split(inputNewline)
+		partialLine = lines.pop()
+		for line in lines: yield line + outputNewline
+	if partialLine: yield partialLine
 
 class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
@@ -163,6 +191,22 @@ class Checkpoint:
 
 			raise IOError("End of file marker not found - Input file is incomplete!")
 
+	def compute(self):
+		self.log.info("Computing checkpoint ...")
+		
+		count_computed = 0
+		count_failed = 0
+		count_skipped = 0
+		
+		# We run find inside the target directory so the filenames in the output are relative
+		# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 and set bufsize to 8192*2
+		find = subprocess.Popen("find . -mount -print0 \( -type f -o -type d \) 2>> {}".format(self.output_files.log), bufsize=16384, cwd=self.input_dir, stdout=subprocess.PIPE, shell=True)
+		
+		for file in fileLineIter(find.stdout, inputNewline="\0", outputNewline="", readSize=2*4096):
+			self.log.info(file)
+		
+		if find.wait() != 0:
+			raise SystemError("find exit-code is non-zero!")
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -178,6 +222,7 @@ def main():
 	checkpoint.set_ioniceness()
 	if not checkpoint.load_from_disk():
 		return False # The checkpoint is complete already, nothing to do.
+	checkpoint.compute()
 
 	return True
 
