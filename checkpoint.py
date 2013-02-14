@@ -51,8 +51,10 @@ class Checkpoint:
 		sha256sum = None # The sha256sum. None if the Entry is a directory
 		stat = None # The filedates (output of stat)
 
-		def __init__(self, path):
+		def __init__(self, path, sha256sum, stat):
 			self.path = path
+			self.sha256sum = sha256sum if not sha256sum == "(directory)" else None
+			self.stat = stat
 
 		def __hash__(self):
 			return self.path.__hash__()
@@ -121,6 +123,15 @@ class Checkpoint:
 		p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
 
 	def load_from_disk(self):
+	    self.log.info"Loading existing checkpoint data to resume from it ..."
+
+		if path.getsize(self.output_files.checkpoint) == 0:
+			self.log.info("No existing checkpoint found, creating a fresh one...")
+			return True
+
+		count = 0
+		count_ignored = 0
+		entries = set()
 		with open(self.output_files.checkpoint, "r") as input:
 			for line in input:
 				splitline = line.split("\0", 1)
@@ -134,11 +145,21 @@ class Checkpoint:
 						self.log.error("Checkpoint is complete already, nothing to do. Exiting.")
 						return False
 					elif file + "\0" == self.eof_marker["incomplete"]:
+						self.log.info("Loaded {} existing checkpoint datasets, ignored {} existing datasets where sha256sum or stat had failed previously.".format(count, count_ignored))
+						self.entries = entries
 						return True
 					else:
 						raise IOError("End of file marker not found - Input file is incomplete!")
 				
-				print "checkpoint_data:" + checkpoint_data
+				(sha256sum, stat) = checkpoint_data.split("\t", 2)[1:]
+				if "(sha256sum failed!)" in sha256sum or "(stat failed!)" in stat:
+					count_ignored += 1
+					continue
+
+				entry = Checkpoint.Entry(file, sha256sum, stat)
+				assert entry not in entries
+				entries.add(entry)
+				count += 1
 
 			raise IOError("End of file marker not found - Input file is incomplete!")
 
