@@ -92,6 +92,9 @@ class Checkpoint:
 		
 		def __eq__(self, other):
 			return self.path.__eq__(other.path)
+		
+		def __cmp__(self, other):
+			return cmp(self.path, other.path)
 	
 	def generate_files_and_directories(self):
 		if not path.isdir(self.output_dir):
@@ -272,6 +275,21 @@ class Checkpoint:
 		
 		self.log.info("Computing finished. Computed {} entries successfully. {} computations failed. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
 
+	def write_to_disk(self):
+		entries = sorted(self.entries)
+		# The script shall work for very large data sets so we deleted the original set to save some RAM
+		del self.entries
+		
+		with open(self.output_files.checkpoint, "w") as output:
+			for entry in entries:
+				output.write(entry.path)
+				output.write("\0\t")
+				output.write(entry.sha256sum if entry.sha256sum else Checkpoint.CONST_SHA256SUM_DIRECTORY)
+				output.write("\t")
+				output.write(entry.stat)
+				output.write("\n")
+			
+			output.write(self.eof_marker["incomplete" if self.abortion_requested else "complete"])
 
 def main():
 	parser = argparse.ArgumentParser()
@@ -288,6 +306,7 @@ def main():
 	if not checkpoint.load_from_disk():
 		return False # The checkpoint is complete already, nothing to do.
 	checkpoint.compute()
+	checkpoint.write_to_disk()
 
 	return True
 
