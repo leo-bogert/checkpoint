@@ -9,7 +9,7 @@ import logging
 import sys
 import signal
 import psutil
-import subprocess
+import shlex, subprocess
 
 # As of 2013-02-14, Python does not support reading files line-by-line with a custom line delimiter.
 # As we want to parse the output of "find -print0", this would be very useful.
@@ -51,6 +51,10 @@ class Checkpoint:
 	eof_marker = { "complete" : "This checkpoint is complete.\n\0",
 					"incomplete" : "This checkpoint is INCOMPLETE but can be resumed.\n\0" }
 	
+	CONST_SHA256SUM_DIRECTORY = "(directory)"
+	CONST_SHA256SUM_FAILED = "(sha256sum failed!)"
+	CONST_STAT_FAILED = "(stat failed!)"
+	
 	def __init__(self, input_dir, output_dir):
 		self.input_dir, self.output_dir = map(path.abspath, (input_dir, output_dir))
 		if not path.isdir(self.input_dir):
@@ -77,10 +81,10 @@ class Checkpoint:
 		path = None # The path of the file/directory in the filesystem
 		sha256sum = None # The sha256sum. None if the Entry is a directory
 		stat = None # The filedates (output of stat)
-
-		def __init__(self, path, sha256sum, stat):
+		
+		def __init__(self, path, sha256sum=None, stat=None):
 			self.path = path
-			self.sha256sum = sha256sum if not sha256sum == "(directory)" else None
+			self.sha256sum = sha256sum if not sha256sum == Checkpoint.CONST_SHA256SUM_DIRECTORY else None
 			self.stat = stat
 		
 		def __hash__(self):
@@ -179,7 +183,7 @@ class Checkpoint:
 						raise IOError("End of file marker not found - Input file is incomplete!")
 				
 				(sha256sum, stat) = checkpoint_data.split("\t", 2)[1:]
-				if "(sha256sum failed!)" in sha256sum or "(stat failed!)" in stat:
+				if Checkpoint.CONST_SHA256SUM_FAILED in sha256sum or Checkpoint.CONST_STAT_FAILED in stat:
 					count_ignored += 1
 					continue
 			
@@ -189,7 +193,35 @@ class Checkpoint:
 				count += 1
 			
 			raise IOError("End of file marker not found - Input file is incomplete!")
-
+	
+	def compute_sha256sum(self, file, log_file):
+		sha_proc = subprocess.Popen(("sha256sum", "--binary", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		sha_output = sha_proc.communicate()
+		
+		assert sha_proc.returncode != None	# process has exited
+		
+		if sha_proc.returncode == 0:
+			sha_stdout = sha_output[0]
+			(sha256sum, rest) = sha_stdout.split(" ", 1)
+			assert rest.split("*", 1)[1] == file + "\n"
+		else:
+			sha256sum = Checkpoint.CONST_SHA256SUM_FAILED
+		
+		return sha256sum
+	
+	def compute_stat(self, file, log_file):
+		stat_proc = subprocess.Popen(("stat", "--printf", "Birth: %w\tAccess: %x\tModify: %y\tChange: %z", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		stat_output = stat_proc.communicate()
+		
+		assert stat_proc.returncode != None	# process has exited
+		
+		if stat_proc.returncode == 0:
+			stat = stat_output[0]
+		else:
+			stat = Checkpoint.CONST_STAT__FAILED
+		
+		return stat
+	
 	def compute(self):
 		self.log.info("Computing checkpoint ...")
 		
@@ -197,15 +229,44 @@ class Checkpoint:
 		count_failed = 0
 		count_skipped = 0
 		
-		# We run find inside the target directory so the filenames in the output are relative
-		# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 and set bufsize to 8192*2
-		find = subprocess.Popen("find . -mount -print0 \( -type f -o -type d \) 2>> {}".format(self.output_files.log), bufsize=16384, cwd=self.input_dir, stdout=subprocess.PIPE, shell=True)
+		with open(self.output_files.log, "a") as log_file:
+			# We run find inside the target directory so the filenames in the output are relative
+			# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 and set bufsize to 8192*2
+			find = subprocess.Popen(shlex.split("find . -mount -print0 ( -type f -o -type d )"), bufsize=16384, cwd=self.input_dir, stderr=log_file, stdout=subprocess.PIPE)
+			
+			for file in fileLineIter(find.stdout, inputNewline="\0", outputNewline="", readSize=2*4096):
+				if self.abortion_requested:
+					self.log.info("Aborting computation due to signal!")
+					break
+				
+				if Checkpoint.Entry(file) in self.entries:
+					count_skipped += 1
+					continue
+				
+				if path.isfile(file):
+					sha256sum = self.compute_sha256sum(file, log_file)
+					if sha256sum == Checkpoint.CONST_SHA256SUM_FAILED:
+						count_failed += 1
+				elif path.isdir(file):
+					sha256sum = Checkpoint.CONST_SHA256SUM_DIRECTORY
+				elif not path.exists(file):
+					self.log.warning("File deleted during processing: " + file)
+					continue
+				else:
+					raise IOError("Unexpected type of file: " + file)
+
+				stat = self.compute_stat(file, log_file)
+				if stat == Checkpoint.CONST_STAT_FAILED:
+					count_failed += 1
+
+				self.entries.add(Checkpoint.Entry(file, sha256sum, stat))
+				count_computed += 1
+
+			if find.wait() != 0:
+				raise SystemError("find exit-code is non-zero!")
 		
-		for file in fileLineIter(find.stdout, inputNewline="\0", outputNewline="", readSize=2*4096):
-			self.log.info(file)
-		
-		if find.wait() != 0:
-			raise SystemError("find exit-code is non-zero!")
+		self.log.info("Computing finished. Computed {} entries successfully. {} computations failed. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
+
 
 def main():
 	parser = argparse.ArgumentParser()
