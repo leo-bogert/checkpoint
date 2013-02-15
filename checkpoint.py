@@ -240,7 +240,8 @@ class Checkpoint:
 		with open(self.output_files.log, "a") as log_file:
 			# We run find inside the target directory so the filenames in the output are relative
 			# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 and set bufsize to 8192*2
-			find = subprocess.Popen(shlex.split("find . -mount -print0 ( -type f -o -type d )"), bufsize=16384, cwd=self.input_dir, stderr=log_file, stdout=subprocess.PIPE)
+			# IMPORTANT: The "-print0" must be AFTER the search options or find will return ALL files. TODO: File a bug report
+			find = subprocess.Popen(shlex.split("find . -mount ( -type f -o -type d ) -print0"), bufsize=16384, cwd=self.input_dir, stderr=log_file, stdout=subprocess.PIPE)
 			
 			for file in fileLineIter(find.stdout, inputNewline="\0", outputNewline="", readSize=2*4096):
 				if self.abortion_requested:
