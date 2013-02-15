@@ -230,6 +230,10 @@ class Checkpoint:
 		count_failed = 0
 		count_skipped = 0
 		
+		# The paths in the checkpoint shall be relative. So we set the working directory of the "find" process to the input dir.
+		# Because we test for the type of the returned file paths on our own, we also need to set our working directory to the input dir.
+		os.chdir(self.input_dir)
+		
 		with open(self.output_files.log, "a") as log_file:
 			# We run find inside the target directory so the filenames in the output are relative
 			# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 and set bufsize to 8192*2
