@@ -20,7 +20,6 @@ def fileLineIter(inputFile,
 				outputNewline=None,
 				readSize=8192):
 	"""Like the normal file iter but you can set what string indicates newline.
-   
 	The newline string can be arbitrarily long; it need not be restricted to a
 	single character. You can also set the read size and control whether or not
 	the newline string is left on the end of the iterated lines.  Setting
@@ -42,13 +41,13 @@ class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
 	output_dir = None # The directory to which the Checkpoint will be written
 	output_files = None # An OutputFiles object which lists all files in the output directory
-
+	
 	entries = None	# A set containing all Entry objects of this checkpoint
-
+	
 	log = None # A logger object which logs to the log file and optionally to the terminal
-
+	
 	abortion_requested = False	# Set to true if signal HUP/INT/TERM is received. The computation is aborted gracefully then and the progress is saved to disk.
-
+	
 	eof_marker = { "complete" : "This checkpoint is complete.\n\0",
 					"incomplete" : "This checkpoint is INCOMPLETE but can be resumed.\n\0" }
 	
@@ -58,7 +57,7 @@ class Checkpoint:
 			raise IOError("Input directory does not exist!")
 		
 		self.output_files = Checkpoint.OutputFiles(self.output_dir)
-
+	
 	class OutputFiles:
 		checkpoint = None # The file to which the checkpoint will be written
 		checkpoint_oldformat_dates = None # The old format date-only checkpoint
@@ -70,10 +69,10 @@ class Checkpoint:
 			self.checkpoint_oldformat_dates = path.join(output_dir, "filedates.txt")
 			self.checkpoint_oldformat_sha256 = path.join(output_dir, "files.sha256")
 			self.log = path.join(output_dir, "checkpoint.log")
-
+		
 		def get_all(self):
 			return vars(self)		
-		
+	
 	class Entry:
 		path = None # The path of the file/directory in the filesystem
 		sha256sum = None # The sha256sum. None if the Entry is a directory
@@ -83,48 +82,48 @@ class Checkpoint:
 			self.path = path
 			self.sha256sum = sha256sum if not sha256sum == "(directory)" else None
 			self.stat = stat
-
+		
 		def __hash__(self):
 			return self.path.__hash__()
-
+		
 		def __eq__(self, other):
 			return self.path.__eq__(other.path)
-
+	
 	def generate_files_and_directories(self):
 		if not path.isdir(self.output_dir):
 			os.makedirs(self.output_dir,0700)
-
+		
 		if os.geteuid() == 0:
 			os.chown(self.output_dir, 0, 0)
 		
 		os.chmod(self.output_dir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-
+		
 		for file in self.output_files.get_all().viewvalues():
 			if not path.isfile(file):
 				with open(file, "a") as f:	# create the file
 					pass
-
+			
 			if os.geteuid() == 0:
 				os.chown(file, 0, 0)
 			os.chmod(file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
-
+	
 	def init_logging(self, show_log_on_console = False):
 		log = logging.getLogger()
 		log.setLevel(logging.DEBUG)
-
+		
 		format = logging.Formatter(fmt='%(asctime)s %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-
+		
 		logfile = logging.FileHandler(self.output_files.log)
 		logfile.setLevel(logging.INFO)
 		logfile.setFormatter(format)
 		log.addHandler(logfile)
-
+		
 		if show_log_on_console:
 			# There is no inverse "setLevel" function so we need a filter class
 			class NoStderrMessagesFilter:
 				def filter(self, record):
 					return record.levelno < logging.WARNING
-
+			
 			stdout = logging.StreamHandler(sys.stdout)
 			stdout.setLevel(logging.DEBUG)
 			stdout.setFormatter(format)
@@ -137,26 +136,26 @@ class Checkpoint:
 			log.addHandler(stderr)
 		
 		self.log = log
-
+	
 	def trap_signals(self):
 		signal.signal(signal.SIGHUP, self.interrupt_compute)
 		signal.signal(signal.SIGINT, self.interrupt_compute)
 		signal.signal(signal.SIGTERM, self.interrupt_compute)
-
+	
 	def interrupt_compute(self):
 		abortion_requested = True
-
+	
 	def set_ioniceness(self):
 		p = psutil.Process(os.getpid())
 		p.set_ionice(psutil.IOPRIO_CLASS_IDLE)
-
+	
 	def load_from_disk(self):
 		self.log.info("Loading existing checkpoint data to resume from it ...")
 		
 		if path.getsize(self.output_files.checkpoint) == 0:
 			self.log.info("No existing checkpoint found, creating a fresh one...")
 			return True
-
+		
 		count = 0
 		count_ignored = 0
 		entries = set()
@@ -165,7 +164,7 @@ class Checkpoint:
 				splitline = line.split("\0", 1)
 				
 				file = splitline[0]
-
+				
 				if len(splitline) == 2:
 					 checkpoint_data = splitline[1]
 				else:
@@ -183,12 +182,12 @@ class Checkpoint:
 				if "(sha256sum failed!)" in sha256sum or "(stat failed!)" in stat:
 					count_ignored += 1
 					continue
-
+			
 				entry = Checkpoint.Entry(file, sha256sum, stat)
 				assert entry not in entries
 				entries.add(entry)
 				count += 1
-
+			
 			raise IOError("End of file marker not found - Input file is incomplete!")
 
 	def compute(self):
