@@ -158,6 +158,7 @@ class Checkpoint:
 		
 		if path.getsize(self.output_files.checkpoint) == 0:
 			self.log.info("No existing checkpoint found, creating a fresh one...")
+			self.entries = set()
 			return True
 		
 		count = 0
