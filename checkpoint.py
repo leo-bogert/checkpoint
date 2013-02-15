@@ -254,14 +254,14 @@ class Checkpoint:
 					continue
 				else:
 					raise IOError("Unexpected type of file: " + file)
-
+				
 				stat = self.compute_stat(file, log_file)
 				if stat == Checkpoint.CONST_STAT_FAILED:
 					count_failed += 1
-
+				
 				self.entries.add(Checkpoint.Entry(file, sha256sum, stat))
 				count_computed += 1
-
+			
 			if find.wait() != 0:
 				raise SystemError("find exit-code is non-zero!")
 		
