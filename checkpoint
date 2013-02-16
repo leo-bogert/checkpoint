@@ -149,6 +149,7 @@ compute() {
 			sha="(directory)"
 		elif [ ! -e "$file" ]; then
 			log "File deleted during processing: $file"
+			let ++failed
 			continue
 		else
 			fail "Unexpected type of file: $file"

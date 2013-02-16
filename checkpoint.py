@@ -272,6 +272,7 @@ class Checkpoint:
 						sha256sum = Checkpoint.CONST_SHA256SUM_DIRECTORY
 					elif not path.exists(file):
 						self.log.warning("File deleted during processing: " + file)
+						count_failed += 1
 						continue
 					else:
 						raise IOError("Unexpected type of file: " + file)
