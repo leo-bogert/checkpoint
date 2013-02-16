@@ -287,11 +287,17 @@ class Checkpoint:
 		self.log.info("Computing finished. Computed {} entries successfully. {} computations failed. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
 	
 	def write_to_disk(self):
+		self.log.info("Writing checkpoint to disk ...")
+		
+		count = 0
+		count_skipped = 0
+		
 		with open(self.output_files.checkpoint, "w") as output:
 			with open(self.output_files.file_list, "r") as file_list:
 				# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 to include some headroom
 				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=2*4096):
 					if file not in self.entries:
+						count_skipped += 1
 						continue
 					
 					entry = self.entries[file]					
@@ -301,8 +307,12 @@ class Checkpoint:
 					output.write("\t")
 					output.write(entry.stat)
 					output.write("\n")
+					
+					count += 1
 			
 			output.write(self.eof_marker["incomplete" if self.abortion_requested else "complete"])
+		
+		self.log.info("Writing checkpoint to disk finished. Wrote {} entries, {} files were not added because they were deleted during the computation.".format(count, count_skipped))
 
 def main():
 	parser = argparse.ArgumentParser()
