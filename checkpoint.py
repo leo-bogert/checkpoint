@@ -296,7 +296,7 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("input_directory", help="The directory for which to generate the checkpoint")
 	parser.add_argument("output_directory", help="The directory to which the checkpoint shall be written. Will be created automatically if it does not exist")
-	parser.add_argument('--verbose', '-v', help="Not only log to the log file but also to stdout/stderr. Also, print additional debug messages which would not be written to the log file.", action='count')
+	parser.add_argument('--verbose', '-v', help="Not only log to the log file but also to stdout/stderr. Also, print additional debug messages which would not be written to the log file. Notice that error messages from subprocesses will only be visible in the log file.", action='count')
 	args = parser.parse_args()
 	
 	checkpoint = Checkpoint(args.input_directory, args.output_directory)
