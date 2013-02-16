@@ -222,7 +222,7 @@ class Checkpoint:
 		if stat_proc.returncode == 0:
 			stat = stat_output[0]
 		else:
-			stat = Checkpoint.CONST_STAT__FAILED
+			stat = Checkpoint.CONST_STAT_FAILED
 		
 		return stat
 	
