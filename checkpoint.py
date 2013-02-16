@@ -42,7 +42,7 @@ class Checkpoint:
 	output_dir = None # The directory to which the Checkpoint will be written
 	output_files = None # An OutputFiles object which lists all files in the output directory
 	
-	entries = None	# A set containing all Entry objects of this checkpoint
+	entries = None	# A dict containing all Entry objects of this checkpoint. The key is the file path
 	
 	log = None # A logger object which logs to the log file and optionally to the terminal
 	
@@ -66,36 +66,29 @@ class Checkpoint:
 		checkpoint = None # The file to which the checkpoint will be written
 		checkpoint_oldformat_dates = None # The old format date-only checkpoint
 		checkpoint_oldformat_sha256 = None # The old format sha256-only checkpoint
+		file_list= None # The sorted listing of all files included in the checkpoint.
+		file_list_unsorted = None # The listing of all files included in the checkpoint. Not sorted yet.
 		log = None # The output log file
 		
 		def __init__(self, output_dir):
 			self.checkpoint = path.join(output_dir, "checkpoint.txt")
 			self.checkpoint_oldformat_dates = path.join(output_dir, "filedates.txt")
 			self.checkpoint_oldformat_sha256 = path.join(output_dir, "files.sha256")
+			self.file_list = path.join(output_dir, "checkpoint.txt.ls")
+			self.file_list_unsorted = path.join(output_dir, "checkpoint.txt.ls.tmp")
 			self.log = path.join(output_dir, "checkpoint.log")
 		
 		def get_all(self):
 			return vars(self)		
 	
 	class Entry:
-		path = None # The path of the file/directory in the filesystem
 		sha256sum = None # The sha256sum. None if the Entry is a directory
 		stat = None # The filedates (output of stat)
 		
-		def __init__(self, path, sha256sum=None, stat=None):
-			self.path = path
+		def __init__(self, sha256sum=None, stat=None):
 			self.sha256sum = sha256sum if not sha256sum == Checkpoint.CONST_SHA256SUM_DIRECTORY else None
 			self.stat = stat
-		
-		def __hash__(self):
-			return self.path.__hash__()
-		
-		def __eq__(self, other):
-			return self.path.__eq__(other.path)
-		
-		def __cmp__(self, other):
-			return cmp(self.path, other.path)
-	
+			
 	def generate_files_and_directories(self):
 		if not path.isdir(self.output_dir):
 			os.makedirs(self.output_dir,0700)
@@ -161,12 +154,12 @@ class Checkpoint:
 		
 		if path.getsize(self.output_files.checkpoint) == 0:
 			self.log.info("No existing checkpoint found, creating a fresh one...")
-			self.entries = set()
+			self.entries = { }
 			return True
 		
 		count = 0
 		count_ignored = 0
-		entries = set()
+		entries = { }
 		with open(self.output_files.checkpoint, "r") as input:
 			for line in input:
 				splitline = line.split("\0", 1)
@@ -190,13 +183,35 @@ class Checkpoint:
 				if Checkpoint.CONST_SHA256SUM_FAILED in sha256sum or Checkpoint.CONST_STAT_FAILED in stat:
 					count_ignored += 1
 					continue
-			
-				entry = Checkpoint.Entry(file, sha256sum, stat)
-				assert entry not in entries
-				entries.add(entry)
+				
+				entry = Checkpoint.Entry(sha256sum, stat)
+				assert file not in entries
+				entries[file] = entry
 				count += 1
 			
 			raise IOError("End of file marker not found - Input file is incomplete!")
+	
+	def compute_find(self):
+		self.log.info("Computing list of files included in the checkpoint ...")
+		
+		with open(self.output_files.log, "a") as log_file:
+			with open(self.output_files.file_list_unsorted, "w") as find_output:
+				# We run find inside the target directory so the filenames in the output are relative
+				# IMPORTANT: The "-print0" must be AFTER the search options or find will return ALL files. TODO: File a bug report
+				subprocess.check_call(shlex.split("find . -mount ( -type f -o -type d ) -print0"), cwd=self.input_dir, stderr=log_file, stdout=find_output)
+		
+		self.log.info("Computing list of files included in the checkpoint finished.")
+	
+	def compute_sort(self):
+		self.log.info("Sorting list of files included in the checkpoint ...")
+		
+		with open(self.output_files.log, "a") as log_file:
+			with open(self.output_files.file_list, "w") as sort_output:
+				subprocess.check_call(("sort", "--stable", "--zero-terminated", self.output_files.file_list_unsorted), cwd=self.output_dir, stderr=log_file, stdout=sort_output)
+		
+		os.remove(self.output_files.file_list_unsorted)
+		
+		self.log.info("Sorting list of files included in the checkpoint finished.")
 	
 	def compute_sha256sum(self, file, log_file):
 		sha_proc = subprocess.Popen(("sha256sum", "--binary", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
@@ -233,62 +248,58 @@ class Checkpoint:
 		count_failed = 0
 		count_skipped = 0
 		
-		# The paths in the checkpoint shall be relative. So we set the working directory of the "find" process to the input dir.
-		# Because we test for the type of the returned file paths on our own, we also need to set our working directory to the input dir.
+		# The paths in the file listing are relative.
+		# Because we test for the type of the file paths, weneed to set our working directory to the input dir.
 		os.chdir(self.input_dir)
 		
 		with open(self.output_files.log, "a") as log_file:
-			# We run find inside the target directory so the filenames in the output are relative
-			# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 and set bufsize to 8192*2
-			# IMPORTANT: The "-print0" must be AFTER the search options or find will return ALL files. TODO: File a bug report
-			find = subprocess.Popen(shlex.split("find . -mount ( -type f -o -type d ) -print0"), bufsize=16384, cwd=self.input_dir, stderr=log_file, stdout=subprocess.PIPE)
-			
-			for file in fileLineIter(find.stdout, inputNewline="\0", outputNewline="", readSize=2*4096):
-				if self.abortion_requested:
-					self.log.info("Aborting computation due to signal!")
-					break
-				
-				if Checkpoint.Entry(file) in self.entries:
-					count_skipped += 1
-					continue
-				
-				if path.isfile(file):
-					sha256sum = self.compute_sha256sum(file, log_file)
-					if sha256sum == Checkpoint.CONST_SHA256SUM_FAILED:
+			with open(self.output_files.file_list, "r") as file_list:
+				# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 to include some headroom
+				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=2*4096):
+					if self.abortion_requested:
+						self.log.info("Aborting computation due to signal!")
+						break
+					
+					if file in self.entries:
+						count_skipped += 1
+						continue
+					
+					if path.isfile(file):
+						sha256sum = self.compute_sha256sum(file, log_file)
+						if sha256sum == Checkpoint.CONST_SHA256SUM_FAILED:
+							count_failed += 1
+					elif path.isdir(file):
+						sha256sum = Checkpoint.CONST_SHA256SUM_DIRECTORY
+					elif not path.exists(file):
+						self.log.warning("File deleted during processing: " + file)
+						continue
+					else:
+						raise IOError("Unexpected type of file: " + file)
+					
+					stat = self.compute_stat(file, log_file)
+					if stat == Checkpoint.CONST_STAT_FAILED:
 						count_failed += 1
-				elif path.isdir(file):
-					sha256sum = Checkpoint.CONST_SHA256SUM_DIRECTORY
-				elif not path.exists(file):
-					self.log.warning("File deleted during processing: " + file)
-					continue
-				else:
-					raise IOError("Unexpected type of file: " + file)
-				
-				stat = self.compute_stat(file, log_file)
-				if stat == Checkpoint.CONST_STAT_FAILED:
-					count_failed += 1
-				
-				self.entries.add(Checkpoint.Entry(file, sha256sum, stat))
-				count_computed += 1
-			
-			if find.wait() != 0:
-				raise SystemError("find exit-code is non-zero!")
+					
+					self.entries[file] = Checkpoint.Entry(sha256sum, stat)
+					count_computed += 1
 		
 		self.log.info("Computing finished. Computed {} entries successfully. {} computations failed. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
-
+	
 	def write_to_disk(self):
-		entries = sorted(self.entries)
-		# The script shall work for very large data sets so we deleted the original set to save some RAM
-		del self.entries
-		
 		with open(self.output_files.checkpoint, "w") as output:
-			for entry in entries:
-				output.write(entry.path)
-				output.write("\0\t")
-				output.write(entry.sha256sum if entry.sha256sum else Checkpoint.CONST_SHA256SUM_DIRECTORY)
-				output.write("\t")
-				output.write(entry.stat)
-				output.write("\n")
+			with open(self.output_files.file_list, "r") as file_list:
+				# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 to include some headroom
+				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=2*4096):
+					if file not in self.entries:
+						continue
+					
+					entry = self.entries[file]					
+					output.write(file)
+					output.write("\0\t")
+					output.write(entry.sha256sum if entry.sha256sum else Checkpoint.CONST_SHA256SUM_DIRECTORY)
+					output.write("\t")
+					output.write(entry.stat)
+					output.write("\n")
 			
 			output.write(self.eof_marker["incomplete" if self.abortion_requested else "complete"])
 
@@ -306,6 +317,8 @@ def main():
 	checkpoint.set_ioniceness()
 	if not checkpoint.load_from_disk():
 		return False # The checkpoint is complete already, nothing to do.
+	checkpoint.compute_find()
+	checkpoint.compute_sort()
 	checkpoint.compute()
 	checkpoint.write_to_disk()
 
