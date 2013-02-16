@@ -149,7 +149,7 @@ class Checkpoint:
 		signal.signal(signal.SIGINT, self.interrupt_compute)
 		signal.signal(signal.SIGTERM, self.interrupt_compute)
 	
-	def interrupt_compute(self):
+	def interrupt_compute(self, signum, frame):
 		abortion_requested = True
 	
 	def set_ioniceness(self):
