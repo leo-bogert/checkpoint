@@ -150,7 +150,7 @@ class Checkpoint:
 		signal.signal(signal.SIGTERM, self.interrupt_compute)
 	
 	def interrupt_compute(self, signum, frame):
-		abortion_requested = True
+		self.abortion_requested = True
 	
 	def set_ioniceness(self):
 		p = psutil.Process(os.getpid())
