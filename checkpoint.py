@@ -186,7 +186,7 @@ class Checkpoint:
 					else:
 						raise IOError("End of file marker not found - Input file is incomplete!")
 				
-				(sha256sum, stat) = checkpoint_data.split("\t", 2)[1:]
+				(sha256sum, stat) = checkpoint_data.strip().split("\t", 1)
 				if Checkpoint.CONST_SHA256SUM_FAILED in sha256sum or Checkpoint.CONST_STAT_FAILED in stat:
 					count_ignored += 1
 					continue
