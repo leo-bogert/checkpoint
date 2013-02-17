@@ -79,7 +79,7 @@ class Checkpoint:
 			self.log = path.join(output_dir, "checkpoint.log")
 		
 		def get_all(self):
-			return vars(self)		
+			return vars(self)
 	
 	class Entry:
 		sha256sum = None # The sha256sum. None if the Entry is a directory
