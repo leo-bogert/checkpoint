@@ -71,12 +71,15 @@ class Checkpoint:
 		log = None # The output log file
 		
 		def __init__(self, output_dir):
-			self.checkpoint = path.join(output_dir, "checkpoint.txt")
-			self.checkpoint_oldformat_dates = path.join(output_dir, "filedates.txt")
-			self.checkpoint_oldformat_sha256 = path.join(output_dir, "files.sha256")
-			self.file_list = path.join(output_dir, "checkpoint.txt.ls")
-			self.file_list_unsorted = path.join(output_dir, "checkpoint.txt.ls.tmp")
-			self.log = path.join(output_dir, "checkpoint.log")
+			self.checkpoint = "checkpoint.txt"
+			self.checkpoint_oldformat_dates = "filedates.txt"
+			self.checkpoint_oldformat_sha256 = "files.sha256"
+			self.file_list = "checkpoint.txt.ls"
+			self.file_list_unsorted = "checkpoint.txt.ls.tmp"
+			self.log = "checkpoint.log"
+			
+			# __dict__ is equal to vars() but can be assigned
+			self.__dict__ = { key: path.join(output_dir, value) for (key, value) in self.__dict__.iteritems() }
 		
 		def get_all(self):
 			return vars(self)
