@@ -291,15 +291,16 @@ class Checkpoint:
 	def write_to_disk(self):
 		self.log.info("Writing checkpoint to disk ...")
 		
-		count = 0
-		count_skipped = 0
+		count_written = 0
+		count_total = 0
 		
 		with open(self.output_files.checkpoint, "w") as output:
 			with open(self.output_files.file_list, "r") as file_list:
 				# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 to include some headroom
 				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=2*4096):
+					count_total += 1
+					
 					if file not in self.entries:
-						count_skipped += 1
 						continue
 					
 					entry = self.entries[file]					
@@ -310,12 +311,12 @@ class Checkpoint:
 					output.write(entry.stat)
 					output.write("\n")
 					
-					count += 1
+					count_written += 1
 			
 			eof_marker = Checkpoint.CONST_EOF_MARKER["incomplete" if self.abortion_requested else "complete"]
 			output.write(eof_marker)
 
-		self.log.info("Writing checkpoint to disk finished. Wrote an entry for {} of the {} input files. ".format(count, count_skipped))
+		self.log.info("Writing checkpoint to disk finished. Wrote an entry for {} of the {} input files/directories. ".format(count_written, count_total))
 		self.log.info(eof_marker.rstrip("\n\0"))
 
 
