@@ -108,7 +108,7 @@ class Checkpoint:
 			
 			if os.geteuid() == 0:
 				os.chown(file, 0, 0)
-			os.chmod(file, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
+			os.chmod(file, stat.S_IRUSR | stat.S_IWUSR)
 	
 	def init_logging(self, show_log_on_console = False):
 		log = logging.getLogger()
