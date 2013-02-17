@@ -231,7 +231,7 @@ write_output() {
 				for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
 					echo -n "$filepath"
 					echo -n -e "\0"
-				done | sort --stable --zero-terminated
+				done | sort --zero-terminated
 			)
 
 		write_eof_marker_to_output

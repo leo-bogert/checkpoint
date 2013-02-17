@@ -209,7 +209,7 @@ class Checkpoint:
 		
 		with open(self.output_files.log, "a") as log_file:
 			with open(self.output_files.file_list, "w") as sort_output:
-				subprocess.check_call(("sort", "--stable", "--zero-terminated", self.output_files.file_list_unsorted), cwd=self.output_dir, stderr=log_file, stdout=sort_output)
+				subprocess.check_call(("sort", "--zero-terminated", self.output_files.file_list_unsorted), cwd=self.output_dir, stderr=log_file, stdout=sort_output)
 		
 		os.remove(self.output_files.file_list_unsorted)
 		
