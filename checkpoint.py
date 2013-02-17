@@ -286,7 +286,7 @@ class Checkpoint:
 					self.entries[file] = Checkpoint.Entry(sha256sum, stat)
 					count_computed += 1
 		
-		self.log.info("Computing finished. Computed {} entries successfully. {} computations failed. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
+		self.log.info("Computing finished. Computed {} entries. {} computations failed. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
 	
 	def write_to_disk(self):
 		self.log.info("Writing checkpoint to disk ...")
