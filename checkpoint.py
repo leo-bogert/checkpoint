@@ -48,8 +48,8 @@ class Checkpoint:
 	
 	abortion_requested = False	# Set to true if signal HUP/INT/TERM is received. The computation is aborted gracefully then and the progress is saved to disk.
 	
-	eof_marker = { "complete" : "This checkpoint is complete.\n\0",
-					"incomplete" : "This checkpoint is INCOMPLETE but can be resumed.\n\0" }
+	CONST_EOF_MARKER = { "complete" : "This checkpoint is complete.\n\0",
+						"incomplete" : "This checkpoint is INCOMPLETE but can be resumed.\n\0" }
 	
 	CONST_SHA256SUM_DIRECTORY = "(directory)"
 	CONST_SHA256SUM_FAILED = "(sha256sum failed!)"
@@ -169,10 +169,10 @@ class Checkpoint:
 				if len(splitline) == 2:
 					 checkpoint_data = splitline[1]
 				else:
-					if file + "\0" == self.eof_marker["complete"]:
+					if file + "\0" == Checkpoint.CONST_EOF_MARKER["complete"]:
 						self.log.error("Checkpoint is complete already, nothing to do. Exiting.")
 						return False
-					elif file + "\0" == self.eof_marker["incomplete"]:
+					elif file + "\0" == Checkpoint.CONST_EOF_MARKER["incomplete"]:
 						self.log.info("Loaded {} existing checkpoint datasets, ignored {} existing datasets where sha256sum or stat had failed previously.".format(count, count_ignored))
 						self.entries = entries
 						return True
@@ -310,7 +310,7 @@ class Checkpoint:
 					
 					count += 1
 			
-			output.write(self.eof_marker["incomplete" if self.abortion_requested else "complete"])
+			output.write(Checkpoint.CONST_EOF_MARKER["incomplete" if self.abortion_requested else "complete"])
 		
 		self.log.info("Writing checkpoint to disk finished. Wrote {} entries, {} files were not added because they were deleted during the computation.".format(count, count_skipped))
 
