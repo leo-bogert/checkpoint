@@ -82,7 +82,7 @@ class Checkpoint:
 			self.__dict__ = { key: path.join(output_dir, value) for (key, value) in self.__dict__.iteritems() }
 		
 		def get_all(self):
-			return vars(self)
+			return vars(self).viewvalues()
 	
 	class Entry:
 		sha256sum = None # The sha256sum. None if the Entry is a directory
@@ -101,7 +101,7 @@ class Checkpoint:
 		
 		os.chmod(self.output_dir, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR)
 		
-		for file in self.output_files.get_all().viewvalues():
+		for file in self.output_files.get_all():
 			if not path.isfile(file):
 				with open(file, "a") as f:	# create the file
 					pass
