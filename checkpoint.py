@@ -312,9 +312,12 @@ class Checkpoint:
 					
 					count += 1
 			
-			output.write(Checkpoint.CONST_EOF_MARKER["incomplete" if self.abortion_requested else "complete"])
-		
-		self.log.info("Writing checkpoint to disk finished. Wrote {} entries, {} files were not added because they were deleted during the computation.".format(count, count_skipped))
+			eof_marker = Checkpoint.CONST_EOF_MARKER["incomplete" if self.abortion_requested else "complete"]
+			output.write(eof_marker)
+
+		self.log.info("Writing checkpoint to disk finished. Wrote an entry for {} of the {} input files. ".format(count, count_skipped))
+		self.log.info(eof_marker.rstrip("\n\0"))
+
 
 def main():
 	parser = argparse.ArgumentParser()
