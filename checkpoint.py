@@ -256,8 +256,12 @@ class Checkpoint:
 		
 		with open(self.output_files.log, "a") as log_file:
 			with open(self.output_files.file_list, "r") as file_list:
-				# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 to include some headroom
-				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=2*4096):
+				# Max path length in Linux is 4096, so the first intention would be to use something around that as readSize.
+				# However, we should imagine that the typical bottleneck of this script is generating checksums for large amounts of small files:
+				# Then the overhead of moving the disk heads continously is very large and would be even larger if they had to be moved very often
+				# for reading from the file list file.
+				# On the other hand, a 1 MiB buffer for the list of input files is very cheap and will greatly reduce moving of the disk heads so we go for it.
+				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=1024*1024):
 					if self.abortion_requested:
 						self.log.info("Aborting computation due to signal!")
 						break
@@ -296,8 +300,8 @@ class Checkpoint:
 		
 		with open(self.output_files.checkpoint, "w") as output:
 			with open(self.output_files.file_list, "r") as file_list:
-				# Max path length in Linux is 4096, so we use fileLineIter with readSize=8192 to include some headroom
-				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=2*4096):
+				# See compute for the reasons behind choice of readSize
+				for file in fileLineIter(file_list, inputNewline="\0", outputNewline="", readSize=1024*1024):
 					count_total += 1
 					
 					if file not in self.entries:
