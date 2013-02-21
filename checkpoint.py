@@ -10,6 +10,7 @@ import sys
 import signal
 import psutil
 import shlex, subprocess
+import time
 
 # As of 2013-02-14, Python does not support reading files line-by-line with a custom line delimiter.
 # As we want to parse the output of "find -print0", this would be very useful.
@@ -249,6 +250,8 @@ class Checkpoint:
 		count_computed = 0
 		count_failed = 0
 		count_skipped = 0
+
+		last_written_to_disk_time = time.time()
 		
 		# The paths in the file listing are relative.
 		# Because we test for the type of the file paths, weneed to set our working directory to the input dir.
@@ -265,6 +268,12 @@ class Checkpoint:
 					if self.abortion_requested:
 						self.log.info("Aborting computation due to signal!")
 						break
+
+					minutes_since_write_to_disk = (time.time() - last_written_to_disk_time) / 60
+					if minutes_since_write_to_disk > 15:
+						self.log.info(str(int(minutes_since_write_to_disk)) + " minutes have passed, writing progress to disk ...")
+						self.write_to_disk(incomplete=True)
+						last_written_to_disk_time = time.time()					
 					
 					if file in self.entries:
 						count_skipped += 1
@@ -292,7 +301,7 @@ class Checkpoint:
 		
 		self.log.info("Computing finished. Computed {} entries. sha256/stat failed {} times. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
 	
-	def write_to_disk(self):
+	def write_to_disk(self, incomplete=False):
 		self.log.info("Writing checkpoint to disk ...")
 		
 		count_written = 0
@@ -317,7 +326,7 @@ class Checkpoint:
 					
 					count_written += 1
 			
-			eof_marker = Checkpoint.CONST_EOF_MARKER["incomplete" if self.abortion_requested else "complete"]
+			eof_marker = Checkpoint.CONST_EOF_MARKER["incomplete" if incomplete or self.abortion_requested else "complete"]
 			output.write(eof_marker)
 
 		self.log.info("Writing checkpoint to disk finished. Wrote an entry for {} of the {} input files/directories. ".format(count_written, count_total))
