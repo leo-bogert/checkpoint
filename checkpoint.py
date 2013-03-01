@@ -224,8 +224,15 @@ class Checkpoint:
 		
 		if sha_proc.returncode == 0:
 			sha_stdout = sha_output[0]
-			(sha256sum, rest) = sha_stdout.split(" ", 1)
-			assert rest.split("*", 1)[1] == file + "\n"
+			(sha256sum, sha_filename) = sha_stdout.split(" *", 1)
+			
+			# if the sum starts with a backslash, sha256sum has escaped linebreaks and the backslash character in the filename
+			
+			sha_filename_unescape = lambda filename: filename if sha256sum[0] != "\\" else filename.replace("\\n", "\n").replace("\\\\", "\\")
+			assert sha_filename_unescape(sha_filename) == file + "\n"
+			
+			if sha256sum[0] == "\\":
+				sha256sum = sha256sum[1:]				
 		else:
 			sha256sum = Checkpoint.CONST_SHA256SUM_FAILED
 		
