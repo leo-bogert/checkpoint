@@ -239,6 +239,8 @@ class Checkpoint:
 		return sha256sum
 	
 	def compute_stat(self, file, log_file):
+		# TODO: Use the Python API for obtaining the stat once Python supports obtaining the birth-time.
+
 		stat_proc = subprocess.Popen(("stat", "--printf", "Birth: %w\tAccess: %x\tModify: %y\tChange: %z", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
 		stat_output = stat_proc.communicate()
 		
