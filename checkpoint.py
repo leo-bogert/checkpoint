@@ -11,6 +11,7 @@ import signal
 import psutil
 import shlex, subprocess
 import time
+import itertools
 
 # As of 2013-02-14, Python does not support reading files line-by-line with a custom line delimiter.
 # As we want to parse the output of "find -print0", this would be very useful.
@@ -92,6 +93,17 @@ class Checkpoint:
 		def __init__(self, sha256sum=None, stat=None):
 			self.sha256sum = sha256sum if not sha256sum == Checkpoint.CONST_SHA256SUM_DIRECTORY else None
 			self.stat = stat
+		
+		def stat_filter(self, stat_array, exclude_times):
+			for time in stat_array:
+				if not time[0].lower() in exclude_times:
+					yield time
+		
+		def get_stat(self, exclude_times):
+			if not exclude_times:
+				return self.stat
+			else:
+				return '\t'.join(self.stat_filter(self.stat.split('\t', 3), exclude_times))
 			
 	def generate_files_and_directories(self):
 		if not path.isdir(self.output_dir):
@@ -172,12 +184,13 @@ class Checkpoint:
 				if len(splitline) == 2:
 					 checkpoint_data = splitline[1]
 				else:
+					self.entries = entries
+					
 					if file + "\0" == Checkpoint.CONST_EOF_MARKER["complete"]:
-						self.log.error("Checkpoint is complete already, nothing to do. Exiting.")
+						self.log.info("Checkpoint is complete already.")
 						return False
 					elif file + "\0" == Checkpoint.CONST_EOF_MARKER["incomplete"]:
 						self.log.info("Loaded {} existing checkpoint datasets, ignored {} existing datasets where sha256sum or stat had failed previously.".format(count, count_ignored))
-						self.entries = entries
 						return True
 					else:
 						raise IOError("End of file marker not found - Input file is incomplete!")
@@ -310,7 +323,7 @@ class Checkpoint:
 		
 		self.log.info("Computing finished. Computed {} entries. sha256/stat failed {} times. Skipped {} of {} files due to incremental computation.".format(count_computed, count_failed, count_skipped, len(self.entries)))
 	
-	def write_to_disk(self, incomplete=False):
+	def write_to_disk(self, incomplete=False, exclude_times=None):
 		self.log.info("Writing checkpoint to disk ...")
 		
 		count_written = 0
@@ -330,7 +343,7 @@ class Checkpoint:
 					output.write("\0\t")
 					output.write(entry.sha256sum if entry.sha256sum else Checkpoint.CONST_SHA256SUM_DIRECTORY)
 					output.write("\t")
-					output.write(entry.stat)
+					output.write(entry.get_stat(exclude_times))
 					output.write("\n")
 					
 					count_written += 1
@@ -346,6 +359,8 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("input_directory", help="The directory for which to generate the checkpoint.")
 	parser.add_argument("output_directory", help="The directory to which the checkpoint shall be written. Will be created automatically if it does not exist.")
+	parser.add_argument("--exclude-times", help="Exclude the selected file timestamps from the output. Can be a combination of the letters a(ccess), b(irth), c(hange), m(modification).", choices=["".join(perm) for i in xrange(1,4) for perm in itertools.combinations('abcm', i)])
+	parser.add_argument("--rewrite-only", help="Do nothing but load the checkpoint from disk and write it to disk again. Useful to filter out unwanted information aftwards, for example with --exclude-times", action='store_true')
 	parser.add_argument('--verbose', '-v', help="Not only log to the log file but also to stdout/stderr. Also, print additional debug messages which would not be written to the log file. Notice that error messages from subprocesses will only be visible in the log file.", action='count')
 	args = parser.parse_args()
 	
@@ -354,13 +369,16 @@ def main():
 	checkpoint.init_logging(args.verbose > 0)
 	checkpoint.trap_signals()
 	checkpoint.set_ioniceness()
-	if not checkpoint.load_from_disk():
-		return False # The checkpoint is complete already, nothing to do.
-	checkpoint.compute_find()
-	checkpoint.compute_sort()
-	checkpoint.compute()
-	checkpoint.write_to_disk()
-
+	if not checkpoint.load_from_disk() and not args.rewrite_only:
+		# The checkpoint is complete already, nothing to do.
+		checkpoint.log.error("Nothing to do, exiting.")
+		return False
+	if not args.rewrite_only:
+		checkpoint.compute_find()
+		checkpoint.compute_sort()
+		checkpoint.compute()
+	checkpoint.write_to_disk(exclude_times=args.exclude_times)
+	
 	return True
 
 if __name__ == "__main__":
