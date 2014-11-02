@@ -162,7 +162,10 @@ class Checkpoint:
 		self.abortion_requested = True
 	
 	def set_ioniceness(self):
-		psutil.Process(os.getpid()).set_ionice(psutil.IOPRIO_CLASS_IDLE)
+		# Mac OS X is incapable of IO niceness.
+		# FIXME: Enable by default, and allow disabling this with a paramter "--mac-os-x"
+		# psutil.Process(os.getpid()).set_ionice(psutil.IOPRIO_CLASS_IDLE)
+		pass # Python won't allow empty functions, so we use the nothing-operation.
 	
 	def load_from_disk(self):
 		self.log.info("Loading existing checkpoint data to resume from it ...")
@@ -230,7 +233,12 @@ class Checkpoint:
 		self.log.info("Sorting list of files included in the checkpoint finished.")
 	
 	def compute_sha256sum(self, file, log_file):
-		sha_proc = subprocess.Popen(("sha256sum", "--binary", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		# GNU Coreutils.
+		# sha_proc = subprocess.Popen(("sha256sum", "--binary", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		
+		# Mac OS X. FIXME: Default to the above GNU variant, and allow enabling this with a paramter "--mac-os-x"
+		sha_proc = subprocess.Popen(("shasum", "--algorithm", "256", "--binary", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		
 		sha_output = sha_proc.communicate()
 		
 		assert sha_proc.returncode != None	# process has exited
@@ -253,8 +261,12 @@ class Checkpoint:
 	
 	def compute_stat(self, file, log_file):
 		# TODO: Use the Python API for obtaining the stat once Python supports obtaining the birth-time.
-
-		stat_proc = subprocess.Popen(("stat", "--printf", "Birth: %w\tAccess: %x\tModify: %y\tChange: %z", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		
+		# GNU Coreutils.
+		# stat_proc = subprocess.Popen(("stat", "--printf", "Birth: %w\tAccess: %x\tModify: %y\tChange: %z", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		
+		# Mac OS X. FIXME: Default to the above GNU variant, and allow enabling this with a paramter "--mac-os-x"
+		stat_proc = subprocess.Popen(("stat", "-f", "Birth: %B\tAccess: %a\tModify: %m\tChange: %c", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
 		stat_output = stat_proc.communicate()
 		
 		assert stat_proc.returncode != None	# process has exited
