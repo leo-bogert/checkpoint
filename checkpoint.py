@@ -74,7 +74,9 @@ class Checkpoint:
 		
 		def __init__(self, output_dir):
 			self.checkpoint = "checkpoint.txt"
+			# TODO: Remove, or implement generation
 			self.checkpoint_oldformat_dates = "filedates.txt"
+			# TODO: Remove, or implement generation
 			self.checkpoint_oldformat_sha256 = "files.sha256"
 			self.file_list = "checkpoint.txt.ls"
 			self.file_list_unsorted = "checkpoint.txt.ls.tmp"
