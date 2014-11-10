@@ -274,7 +274,7 @@ class Checkpoint:
 		assert stat_proc.returncode != None	# process has exited
 		
 		if stat_proc.returncode == 0:
-			stat = stat_output[0]
+			stat = stat_output[0].strip()
 		else:
 			stat = Checkpoint.CONST_STAT_FAILED
 		
