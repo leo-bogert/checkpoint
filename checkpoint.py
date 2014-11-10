@@ -268,7 +268,7 @@ class Checkpoint:
 		# stat_proc = subprocess.Popen(("stat", "--printf", "Birth: %w\tAccess: %x\tModify: %y\tChange: %z", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
 		
 		# Mac OS X. FIXME: Default to the above GNU variant, and allow enabling this with a paramter "--mac-os-x"
-		stat_proc = subprocess.Popen(("stat", "-f", "Birth: %B\tAccess: %a\tModify: %m\tChange: %c", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
+		stat_proc = subprocess.Popen(("stat", "-f", "Birth: %SB\tAccess: %Sa\tModify: %Sm\tChange: %Sc", "-t", "%Y-%m-%d %H:%M:%S %z", file), bufsize=-1, cwd=self.input_dir, stdout=subprocess.PIPE, stderr=log_file)
 		stat_output = stat_proc.communicate()
 		
 		assert stat_proc.returncode != None	# process has exited
