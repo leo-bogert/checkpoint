@@ -12,6 +12,7 @@ import psutil
 import shlex, subprocess
 import time
 import itertools
+import re
 
 # As of 2013-02-14, Python does not support reading files line-by-line with a custom line delimiter.
 # As we want to parse the output of "find -print0", this would be very useful.
@@ -38,6 +39,12 @@ def fileLineIter(inputFile,
 		partialLine = lines.pop()
 		for line in lines: yield line + outputNewline
 	if partialLine: yield partialLine
+
+clean_stat_regexp = re.compile('[.][0-9]+[ ]')
+# As of 2015-02-16, stat does not support disabling printing of decimal places for the seconds of times
+# Thus, this function removes them using the regexp clean_stat_regexp
+def clean_stat(stat_output):
+	return clean_stat_regexp.sub(' ', stat_output)
 
 class Checkpoint:
 	input_dir = None # The directory for which the Checkpoint is generated
@@ -262,7 +269,7 @@ class Checkpoint:
 		assert stat_proc.returncode != None	# process has exited
 		
 		if stat_proc.returncode == 0:
-			stat = stat_output[0]
+			stat = clean_stat(stat_output[0])
 		else:
 			stat = Checkpoint.CONST_STAT_FAILED
 		
