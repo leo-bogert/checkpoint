@@ -15,7 +15,9 @@ shopt -s failglob
 INCLUDE=( '^\./home/'  )
 EXCLUDE=( '^\./home/some-user/' )
 EXCLUDE+=( '^./home/([[:alnum:]]|-)+/\.cache/mozilla/firefox/' )
+EXCLUDE+=( '^./home/([[:alnum:]]|-)+/\.mozilla/firefox/' )
 EXCLUDE+=( '^./home/([[:alnum:]]|-)+/\.cache/chromium/' )
+EXCLUDE+=( '^./home/([[:alnum:]]|-)+/\.config/chromium/' )
 
 INCLUDE+=( '^This checkpoint is complete\.$' )
 INCLUDE+=( '^This checkpoint is INCOMPLETE but can be resumed\.$' )
