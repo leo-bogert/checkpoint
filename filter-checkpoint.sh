@@ -10,12 +10,14 @@ shopt -s failglob
 
 # These arrays contain regular expressions!
 # So please be careful with using any non-letter characters, they may be reserved by grep and need to be escaped with \ then!
-# See e.g. https://www.regular-expressions.info/refcharacters.html (Literal chracters in GNU BRE = what is safe).
+# See e.g. https://www.regular-expressions.info/refcharacters.html (Literal chracters in GNU ERE = what is safe).
 # If in doubt test your regexp by kdiff3'ing a filtered checkpoint against its original version.
 INCLUDE=( '^\./home/'  )
 EXCLUDE=( '^\./home/some-user/' )
+EXCLUDE+=( '^./home/([[:alnum:]]|-)*/\.cache/mozilla/firefox/' )
+EXCLUDE+=( '^./home/([[:alnum:]]|-)*/\.cache/chromium/' )
 
 INCLUDE+=( '^This checkpoint is complete\.$' )
 INCLUDE+=( '^This checkpoint is INCOMPLETE but can be resumed\.$' )
-grep --text --file=<(printf '%s\n' "${INCLUDE[@]}") -- "$1/checkpoint.txt" |
-grep --text --file=<(printf '%s\n' "${EXCLUDE[@]}") --invert-match > "$1/checkpoint.txt.filtered"
+grep --text --extended-regexp --file=<(printf '%s\n' "${INCLUDE[@]}") -- "$1/checkpoint.txt" |
+grep --text --extended-regexp --file=<(printf '%s\n' "${EXCLUDE[@]}") --invert-match > "$1/checkpoint.txt.filtered"
