@@ -23,7 +23,7 @@ EXCLUDE+=( '^\./home/([[:alnum:]]|-)+/\.kde/share/config/' )
 EXCLUDE+=( '^\./home/([[:alnum:]]|-)+/\.config/akonadi/' )
 EXCLUDE+=( '^\./home/([[:alnum:]]|-)+/\.local/share/akonadi/' )
 EXCLUDE+=( '^\./home/([[:alnum:]]|-)+/\.thumbnails/' )
-EXCLUDE+=( '^\./home/([[:alnum:]]|-)+/Temp/' )
+EXCLUDE+=( '^\./home/([[:alnum:]]|-)+/[tT]emp/' )
 
 INCLUDE+=( '^This checkpoint is complete\.$' )
 INCLUDE+=( '^This checkpoint is INCOMPLETE but can be resumed\.$' )
