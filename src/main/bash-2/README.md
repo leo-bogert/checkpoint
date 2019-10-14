@@ -1,4 +1,4 @@
-# Rewrite of bash implementation
+# Second bash implementation
 
 This is the second implementation of checkpoint, written in Bash like the first.
 

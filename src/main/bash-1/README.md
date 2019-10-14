@@ -1,4 +1,4 @@
-# Bash reference implementation
+# First bash implementation
 
 This is the first implementation of checkpoint.
 
