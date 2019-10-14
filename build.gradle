@@ -1,0 +1,8 @@
+apply plugin: 'java'
+defaultTasks 'jar', 'test'
+
+dependencies {
+    testImplementation files('/usr/share/java/junit4.jar')
+}
+
+jar.manifest.attributes 'Main-Class': 'checkpoint.ui.Shell'
