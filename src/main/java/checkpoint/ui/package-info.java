@@ -1,2 +1,2 @@
-/** User interfaces */
+/** User interfaces. */
 package checkpoint.ui;
