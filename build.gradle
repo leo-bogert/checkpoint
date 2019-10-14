@@ -5,4 +5,4 @@ dependencies {
     testImplementation files('/usr/share/java/junit4.jar')
 }
 
-jar.manifest.attributes('Main-Class': 'checkpoint.ui.Shell')
+jar.manifest.attributes 'Main-Class': 'checkpoint.ui.Shell'
