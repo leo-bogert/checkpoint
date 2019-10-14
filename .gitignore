@@ -1,1 +1,3 @@
 .gradle/
+# Eclipse's build output
+bin/
