@@ -7,6 +7,13 @@ import java.nio.file.attribute.FileTime;
  *  upon instantiation to avoid unnecessary disk seeking. */
 public abstract class Timestamps {
 
+	/** We support including the access time in checkpoints even though
+	 *  generating one will access all files because the access time is a
+	 *  very suitable replacement for {@link #getBirthTime()} which isn't
+	 *  implemented on an average Linux (see its JavaDoc):
+	 *  If you mount your filesystem with "noatime" then the access times
+	 *  won't ever be updated and thus are equal to the time of birth of each
+	 *  file. */
 	public abstract FileTime getAccessTime();
 
 	/** Always returns null currently because:
