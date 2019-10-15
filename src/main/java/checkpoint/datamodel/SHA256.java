@@ -6,12 +6,12 @@ import java.nio.file.Path;
 
 public interface SHA256 {
 
-	public SHA256 sha256fromString(String hexEncodedSHA);
+	SHA256 sha256fromString(String hexEncoded);
 
-	public SHA256 sha256fromFile(Path p)
+	SHA256 sha256fromFile(Path p)
 		throws FileNotFoundException, IOException, InterruptedException;
 
 	// FIXME: Implement using https://stackoverflow.com/a/9655275
-	public String toString();
+	String toString();
 
 }
