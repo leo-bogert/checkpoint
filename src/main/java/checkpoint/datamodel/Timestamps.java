@@ -17,7 +17,7 @@ public abstract class Timestamps {
 		return null;
 	}
 
-	public abstract FileTime getChangeTime();
+	public abstract FileTime getStatusChangeTime();
 
 	public abstract FileTime getModificationTime();
 
