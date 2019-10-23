@@ -25,6 +25,12 @@ public final class Checkpoint implements ICheckpoint {
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
+	private static final class EOFMarkers {
+		static final String CheckpointComplete
+			= "This checkpoint is complete.\n\0";
+		static final String CheckpointIncomplete
+			= "This checkpoint is INCOMPLETE but can be resumed.\n\0";
+	}
 
 	@Override public synchronized void addNode(INode n)
 			throws IllegalArgumentException {
