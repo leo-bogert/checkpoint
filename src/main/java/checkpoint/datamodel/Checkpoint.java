@@ -2,7 +2,7 @@ package checkpoint.datamodel;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Set;
+import java.util.Collection;
 
 public interface Checkpoint {
 
