@@ -6,8 +6,8 @@ import java.nio.file.Path;
 public interface ICheckpoint {
 
 	/** @throws IllegalArgumentException If a node with the given
-	 *     {@link Node#getPath()} is already contained . */
-	void addNode(Node n) throws IllegalArgumentException;
+	 *     {@link INode#getPath()} is already contained . */
+	void addNode(INode n) throws IllegalArgumentException;
 
 	ICheckpoint load(Path checkpointDir) throws IOException;
 

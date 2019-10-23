@@ -4,7 +4,7 @@ import java.nio.file.Path;
 
 /** Represents an entry of a checkpoint.
  *  Either a file or a directory on disk. */
-public interface Node {
+public interface INode {
 
 	Path getPath();
 
