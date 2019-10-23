@@ -4,11 +4,11 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 
 /** Filesystem timestamps of a file/directory. */
-public abstract class Timestamps {
+public abstract class ITimestamps {
 
 	/** Implementations must read all timestamps at once from disk to avoid
 	 *  unnecessary disk seeking! */
-	public abstract Timestamps readTimestamps(Path p);
+	public abstract ITimestamps readTimestamps(Path p);
 
 	/** We support including the access time in checkpoints even though
 	 *  generating one will access all files because the access time is a
@@ -22,7 +22,12 @@ public abstract class Timestamps {
 	/** Always returns null currently because:
 	 *  - the Linux kernel does not currently support obtaining it in userspace.
 	 *  - and Java 11 does not seem to support detection if the above is still
-	 *    the case, it will just return a different one of the timestamps. */
+	 *    the case, it will just return a different one of the timestamps.
+	 *  
+	 *  TODO: Remove the implementation and thereby the above limitation once
+	 *  it is possible to get the birth time from the kernel.
+	 *  Once you do that also make this abstract class an interface instead to
+	 *  match its name prefix. */
 	public final FileTime getBirthTime() {
 		return null;
 	}

@@ -14,6 +14,6 @@ public interface INode {
 	 *  directories inside of it. */
 	ISHA256 getHash();
 
-	Timestamps getTimetamps();
+	ITimestamps getTimetamps();
 
 }
