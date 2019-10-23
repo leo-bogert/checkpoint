@@ -21,7 +21,7 @@ public final class Checkpoint implements ICheckpoint {
 	 *  specific. 
 	 *  FIXME: Performance: Replace with data structure which supports fast
 	 *  concurrent adding so our many generator threads can deal with the
-	 *  sorting in parallel. */
+	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
 	@Override public void addNode(INode n) throws IllegalArgumentException {
