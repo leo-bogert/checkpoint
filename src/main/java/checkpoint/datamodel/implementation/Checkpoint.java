@@ -25,7 +25,10 @@ public final class Checkpoint implements ICheckpoint {
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
-	@Override public void addNode(INode n) throws IllegalArgumentException {
+
+	@Override public synchronized void addNode(INode n)
+			throws IllegalArgumentException {
+		
 		// Instead of using putIfAbsent() so we can throw if the key is already
 		// contained we put() the new INode and replace it with put()ing old one
 		// again if put()'s return value tells us that there already was an
@@ -46,11 +49,15 @@ public final class Checkpoint implements ICheckpoint {
 		}
 	}
 
-	@Override public void save(Path checkpointDir) throws IOException {
+	@Override public synchronized void save(Path checkpointDir)
+			throws IOException {
+		
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 
-	@Override public Checkpoint load(Path checkpointDir) throws IOException {
+	@Override public synchronized Checkpoint load(Path checkpointDir)
+			throws IOException {
+		
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 

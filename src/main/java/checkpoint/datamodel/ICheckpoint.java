@@ -3,6 +3,8 @@ package checkpoint.datamodel;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/** All functions are safe to be called concurrently both with regards to
+ *  themselves and other functions of this interface. */
 public interface ICheckpoint {
 
 	/** @throws IllegalArgumentException If a node with the given
