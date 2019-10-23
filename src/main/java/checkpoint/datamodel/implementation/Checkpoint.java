@@ -25,6 +25,10 @@ public final class Checkpoint implements ICheckpoint {
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
+	// TODO: Check git history of Python/Bash implementations and figure out
+	// why we add the \0 to them. It's probably to keep the line parser simple
+	// so it can always split upon \0 as that is what separates the filename
+	// from the rest of each non-EOF line.
 	private static final class EOFMarkers {
 		static final String CheckpointComplete
 			= "This checkpoint is complete.\n\0";
