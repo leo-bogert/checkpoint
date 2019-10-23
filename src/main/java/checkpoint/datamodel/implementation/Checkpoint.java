@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
