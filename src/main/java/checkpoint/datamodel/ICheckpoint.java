@@ -20,6 +20,8 @@ public interface ICheckpoint {
 
 	void save(Path checkpointDir) throws IOException;
 
-	ICheckpoint load(Path checkpointDir) throws IOException;
+	// Java does not support static abstract interface methods, so the following
+	// is required but commented out:
+	/* static ICheckpoint load(Path checkpointDir) throws IOException; */
 
 }

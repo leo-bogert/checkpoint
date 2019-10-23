@@ -55,7 +55,7 @@ public final class Checkpoint implements ICheckpoint {
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 
-	@Override public synchronized Checkpoint load(Path checkpointDir)
+	public static Checkpoint load(Path checkpointDir)
 			throws IOException {
 		
 		throw new UnsupportedOperationException("FIXME: Implement!");
