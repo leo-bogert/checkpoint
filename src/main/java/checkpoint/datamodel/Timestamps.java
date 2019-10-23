@@ -1,11 +1,14 @@
 package checkpoint.datamodel;
 
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 
-/** Filesystem timestamps of a file/directory.
- *  Implementations of this class must read all timestamps at once from disk
- *  upon instantiation to avoid unnecessary disk seeking. */
+/** Filesystem timestamps of a file/directory. */
 public abstract class Timestamps {
+
+	/** Implementations must read all timestamps at once from disk to avoid
+	 *  unnecessary disk seeking! */
+	public abstract Timestamps readTimestamps(Path p);
 
 	/** We support including the access time in checkpoints even though
 	 *  generating one will access all files because the access time is a
