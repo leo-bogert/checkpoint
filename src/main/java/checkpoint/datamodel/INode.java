@@ -12,7 +12,7 @@ public interface INode {
 	 * 
 	 *  TODO: Actually do return a hash by hashing the hashes of all files and
 	 *  directories inside of it. */
-	SHA256 getHash();
+	ISHA256 getHash();
 
 	Timestamps getTimetamps();
 
