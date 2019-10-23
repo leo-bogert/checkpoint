@@ -18,7 +18,11 @@ public interface ICheckpoint {
 	 *       information is available for free anyway. */
 	void addNode(INode n) throws IllegalArgumentException;
 
-	void save(Path checkpointDir) throws IOException;
+	/** @param isComplete The EOF-marker of the resulting plain-text file will
+	 *      tell the user if the checkpoint is complete or not, depending upon
+	 *      this boolean. You must thus set this to false if you're doing an
+	 *      intermediate save - which you might want to do every N minutes. */
+	void save(Path checkpointDir, boolean isComplete) throws IOException;
 
 	// Java does not support static abstract interface methods, so the following
 	// is required but commented out:
