@@ -12,6 +12,7 @@ public interface ISHA256 {
 	// FIXME: Implement using https://stackoverflow.com/a/9655275
 	String toString();
 
-	ISHA256 sha256fromString(String hexEncoded);
+	/** @throws NumberFormatException If the hex encoding is not valid. */
+	ISHA256 sha256fromString(String hexEncoded) throws NumberFormatException;
 
 }
