@@ -26,7 +26,24 @@ public final class Checkpoint implements ICheckpoint {
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
 	@Override public void addNode(INode n) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// Instead of using putIfAbsent() so we can throw if the key is already
+		// contained we put() the new INode and replace it with put()ing old one
+		// again if put()'s return value tells us that there already was an
+		// entry for the key.
+		// We do so because that is faster than putIfAbsent():
+		// putIfAbsent() will first do a contains() check, and then put().
+		// This means that the tree of the map has to be walked twice in the
+		// regular case of no duplicate existing, whereas our approach only
+		// walks twice if there is a duplicate - which should never happen if
+		// the code has no bugs.
+		Path key = n.getPath();
+		INode oldValue = nodes.put(key, n);
+		if(oldValue != null) {
+			nodes.put(key, oldValue);
+			
+			throw new IllegalArgumentException(
+				"Bug, please report: INode already contained for path: " + key);
+		}
 	}
 
 	@Override public void save(Path checkpointDir) throws IOException {
