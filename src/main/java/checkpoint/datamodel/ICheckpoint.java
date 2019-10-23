@@ -9,8 +9,8 @@ public interface ICheckpoint {
 	 *     {@link INode#getPath()} is already contained . */
 	void addNode(INode n) throws IllegalArgumentException;
 
-	ICheckpoint load(Path checkpointDir) throws IOException;
-
 	void save(Path checkpointDir) throws IOException;
+
+	ICheckpoint load(Path checkpointDir) throws IOException;
 
 }
