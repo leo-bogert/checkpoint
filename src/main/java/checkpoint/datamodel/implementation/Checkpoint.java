@@ -1,8 +1,12 @@
 package checkpoint.datamodel.implementation;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -24,6 +28,12 @@ public final class Checkpoint implements ICheckpoint {
 	 *  concurrent adding so our many generator threads can deal with the
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
+
+	/** Used by {@link #save(Path, boolean)} and {@link #load(Path)}.
+	 *  WARNING: SimpleDateFormat is NOT thread-safe! Synchronize upon this
+	 *  Checkpoint when using this! */
+	private final SimpleDateFormat dateFormat
+		= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
 
 	// TODO: Check git history of Python/Bash implementations and figure out
 	// why we add the \0 to them. It's probably to keep the line parser simple
@@ -62,7 +72,43 @@ public final class Checkpoint implements ICheckpoint {
 	@Override public synchronized void save(Path checkpointDir,
 			boolean isComplete) throws IOException {
 		
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		Path outputFilePath = checkpointDir.resolve("checkpoint.txt");
+		// Default OpenOptions of this truncate a pre-existing file so we don't
+		// have to delete it before. The default CharSet of UTF-8 is also fine.
+		// FIXME: Performance: Use a custom buffer size, default is 8192 which
+		// is a bit small.
+		BufferedWriter w = Files.newBufferedWriter(outputFilePath);
+		try {
+			for(INode n : nodes.values()) {
+				w.write(n.getPath().toString());
+				
+				w.write("\0\t");
+				w.write(n.getHash().toString());
+				
+				FileTimeToDateAdapter t
+					= new FileTimeToDateAdapter(n.getTimetamps());
+				
+				w.write("\tBirth: ");
+				Date btime = t.getBirthTime();
+				w.write(btime == null ? "-" : dateFormat.format(btime));
+				
+				w.write("\tAccess: ");
+				w.write(dateFormat.format(t.getAccessTime()));
+				
+				w.write("\tModify: ");
+				w.write(dateFormat.format(t.getModificationTime()));
+				
+				w.write("\tChange: ");
+				w.write(dateFormat.format(t.getStatusChangeTime()));
+				
+				w.write('\n');
+			}
+			
+			w.write(isComplete ? EOFMarkers.CheckpointComplete
+			                   : EOFMarkers.CheckpointIncomplete);
+		} finally {
+			w.close();
+		}
 	}
 
 	public static Checkpoint load(Path checkpointDir)
