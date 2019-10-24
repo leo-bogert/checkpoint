@@ -15,13 +15,13 @@ public final class JavaSHA256 implements ISHA256 {
 		this.sha256 = sha256;
 	}
 
-	@Override public JavaSHA256 sha256fromFile(Path p)
+	public static JavaSHA256 sha256fromFile(Path p)
 			throws FileNotFoundException, IOException, InterruptedException {
 		
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 
-	@Override public JavaSHA256 sha256fromString(String hexEncoded)
+	public static JavaSHA256 sha256fromString(String hexEncoded)
 			throws NumberFormatException {
 		
 		throw new UnsupportedOperationException("FIXME: Implement!");
