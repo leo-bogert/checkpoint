@@ -32,7 +32,8 @@ final class FileTimeToDateAdapter {
 	}
 
 	Date getBirthTime() {
-		return null;
+		FileTime t = timestamps.getBirthTime();
+		return t == null ? null : new Date(t.toMillis());
 	}
 
 	Date getStatusChangeTime() {
