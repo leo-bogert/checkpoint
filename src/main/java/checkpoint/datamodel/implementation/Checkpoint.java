@@ -23,6 +23,9 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 
+// FIXME: save() / load() don't support "(sha256sum failed!)" and
+// "(stat failed!)" fields which the Python implementation is capable of
+// producing.
 public final class Checkpoint implements ICheckpoint {
 
 	/** Storage of the {@link INode}s which have been added via
