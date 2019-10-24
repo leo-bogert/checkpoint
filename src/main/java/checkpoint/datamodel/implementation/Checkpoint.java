@@ -20,6 +20,8 @@ public final class Checkpoint implements ICheckpoint {
 	 *  Beyond storage this also has the purpose of implicitly sorting them by
 	 *  their {@link INode#getPath()} since our human readable file format
 	 *  of {@link #save(Path)} will sort by path.
+	 *  
+	 *  WARNING: You must synchronize upon this Checkpoint when using this!
 	 * 
 	 *  FIXME: Code quality: Provide an explicit {@link Comparator} because
 	 *  {@link Path#compareTo(Path)}'s JavaDoc says the ordering is platform
