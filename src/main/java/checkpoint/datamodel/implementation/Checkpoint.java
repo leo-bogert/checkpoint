@@ -5,13 +5,18 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
@@ -36,11 +41,19 @@ public final class Checkpoint implements ICheckpoint {
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
-	/** Used by {@link #save(Path, boolean)} and {@link #load(Path)}.
+	/** Used by {@link #dateFormat} and {@link #load(Path)}. */
+	private static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss Z";
+	
+	/** Used by {@link #save(Path, boolean)}.
+	 * 
 	 *  WARNING: SimpleDateFormat is NOT thread-safe! Synchronize upon this
-	 *  Checkpoint when using this! */
+	 *  Checkpoint when using this!
+	 *  
+	 *  Not used by {@link #load(Path)} since that function is static and we
+	 *  shouldn't require globally synchronizing all instances of Checkpoint
+	 *  to access this concurrently. */
 	private final SimpleDateFormat dateFormat
-		= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z");
+		= new SimpleDateFormat(DATE_FORMAT_STRING);
 
 	// TODO: Check git history of Python/Bash implementations and figure out
 	// why we add the \0 to them. It's probably to keep the line parser simple
@@ -124,7 +137,54 @@ public final class Checkpoint implements ICheckpoint {
 	public static Checkpoint load(Path checkpointDir)
 			throws IOException {
 		
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		Checkpoint result = new Checkpoint();
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
+		Path inputFilePath = checkpointDir.resolve("checkpoint.txt");
+		// FIXME: Performance: Use a custom buffer size, default is 8192 which
+		// is a bit small.
+		BufferedReader r = Files.newBufferedReader(inputFilePath, UTF_8);
+		try {
+			String l;
+			while((l = r.readLine()) != null) {
+				// Albeit save() separates all fields by \t we cannot use that
+				// for splitting the whole line into tokens since Linux
+				// filenames may contain \t.
+				// So first split by the additional \0 which terminates the path
+				// and then split the remainder of the line by \t.
+				// Notice:
+				// - nextToken("\t") updates the delimiter permanently.
+				// - nextToken() skips empty tokens, which we need for "\0\t".
+				StringTokenizer t = new StringTokenizer(l, "\0");
+				Path path = Paths.get(t.nextToken());
+				// FIXME: Use SHA256 once it is implemented.
+				String hash = t.nextToken("\t");
+				
+				// TODO: Performance: Use ArrayMap from e.g. Apache Java Commons
+				HashMap<String, Date> dates = new HashMap<>();
+				while(t.hasMoreTokens()) {
+					StringTokenizer key_value
+						= new StringTokenizer(t.nextToken(), ": ");
+					
+					String dateName = key_value.nextToken();
+					String date     = key_value.nextToken();
+					dates.put(dateName, dateFormat.parse(date));
+				}
+				
+				Date atime = dates.get("Access");
+				Date btime = dates.get("Birth");
+				Date ctime = dates.get("Modify");
+				Date mtime = dates.get("Change");
+				
+				// FIXME: Add new Node() once Node is implemented.
+				result.addNode(null);
+			}
+			
+			return result;
+		} catch(RuntimeException | ParseException e) {
+			throw new IOException(e);
+		} finally {
+			r.close();
+		}
 	}
 
 }
