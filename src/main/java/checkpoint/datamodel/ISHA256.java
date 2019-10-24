@@ -14,6 +14,9 @@ import checkpoint.datamodel.implementation.JavaSHA256;
  *  is the fastest. Candidates: BouncyCastle, Apache Java Commons. */
 public interface ISHA256 {
 
+	/** Must obey {@link Thread#isInterrupted()} by throwing
+	 *  {@link InterruptedException} because we will use it upon arbitrarily
+	 *  large user-supplied files. */
 	ISHA256 sha256fromFile(Path p)
 		throws FileNotFoundException, IOException, InterruptedException;
 
