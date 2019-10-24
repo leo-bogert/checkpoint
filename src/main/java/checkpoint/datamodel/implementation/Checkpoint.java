@@ -1,5 +1,10 @@
 package checkpoint.datamodel.implementation;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
+import static java.nio.file.StandardOpenOption.WRITE;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -75,11 +80,10 @@ public final class Checkpoint implements ICheckpoint {
 			boolean isComplete) throws IOException {
 		
 		Path outputFilePath = checkpointDir.resolve("checkpoint.txt");
-		// Default OpenOptions of this truncate a pre-existing file so we don't
-		// have to delete it before. The default CharSet of UTF-8 is also fine.
 		// FIXME: Performance: Use a custom buffer size, default is 8192 which
 		// is a bit small.
-		BufferedWriter w = Files.newBufferedWriter(outputFilePath);
+		BufferedWriter w = Files.newBufferedWriter(outputFilePath, UTF_8,
+				CREATE, TRUNCATE_EXISTING, WRITE);
 		try {
 			for(INode n : nodes.values()) {
 				w.write(n.getPath().toString());
