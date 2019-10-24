@@ -153,7 +153,8 @@ public final class Checkpoint implements ICheckpoint {
 				// and then split the remainder of the line by \t.
 				// Notice:
 				// - nextToken("\t") updates the delimiter permanently.
-				// - nextToken() skips empty tokens, which we need for "\0\t".
+				// - nextToken("\t") skips empty tokens, which we need for the
+				//   "\0\t" preceding the hash.
 				StringTokenizer t = new StringTokenizer(l, "\0");
 				Path path = Paths.get(t.nextToken());
 				// FIXME: Use SHA256 once it is implemented.
