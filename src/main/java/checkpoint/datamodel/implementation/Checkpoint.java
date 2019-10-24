@@ -163,10 +163,12 @@ public final class Checkpoint implements ICheckpoint {
 				HashMap<String, Date> dates = new HashMap<>();
 				while(t.hasMoreTokens()) {
 					StringTokenizer key_value
-						= new StringTokenizer(t.nextToken(), ": ");
+						= new StringTokenizer(t.nextToken(), ":");
 					
+					// TODO: Performance: Java 8: Use stripLeading() instead of
+					// trim().
 					String dateName = key_value.nextToken();
-					String date     = key_value.nextToken();
+					String date     = key_value.nextToken().trim();
 					dates.put(dateName, dateFormat.parse(date));
 				}
 				
