@@ -4,8 +4,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import checkpoint.datamodel.implementation.JavaSHA256;
+
 /** Provides the same hash values as GNU coreutils' sha256sum command with the
- *  '--binary' flag. */
+ *  '--binary' flag.
+ *  
+ *  Implemented at {@link JavaSHA256} using Java's SHA256 implementation.
+ *  TODO: Performance: Provide alternate implementations and benchmark which one
+ *  is the fastest. Candidates: BouncyCastle, Apache Java Commons. */
 public interface ISHA256 {
 
 	ISHA256 sha256fromFile(Path p)
