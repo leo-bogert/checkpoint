@@ -79,6 +79,10 @@ public final class Checkpoint implements ICheckpoint {
 	@Override public synchronized void save(Path checkpointDir,
 			boolean isComplete) throws IOException {
 		
+		// TODO: Use Files.createTempFile() and move it into place once we're
+		// finished. This may ensure that intermediate saving will never result
+		// in a corrupted file if the system crashes: Either the old file will
+		// still be there, or the new one, or none.
 		Path outputFilePath = checkpointDir.resolve("checkpoint.txt");
 		// FIXME: Performance: Use a custom buffer size, default is 8192 which
 		// is a bit small.
