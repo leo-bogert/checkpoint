@@ -165,7 +165,7 @@ public final class Checkpoint implements ICheckpoint {
 					StringTokenizer key_value
 						= new StringTokenizer(t.nextToken(), ":");
 					
-					// TODO: Performance: Java 8: Use stripLeading() instead of
+					// TODO: Performance: Java 11: Use stripLeading() instead of
 					// trim().
 					String dateName = key_value.nextToken();
 					String date     = key_value.nextToken().trim();
