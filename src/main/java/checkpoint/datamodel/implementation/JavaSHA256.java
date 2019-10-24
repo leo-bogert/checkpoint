@@ -21,6 +21,10 @@ public final class JavaSHA256 implements ISHA256 {
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 
+	@Override public String toString() {
+		throw new UnsupportedOperationException("FIXME: Implement!");
+	}
+
 	public static JavaSHA256 sha256fromString(String hexEncoded)
 			throws NumberFormatException {
 		
