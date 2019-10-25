@@ -45,7 +45,8 @@ public final class JavaSHA256 implements ISHA256 {
 			// FIXME: Adjust buffer size automatically from channel.size().
 			// FIXME: Performance: Use two buffers and while hashing one of
 			// them read into the other one asynchronously.
-			// FIXME: Performance: Try if allocateDirect() is faster.
+			// FIXME: Performance: Try if a direct buffer, obtainable using
+			// allocateDirect(), speeds up the function.
 			// First make sure to read the warnings about that at ByteBuffer's
 			// top-level JavaDoc.
 			ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
