@@ -8,4 +8,6 @@ dependencies {
 
 jar.manifest.attributes(
 	'Main-Class': 'checkpoint.ui.Shell',
-	'Class-Path': '/usr/share/java/commons-codec.jar')
+	'Class-Path':
+		configurations.runtimeClasspath.collect { it.getPath() }.join(' ')
+)
