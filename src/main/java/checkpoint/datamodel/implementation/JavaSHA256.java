@@ -2,7 +2,6 @@ package checkpoint.datamodel.implementation;
 
 import static java.nio.file.StandardOpenOption.READ;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
@@ -23,7 +22,7 @@ public final class JavaSHA256 implements ISHA256 {
 	}
 
 	public static JavaSHA256 sha256fromFile(Path p)
-			throws FileNotFoundException, IOException, InterruptedException {
+			throws IOException, InterruptedException {
 		
 		// TODO: Performance: Recycle the MessageDigest objects using reset(),
 		// by changing this class to be non-immutable = having this function

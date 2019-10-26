@@ -18,7 +18,7 @@ public interface ISHA256 {
 	 *  large user-supplied files. */
 	/*
 	static ISHA256 sha256fromFile(Path p)
-		throws FileNotFoundException, IOException, InterruptedException;
+		throws IOException, InterruptedException;
 	 */
 
 	// FIXME: Implement using https://stackoverflow.com/a/9655275
