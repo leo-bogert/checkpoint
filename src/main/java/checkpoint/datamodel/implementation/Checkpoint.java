@@ -1,5 +1,6 @@
 package checkpoint.datamodel.implementation;
 
+import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -20,8 +21,11 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import org.apache.commons.codec.DecoderException;
+
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
+import checkpoint.datamodel.ISHA256;
 
 // FIXME: save() / load() don't support "(sha256sum failed!)" and
 // "(stat failed!)" fields which the Python implementation is capable of
@@ -160,8 +164,7 @@ public final class Checkpoint implements ICheckpoint {
 				//   "\0\t" preceding the hash.
 				StringTokenizer t = new StringTokenizer(l, "\0");
 				Path path = Paths.get(t.nextToken());
-				// FIXME: Use SHA256 once it is implemented.
-				String hash = t.nextToken("\t");
+				ISHA256 hash = sha256fromString(t.nextToken("\t"));
 				
 				// TODO: Performance: Use ArrayMap from e.g. Apache Java Commons
 				HashMap<String, Date> dates = new HashMap<>();
@@ -186,7 +189,7 @@ public final class Checkpoint implements ICheckpoint {
 			}
 			
 			return result;
-		} catch(RuntimeException | ParseException e) {
+		} catch(DecoderException | ParseException | RuntimeException e) {
 			throw new IOException(e);
 		} finally {
 			r.close();
