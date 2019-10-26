@@ -21,7 +21,6 @@ public interface ISHA256 {
 		throws IOException, InterruptedException;
 	 */
 
-	// FIXME: Implement using https://stackoverflow.com/a/9655275
 	/** Returns a hex-encoded string which can be decoded using
 	 *  {@link #sha256fromString(String)}. */
 	String toString();

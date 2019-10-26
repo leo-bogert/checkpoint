@@ -1,6 +1,7 @@
 package checkpoint.datamodel.implementation;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -70,7 +71,7 @@ public final class JavaSHA256 implements ISHA256 {
 	}
 
 	@Override public String toString() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		return encodeHexString(sha256);
 	}
 
 	public static JavaSHA256 sha256fromString(String hexEncoded)
