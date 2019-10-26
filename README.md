@@ -30,3 +30,10 @@ FIXME
 
 Install the package `python-psutil` before usage.
 
+## License
+
+- You can use and relicense this however you want to. This may be limited by
+  the licenses of the libraries it uses, see `build.gradle`.
+
+- No warranty whatsoever is provided for any damage caused by this. Use at your
+  own risk!
