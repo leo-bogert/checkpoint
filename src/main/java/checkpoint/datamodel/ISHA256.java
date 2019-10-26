@@ -25,9 +25,9 @@ public interface ISHA256 {
 	 *  {@link #sha256fromString(String)}. */
 	String toString();
 
-	/** @throws NumberFormatException If the hex encoding is not valid. */
+	/** @throws DecoderException If the hex encoding is not valid. */
 	/*
 	static ISHA256 sha256fromString(String hexEncoded)
-		throws NumberFormatException;
+		throws DecoderException;
 	 */
 }

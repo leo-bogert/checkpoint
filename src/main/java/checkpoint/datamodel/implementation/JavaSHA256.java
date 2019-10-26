@@ -1,6 +1,7 @@
 package checkpoint.datamodel.implementation;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static org.apache.commons.codec.binary.Hex.decodeHex;
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 import java.io.IOException;
@@ -10,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import org.apache.commons.codec.DecoderException;
 
 import checkpoint.datamodel.ISHA256;
 
@@ -75,9 +78,9 @@ public final class JavaSHA256 implements ISHA256 {
 	}
 
 	public static JavaSHA256 sha256fromString(String hexEncoded)
-			throws NumberFormatException {
+			throws DecoderException {
 		
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		return new JavaSHA256(decodeHex(hexEncoded));
 	}
 
 }
