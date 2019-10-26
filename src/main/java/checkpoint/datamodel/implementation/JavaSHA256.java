@@ -19,6 +19,8 @@ import checkpoint.datamodel.ISHA256;
 /** Implements {@link ISHA256} using Java's default SHA256 implementation. */
 public final class JavaSHA256 implements ISHA256 {
 
+	public static final int READ_BUFFER_SIZE = 1024 * 1024;
+
 	private final byte[] sha256;
 
 	private JavaSHA256(byte[] sha256) {
@@ -52,7 +54,7 @@ public final class JavaSHA256 implements ISHA256 {
 			// allocateDirect(), speeds up the function.
 			// First make sure to read the warnings about that at ByteBuffer's
 			// top-level JavaDoc.
-			ByteBuffer buffer = ByteBuffer.allocate(1024 * 1024);
+			ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
 			while(channel.read(buffer) > 0) {
 				// rewind() & flip() are difficult to understand, but they're
 				// what the Java tutorial recommends for reading a file at
