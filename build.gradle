@@ -3,7 +3,7 @@ defaultTasks 'jar', 'test'
 
 dependencies {
 	implementation files('/usr/share/java/commons-codec.jar')
-    testImplementation files('/usr/share/java/junit4.jar')
+	testImplementation files('/usr/share/java/junit4.jar')
 }
 
 jar.manifest.attributes(
