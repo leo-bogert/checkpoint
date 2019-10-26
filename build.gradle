@@ -2,7 +2,10 @@ apply plugin: 'java'
 defaultTasks 'jar', 'test'
 
 dependencies {
+	implementation files('/usr/share/java/commons-codec.jar')
     testImplementation files('/usr/share/java/junit4.jar')
 }
 
-jar.manifest.attributes 'Main-Class': 'checkpoint.ui.Shell'
+jar.manifest.attributes(
+	'Main-Class': 'checkpoint.ui.Shell',
+	'Class-Path': '/usr/share/java/commons-codec.jar')
