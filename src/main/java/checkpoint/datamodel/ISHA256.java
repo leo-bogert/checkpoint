@@ -17,7 +17,7 @@ public interface ISHA256 {
 	 *  {@link InterruptedException} because we will use it upon arbitrarily
 	 *  large user-supplied files. */
 	/*
-	static ISHA256 sha256fromFile(Path p)
+	static ISHA256 sha256ofFile(Path p)
 		throws IOException, InterruptedException;
 	 */
 

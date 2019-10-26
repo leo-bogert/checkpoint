@@ -25,7 +25,7 @@ public final class JavaSHA256 implements ISHA256 {
 		this.sha256 = sha256;
 	}
 
-	public static JavaSHA256 sha256fromFile(Path p)
+	public static JavaSHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
 		// TODO: Performance: Recycle the MessageDigest objects using reset(),
