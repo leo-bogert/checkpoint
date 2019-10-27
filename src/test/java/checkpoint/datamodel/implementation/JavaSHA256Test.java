@@ -1,5 +1,6 @@
 package checkpoint.datamodel.implementation;
 
+import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.write;
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
@@ -58,8 +59,20 @@ public final class JavaSHA256Test {
 		} catch(DecoderException e) {}
 	}
 
-	@Test public void testEquals() {
-		fail("Not yet implemented");
+	@Test public void testEquals() throws DecoderException {
+		String hashA =
+			"0000000000000000000000000000000000000000000000000000000000000000",
+		       hashB = // Different by one bit
+			"0000000000000000000000000000000000000000000000000000000000000001";
+		
+		JavaSHA256 shaA = sha256fromString(hashA),
+		           shaB = sha256fromString(hashB);
+		
+		assertNotEquals(shaA, shaB);
+		assertEquals(   shaA, shaA);
+		assertEquals(   shaA, sha256fromString(hashA));
+		assertNotEquals(shaA, null);
+		assertNotEquals(shaA, new Object());
 	}
 
 	@Test public void testHashCode() {
