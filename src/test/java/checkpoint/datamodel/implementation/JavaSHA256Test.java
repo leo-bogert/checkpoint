@@ -75,8 +75,20 @@ public final class JavaSHA256Test {
 		assertFalse(shaA.equals(new Object()));
 	}
 
-	@Test public void testHashCode() {
-		fail("Not yet implemented");
+	@Test public void testHashCode() throws DecoderException {
+		String hashA =
+			"7dd91e07f0341646d53f6938278a4d3e87961fabea066f7e6f40b7398f3b0b0f",
+		       hashB = // Very different because hashCode() trims to 32 bit.
+			"0000000000000000000000000000000000000000000000000000000000000000";
+		
+		JavaSHA256 shaA1 = sha256fromString(hashA),
+				   shaA2 = sha256fromString(hashA),
+		           shaB = sha256fromString(hashB);
+		
+		assertNotEquals(shaA1.hashCode(), shaB.hashCode());
+		assertEquals(shaA1.hashCode(), shaA1.hashCode());
+		assertNotSame(shaA1, shaA2);
+		assertEquals(shaA1.hashCode(), shaA2.hashCode());
 	}
 
 }
