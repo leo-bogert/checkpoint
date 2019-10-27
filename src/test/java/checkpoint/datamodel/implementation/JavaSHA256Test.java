@@ -45,12 +45,17 @@ public final class JavaSHA256Test {
 			JavaSHA256.sha256ofFile(largeFile).toString());
 	}
 
-	@Test public void testToString() {
-		fail("Not yet implemented");
-	}
-
-	@Test public void testSha256fromString() {
-		fail("Not yet implemented");
+	@Test public void testSha256ToAndFromString() throws DecoderException {
+		String hash =
+			"7dd91e07f0341646d53f6938278a4d3e87961fabea066f7e6f40b7398f3b0b0f";
+		
+		assertEquals(hash, JavaSHA256.sha256fromString(hash).toString());
+		
+		try {
+			// Too short input
+			JavaSHA256.sha256fromString("00");
+			fail();
+		} catch(DecoderException e) {}
 	}
 
 	@Test public void testEquals() {
