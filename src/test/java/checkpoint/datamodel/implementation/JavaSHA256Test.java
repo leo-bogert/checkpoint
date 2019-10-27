@@ -68,11 +68,11 @@ public final class JavaSHA256Test {
 		JavaSHA256 shaA = sha256fromString(hashA),
 		           shaB = sha256fromString(hashB);
 		
-		assertNotEquals(shaA, shaB);
-		assertEquals(   shaA, shaA);
-		assertEquals(   shaA, sha256fromString(hashA));
-		assertNotEquals(shaA, null);
-		assertNotEquals(shaA, new Object());
+		assertFalse(shaA.equals(shaB));
+		assertTrue( shaA.equals(shaA));
+		assertTrue( shaA.equals(sha256fromString(hashA)));
+		assertFalse(shaA.equals(null));
+		assertFalse(shaA.equals(new Object()));
 	}
 
 	@Test public void testHashCode() {
