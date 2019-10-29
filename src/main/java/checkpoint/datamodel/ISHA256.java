@@ -37,6 +37,10 @@ public interface ISHA256 {
 
 	@Override int hashCode();
 
+	/** Must return true if {@link #getBytes()} returns an equal non-null (!)
+	 *  byte[] for both this and a given object which implements ISHA256.
+	 *  
+	 *  WARNING: Arrays.equals() will consider two null pointers to be equal! */
 	@Override boolean equals(Object obj);
 
 }
