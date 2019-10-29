@@ -38,10 +38,11 @@ public final class JavaSHA256Test {
 		// Test with a file larger than the read buffer of sha256ofFile() to
 		// ensure bugs related to the "while(read(buffer..." loop are caught.
 		byte[] bytes = new byte[JavaSHA256.READ_BUFFER_SIZE * 3];
-		new Random().nextBytes(bytes);
+		long seed = new Random().nextLong();
+		new Random(seed).nextBytes(bytes);
 		Path largeFile = tempDir.newFile().toPath();
 		write(largeFile, bytes);
-		assertEquals(
+		assertEquals("Failed for seed: " + seed,
 			encodeHexString(MessageDigest.getInstance("SHA-256").digest(bytes)),
 			JavaSHA256.sha256ofFile(largeFile).toString());
 	}
