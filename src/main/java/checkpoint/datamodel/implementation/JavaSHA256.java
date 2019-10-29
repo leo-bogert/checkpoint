@@ -1,6 +1,7 @@
 package checkpoint.datamodel.implementation;
 
 import static java.nio.file.StandardOpenOption.READ;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.codec.binary.Hex.decodeHex;
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
@@ -112,7 +113,12 @@ public final class JavaSHA256 implements ISHA256 {
 		if(obj == null || !(obj instanceof ISHA256))
 			return false;
 		
-		return Arrays.equals(sha256, ((ISHA256)obj).toBytes());
+		// Arrays.equals() returns true for two null-pointers as argument so
+		// make sure we don't pass null.
+		byte[] a = requireNonNull(sha256);
+		byte[] b = requireNonNull(((ISHA256)obj).toBytes());
+		
+		return Arrays.equals(a, b);
 	}
 
 }
