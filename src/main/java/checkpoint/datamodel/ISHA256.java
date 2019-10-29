@@ -30,4 +30,9 @@ public interface ISHA256 {
 	static ISHA256 sha256fromString(String hexEncoded)
 		throws DecoderException;
 	 */
+
+	@Override int hashCode();
+
+	@Override boolean equals(Object obj);
+
 }
