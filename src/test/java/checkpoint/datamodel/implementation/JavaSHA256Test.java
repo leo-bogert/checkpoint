@@ -82,7 +82,7 @@ public final class JavaSHA256Test {
 			"3ea600325ec065453cad9753910a8e811822aa93b479073a269cc497e17b0fec";
 		
 		JavaSHA256 shaA1 = sha256fromString(hashA),
-				   shaA2 = sha256fromString(hashA),
+		           shaA2 = sha256fromString(hashA),
 		           shaB = sha256fromString(hashB);
 		
 		assertNotEquals(shaA1.hashCode(), shaB.hashCode());
