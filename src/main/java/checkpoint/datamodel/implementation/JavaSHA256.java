@@ -64,15 +64,11 @@ public final class JavaSHA256 implements ISHA256 {
 				// at "Reading and Writing Files by Using Channel I/O".
 				// Tell them it needs to be done like this instead:
 				
-				printBufferDebugInfo(buffer);
 				buffer.flip();
-				printBufferDebugInfo(buffer);
 				md.update(buffer);
-				printBufferDebugInfo(buffer);
 				// Its JavaDoc says it doesn't actually erase memory, just the
 				// counters of the buffer, so this is fine to use w.r.t. speed.
 				buffer.clear();
-				printBufferDebugInfo(buffer);
 				
 				// TODO: Performance: Try if checking this only every N'th
 				// iteration provides a noticeable improvement.
@@ -84,14 +80,6 @@ public final class JavaSHA256 implements ISHA256 {
 		} finally {
 			channel.close();
 		}
-	}
-
-	private static void printBufferDebugInfo(ByteBuffer buffer) {
-		System.err.println(
-				   "position: " + buffer.position()
-				+ " remaining: " + buffer.remaining()
-				+ " limit: " + buffer.limit()
-				+ " capacity: " + buffer.capacity());
 	}
 
 	@Override public String toString() {
