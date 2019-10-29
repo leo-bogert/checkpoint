@@ -90,6 +90,12 @@ public final class JavaSHA256 implements ISHA256 {
 	public static JavaSHA256 sha256fromString(String hexEncoded)
 			throws DecoderException {
 		
+		if(hexEncoded.length() != 64) {
+			throw new DecoderException(
+				"Invalid length for hex-encoded SHA256, should be 64: "
+				+ hexEncoded.length());
+		}
+		
 		return new JavaSHA256(decodeHex(hexEncoded));
 	}
 
