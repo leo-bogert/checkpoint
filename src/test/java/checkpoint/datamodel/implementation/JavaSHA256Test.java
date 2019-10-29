@@ -17,6 +17,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import checkpoint.datamodel.ISHA256;
+
 /** Tests {@link JavaSHA256}. */
 public final class JavaSHA256Test {
 
@@ -60,6 +62,7 @@ public final class JavaSHA256Test {
 		} catch(DecoderException e) {}
 	}
 
+	@SuppressWarnings("unlikely-arg-type")
 	@Test public void testEquals() throws DecoderException {
 		String hashA =
 			"0000000000000000000000000000000000000000000000000000000000000000",
@@ -74,6 +77,31 @@ public final class JavaSHA256Test {
 		assertTrue( shaA.equals(sha256fromString(hashA)));
 		assertFalse(shaA.equals(null));
 		assertFalse(shaA.equals(new Object()));
+		
+		// Arrays.equals() returns true when passing two null pointers instead
+		// of two byte[], and the implementation of JavaSHA256 uses that
+		// function.
+		// Thus check JavaSHA256.equals() to be safe against the internal
+		// byte[] of the object being null, which constructForUnitTestOnly(null)
+		// does.
+		// We only use constructForUnitTestOnly(null) to construct the left-hand
+		// object of equals() and instead pass an anonymous class into the
+		// right-hand argument because JavaSHA256.getBytes() would throw a
+		// NullPointerException if we passed a JavaSHA256 at the right side.
+		// That NullPointerException would hide the fact that a bogus
+		// equals() implementation does not throw it for the case we hereby
+		// test, i.e. getBytes() returning null.
+		try {
+			JavaSHA256.constructForUnitTestOnly(null).equals(
+				new ISHA256() {
+					@Override public byte[] toBytes() {
+						return null;
+					}
+				});
+			fail();
+		} catch(NullPointerException e) {
+			// Success
+		}
 	}
 
 	@Test public void testHashCode() throws DecoderException {

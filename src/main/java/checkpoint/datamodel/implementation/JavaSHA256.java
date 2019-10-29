@@ -29,6 +29,10 @@ public final class JavaSHA256 implements ISHA256 {
 		this.sha256 = sha256;
 	}
 
+	static JavaSHA256 constructForUnitTestOnly(byte[] sha256) {
+		return new JavaSHA256(sha256);
+	}
+
 	public static JavaSHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
