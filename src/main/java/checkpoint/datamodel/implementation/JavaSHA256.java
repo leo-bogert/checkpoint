@@ -30,6 +30,8 @@ public final class JavaSHA256 implements ISHA256 {
 	public static JavaSHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
+		System.err.println("sha256ofFile()...");
+		
 		// TODO: Performance: Recycle the MessageDigest objects using reset(),
 		// by changing this class to be non-immutable = having this function
 		// (and sha256fromString()) not be static and storing the MessageDigest
@@ -56,16 +58,20 @@ public final class JavaSHA256 implements ISHA256 {
 			// top-level JavaDoc.
 			ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
 			while(channel.read(buffer) > 0) {
-				// rewind() & flip() are difficult to understand, but they're
-				// what the Java tutorial recommends for reading a file at
-				// section "Reading, Writing and Creating files".
+				// FIXME: The Oracle Java tutorial wrongly says we should
+				// rewind() the buffer before md.update() and then flip() it
+				// afterwards, at section "Reading, Writing and Creating files"
+				// at "Reading and Writing Files by Using Channel I/O".
+				// Tell them it needs to be done like this instead:
 				
 				printBufferDebugInfo(buffer);
-				buffer.rewind();
+				buffer.flip();
 				printBufferDebugInfo(buffer);
 				md.update(buffer);
 				printBufferDebugInfo(buffer);
-				buffer.flip();
+				// Its JavaDoc says it doesn't actually erase memory, just the
+				// counters of the buffer, so this is fine to use w.r.t. speed.
+				buffer.clear();
 				printBufferDebugInfo(buffer);
 				
 				// TODO: Performance: Try if checking this only every N'th
