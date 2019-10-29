@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import org.apache.commons.codec.DecoderException;
 
@@ -97,6 +98,17 @@ public final class JavaSHA256 implements ISHA256 {
 		}
 		
 		return new JavaSHA256(decodeHex(hexEncoded));
+	}
+
+	@Override public int hashCode() {
+		return Arrays.hashCode(sha256);
+	}
+
+	@Override public boolean equals(Object obj) {
+		if(obj == null || !(obj instanceof JavaSHA256))
+			return false;
+		
+		return Arrays.equals(sha256, ((JavaSHA256)obj).sha256);
 	}
 
 }
