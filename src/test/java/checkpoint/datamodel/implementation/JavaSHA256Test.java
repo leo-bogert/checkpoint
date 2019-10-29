@@ -78,8 +78,8 @@ public final class JavaSHA256Test {
 	@Test public void testHashCode() throws DecoderException {
 		String hashA =
 			"7dd91e07f0341646d53f6938278a4d3e87961fabea066f7e6f40b7398f3b0b0f",
-		       hashB = // Very different because hashCode() trims to 32 bit.
-			"0000000000000000000000000000000000000000000000000000000000000000";
+		       hashB =
+			"3ea600325ec065453cad9753910a8e811822aa93b479073a269cc497e17b0fec";
 		
 		JavaSHA256 shaA1 = sha256fromString(hashA),
 				   shaA2 = sha256fromString(hashA),
