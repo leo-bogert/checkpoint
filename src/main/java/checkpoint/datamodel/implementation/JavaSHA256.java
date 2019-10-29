@@ -62,6 +62,9 @@ public final class JavaSHA256 implements ISHA256 {
 				// rewind() the buffer before md.update() and then flip() it
 				// afterwards, at section "Reading, Writing and Creating files"
 				// at "Reading and Writing Files by Using Channel I/O".
+				// See the debug logging added and quoted in commits:
+				//     52f46c1d3965b9e69798b76ccdeb47ea97dada80
+				//     f767a02d680a3a8604668187f9a4067029310842
 				// Tell them it needs to be done like this instead:
 				
 				buffer.flip();
