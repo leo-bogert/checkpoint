@@ -30,8 +30,6 @@ public final class JavaSHA256 implements ISHA256 {
 	public static JavaSHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
-		System.err.println("sha256ofFile()...");
-		
 		// TODO: Performance: Recycle the MessageDigest objects using reset(),
 		// by changing this class to be non-immutable = having this function
 		// (and sha256fromString()) not be static and storing the MessageDigest
