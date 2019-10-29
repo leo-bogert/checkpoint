@@ -100,15 +100,19 @@ public final class JavaSHA256 implements ISHA256 {
 		return new JavaSHA256(decodeHex(hexEncoded));
 	}
 
+	public byte[] toBytes() {
+		return sha256.clone();
+	}
+
 	@Override public int hashCode() {
 		return Arrays.hashCode(sha256);
 	}
 
 	@Override public boolean equals(Object obj) {
-		if(obj == null || !(obj instanceof JavaSHA256))
+		if(obj == null || !(obj instanceof ISHA256))
 			return false;
 		
-		return Arrays.equals(sha256, ((JavaSHA256)obj).sha256);
+		return Arrays.equals(sha256, ((ISHA256)obj).toBytes());
 	}
 
 }

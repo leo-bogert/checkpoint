@@ -31,6 +31,10 @@ public interface ISHA256 {
 		throws DecoderException;
 	 */
 
+	/** Make sure to clone() the underlying array when implementing this, Java
+	 *  arrays are not immutable even if final! */
+	byte[] toBytes();
+
 	@Override int hashCode();
 
 	@Override boolean equals(Object obj);
