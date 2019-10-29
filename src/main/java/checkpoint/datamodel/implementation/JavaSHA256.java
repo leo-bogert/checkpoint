@@ -59,9 +59,14 @@ public final class JavaSHA256 implements ISHA256 {
 				// rewind() & flip() are difficult to understand, but they're
 				// what the Java tutorial recommends for reading a file at
 				// section "Reading, Writing and Creating files".
+				
+				printBufferDebugInfo(buffer);
 				buffer.rewind();
+				printBufferDebugInfo(buffer);
 				md.update(buffer);
+				printBufferDebugInfo(buffer);
 				buffer.flip();
+				printBufferDebugInfo(buffer);
 				
 				// TODO: Performance: Try if checking this only every N'th
 				// iteration provides a noticeable improvement.
@@ -73,6 +78,14 @@ public final class JavaSHA256 implements ISHA256 {
 		} finally {
 			channel.close();
 		}
+	}
+
+	private static void printBufferDebugInfo(ByteBuffer buffer) {
+		System.err.println(
+				   "position: " + buffer.position()
+				+ " remaining: " + buffer.remaining()
+				+ " limit: " + buffer.limit()
+				+ " capacity: " + buffer.capacity());
 	}
 
 	@Override public String toString() {
