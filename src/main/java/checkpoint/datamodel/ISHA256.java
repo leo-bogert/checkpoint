@@ -1,5 +1,7 @@
 package checkpoint.datamodel;
 
+import java.util.Arrays;
+
 import checkpoint.datamodel.implementation.JavaSHA256;
 
 /** Provides the same hash values as GNU coreutils' sha256sum command with the
@@ -35,6 +37,17 @@ public interface ISHA256 {
 	 *  arrays are not immutable even if final! */
 	byte[] toBytes();
 
+	/**
+	 *  Same as {@link Arrays#hashCode(byte[])} upon {@link #toBytes()} with
+	 *  one difference:
+	 *  If {@link #toBytes()} would return null or throw
+	 *  {@link NullPointerException} then {@link NullPointerException} must be
+	 *  thrown.
+	 *  See {@link #equals(Object)} for the defensive programming reasons
+	 *  behind this.
+	 *  
+	 *  WARNING: Arrays.hashCode() does not throw on its own, you must do that
+	 *  manually! */
 	@Override int hashCode();
 
 	/** Must return true if {@link #getBytes()} returns an equal non-null (!)

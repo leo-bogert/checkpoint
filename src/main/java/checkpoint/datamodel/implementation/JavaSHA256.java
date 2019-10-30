@@ -110,6 +110,7 @@ public final class JavaSHA256 implements ISHA256 {
 	}
 
 	@Override public int hashCode() {
+		requireNonNull(sha256);
 		return Arrays.hashCode(sha256);
 	}
 

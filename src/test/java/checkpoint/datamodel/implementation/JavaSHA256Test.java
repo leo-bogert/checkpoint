@@ -149,6 +149,15 @@ public final class JavaSHA256Test {
 		assertEquals(shaA1.hashCode(), shaA1.hashCode());
 		assertNotSame(shaA1, shaA2);
 		assertEquals(shaA1.hashCode(), shaA2.hashCode());
+		
+		JavaSHA256 x = JavaSHA256.constructForUnitTestOnly(null);
+		assertNotNull(x);
+		try {
+			x.hashCode();
+			fail("Must throw if byte[] sha256 is null!");
+		} catch(NullPointerException e) {
+			// Success
+		}
 	}
 
 }
