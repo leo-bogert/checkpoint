@@ -7,7 +7,7 @@ import checkpoint.datamodel.ITimestamps;
 
 public final class Timestamps extends ITimestamps {
 
-	public static ITimestamps readTimestamps(Path p) {
+	public static Timestamps readTimestamps(Path p) {
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 
