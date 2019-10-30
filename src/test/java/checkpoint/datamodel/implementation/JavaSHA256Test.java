@@ -89,8 +89,22 @@ public final class JavaSHA256Test {
 		assertFalse(shaA.equals(shaB));
 		assertTrue( shaA.equals(shaA));
 		assertTrue( shaA.equals(sha256fromString(hashA)));
-		assertFalse(shaA.equals(null));
-		assertFalse(shaA.equals(new Object()));
+
+		assertNotNull(shaA);
+		try {
+			shaA.equals(null);
+			fail();
+		} catch(NullPointerException e) {
+			// Success
+		}
+		
+		try {
+			// Not an instance of ISHA256.
+			shaA.equals(new Object());
+			fail();
+		} catch(UnsupportedOperationException e) {
+			// Success
+		}
 		
 		// Arrays.equals() returns true when passing two null pointers instead
 		// of two byte[], and the implementation of JavaSHA256 uses that

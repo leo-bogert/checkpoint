@@ -114,8 +114,12 @@ public final class JavaSHA256 implements ISHA256 {
 	}
 
 	@Override public boolean equals(Object obj) {
-		if(obj == null || !(obj instanceof ISHA256))
-			return false;
+		requireNonNull(obj);
+		
+		if(!(obj instanceof ISHA256)) {
+			throw new UnsupportedOperationException(
+					"Does not implement ISHA256: " + obj);
+		}
 		
 		// Arrays.equals() returns true for two null-pointers as argument so
 		// make sure we don't pass null.
