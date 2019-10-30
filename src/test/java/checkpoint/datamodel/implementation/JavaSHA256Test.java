@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Random;
 
 import org.apache.commons.codec.DecoderException;
@@ -60,6 +61,20 @@ public final class JavaSHA256Test {
 			JavaSHA256.sha256fromString("00");
 			fail();
 		} catch(DecoderException e) {}
+	}
+
+	@Test public void testToBytes() throws DecoderException {
+		String hash = // All bytes = 0, the last = 1
+			"0000000000000000000000000000000000000000000000000000000000000001";
+		
+		byte[] bytes = sha256fromString(hash).toBytes();
+		assertEquals(256 / 8, bytes.length);
+		int allButLast = bytes.length - 1;
+		
+		assertArrayEquals(new byte[allButLast],
+			Arrays.copyOf(bytes, allButLast));
+		
+		assertEquals((byte)1, bytes[bytes.length - 1]);
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
