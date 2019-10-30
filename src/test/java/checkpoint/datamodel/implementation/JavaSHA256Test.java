@@ -106,13 +106,16 @@ public final class JavaSHA256Test {
 		// That NullPointerException would hide the fact that a bogus
 		// equals() implementation would not throw it for the case we hereby
 		// test, i.e. toBytes() returning null.
+		ISHA256 x = JavaSHA256.constructForUnitTestOnly(null);
+		ISHA256 y = new ISHA256() {
+			@Override public byte[] toBytes() {
+				return null;
+			}
+		};
+		assertNotNull(x);
+		assertNotNull(y);
 		try {
-			JavaSHA256.constructForUnitTestOnly(null).equals(
-				new ISHA256() {
-					@Override public byte[] toBytes() {
-						return null;
-					}
-				});
+			x.equals(y);
 			fail();
 		} catch(NullPointerException e) {
 			// Success
