@@ -86,11 +86,11 @@ public final class JavaSHA256Test {
 		// does.
 		// We only use constructForUnitTestOnly(null) to construct the left-hand
 		// object of equals() and instead pass an anonymous class into the
-		// right-hand argument because JavaSHA256.getBytes() would throw a
+		// right-hand argument because JavaSHA256.toBytes() would throw a
 		// NullPointerException if we passed a JavaSHA256 at the right side.
 		// That NullPointerException would hide the fact that a bogus
-		// equals() implementation does not throw it for the case we hereby
-		// test, i.e. getBytes() returning null.
+		// equals() implementation would not throw it for the case we hereby
+		// test, i.e. toBytes() returning null.
 		try {
 			JavaSHA256.constructForUnitTestOnly(null).equals(
 				new ISHA256() {
