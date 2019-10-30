@@ -77,7 +77,6 @@ public final class JavaSHA256Test {
 		assertEquals((byte)1, bytes[bytes.length - 1]);
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Test public void testEquals() throws DecoderException {
 		String hashA =
 			"0000000000000000000000000000000000000000000000000000000000000000",
