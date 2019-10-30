@@ -40,7 +40,18 @@ public interface ISHA256 {
 	/** Must return true if {@link #getBytes()} returns an equal non-null (!)
 	 *  byte[] for both this and a given object which implements ISHA256.
 	 *  
-	 *  WARNING: Arrays.equals() will consider two null pointers to be equal! */
+	 *  WARNING: Arrays.equals() will consider two null pointers to be equal!
+	 *  
+	  * If {@link #getBytes()} for this or the given object is null or the
+	  * object is null, {@link NullPointerException} must be thrown.
+	  * If the given object does not implement ISHA256 it shall throw
+	  * {@link UnsupportedOperationException}.
+	  * 
+	  * By the above throwing we intentionally violate the contract of
+	  * {@link Object#equals(Object)}:
+	  * The design goal of the Checkpoint-tool is to ensure maximum
+	  * reliability against data corruption so we must make very sure not to
+	  * have bugs which would cause wrongly assuming file hashes do match. */
 	@Override boolean equals(Object obj);
 
 }
