@@ -44,8 +44,8 @@ public interface ISHA256 {
 	 *  
 	  * If {@link #getBytes()} for this or the given object is null or the
 	  * object is null, {@link NullPointerException} must be thrown.
-	  * If the given object does not implement ISHA256 it shall throw
-	  * {@link UnsupportedOperationException}.
+	  * If the given object does not implement ISHA256
+	  * {@link UnsupportedOperationException} must be thrown.
 	  * 
 	  * By the above throwing we intentionally violate the contract of
 	  * {@link Object#equals(Object)}:
