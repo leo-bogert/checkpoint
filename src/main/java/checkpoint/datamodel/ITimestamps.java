@@ -31,12 +31,16 @@ public abstract class ITimestamps {
 		throws IOException;
 	*/
 
+	/** Any of the given {@link Date} objects may be null if it has been
+	 *  filtered out of the {@link Checkpoint}. */
 	/*
 	public abstract static ITimestamps timestampsFromDates(
 			Date atime, Date ctime, Date mtime);
 	*/
 
-	/** We support including the access time in checkpoints even though
+	/** Null if it has been filtered out of the {@link Checkpoint}.
+	 *  
+	 *  We support including the access time in checkpoints even though
 	 *  generating one will access all files because the access time is a
 	 *  very suitable replacement for {@link #getBirthTime()} which isn't
 	 *  implemented on an average Linux (see its JavaDoc):
@@ -58,8 +62,10 @@ public abstract class ITimestamps {
 		return null;
 	}
 
+	/** Null if it has been filtered out of the {@link Checkpoint}. */
 	public abstract Date getStatusChangeTime();
 
+	/** Null if it has been filtered out of the {@link Checkpoint}. */
 	public abstract Date getModificationTime();
 
 }
