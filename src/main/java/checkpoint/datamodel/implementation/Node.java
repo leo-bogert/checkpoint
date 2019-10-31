@@ -23,6 +23,13 @@ public final class Node implements INode {
 		this.sha256      = sha256;
 		this.timestamps  = timestamps;
 	}
+
+	public static Node constructNode(Path path, boolean isDirectory,
+			ISHA256 sha256, ITimestamps timestamps) {
+		
+		return new Node(path, isDirectory, sha256, timestamps);
+	}
+
 	@Override public Path getPath() {
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
