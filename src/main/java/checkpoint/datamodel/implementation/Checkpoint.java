@@ -1,6 +1,7 @@
 package checkpoint.datamodel.implementation;
 
 import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
+import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
@@ -26,6 +27,7 @@ import org.apache.commons.codec.DecoderException;
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.ISHA256;
+import checkpoint.datamodel.ITimestamps;
 
 // FIXME: save() / load() don't support "(sha256sum failed!)" and
 // "(stat failed!)" fields which the Python implementation is capable of
@@ -115,21 +117,25 @@ public final class Checkpoint implements ICheckpoint {
 				w.write("\0\t");
 				w.write(n.getHash().toString());
 				
-				FileTimeToDateAdapter t
-					= new FileTimeToDateAdapter(n.getTimetamps());
+				ITimestamps t = n.getTimetamps();
 				
 				w.write("\tBirth: ");
 				Date btime = t.getBirthTime();
+				// btime is currently not supported and will always be null,
+				// see ITimestamps.
 				w.write(btime == null ? "-" : dateFormat.format(btime));
 				
 				w.write("\tAccess: ");
-				w.write(dateFormat.format(t.getAccessTime()));
+				Date atime = t.getAccessTime();
+				w.write(atime != null ? dateFormat.format(atime) : "-");
 				
 				w.write("\tModify: ");
-				w.write(dateFormat.format(t.getModificationTime()));
+				Date mtime = t.getModificationTime();
+				w.write(mtime != null ? dateFormat.format(mtime) : "-");
 				
 				w.write("\tChange: ");
-				w.write(dateFormat.format(t.getStatusChangeTime()));
+				Date ctime = t.getStatusChangeTime();
+				w.write(ctime != null ? dateFormat.format(ctime) : "-");
 				
 				w.write('\n');
 			}
@@ -176,13 +182,22 @@ public final class Checkpoint implements ICheckpoint {
 					// trim().
 					String dateName = key_value.nextToken();
 					String date     = key_value.nextToken().trim();
+					
+					if(date.equals("-"))
+						continue;
+					
 					dates.put(dateName, dateFormat.parse(date));
 				}
 				
 				Date atime = dates.get("Access");
-				Date btime = dates.get("Birth");
+				// Class Timestamps does not support consuming this yet, see
+				// ITimestamps.getBirthTime()
+				/* Date btime = dates.get("Birth"); */
 				Date ctime = dates.get("Modify");
 				Date mtime = dates.get("Change");
+				
+				Timestamps timestamps
+					= timestampsFromDates(atime, ctime, mtime);
 				
 				// FIXME: Add new Node() once Node is implemented.
 				result.addNode(null);
