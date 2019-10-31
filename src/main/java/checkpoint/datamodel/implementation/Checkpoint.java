@@ -1,6 +1,7 @@
 package checkpoint.datamodel.implementation;
 
 import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
+import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -226,8 +227,8 @@ public final class Checkpoint implements ICheckpoint {
 							dates.get("Modify"))
 					: null;
 				
-				// FIXME: Add new Node() once Node is implemented.
-				result.addNode(null);
+				result.addNode(
+					constructNode(path, isDirectory, hash, timestamps));
 			}
 			
 			return result;
