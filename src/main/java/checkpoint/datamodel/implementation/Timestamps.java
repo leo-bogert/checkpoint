@@ -50,19 +50,16 @@ public final class Timestamps extends ITimestamps {
 			(mtime != null ? FileTime.fromMillis(mtime.getTime()) : null));
 	}
 
-	@Override public FileTime getAccessTime() {
-		// FileTime's JavaDoc says it is immutable so we don't need to clone().
-		return atime;
+	@Override public Date getAccessTime() {
+		return new Date(atime.toMillis());
 	}
 
-	@Override public FileTime getStatusChangeTime() {
-		// FileTime's JavaDoc says it is immutable so we don't need to clone().
-		return ctime;
+	@Override public Date getStatusChangeTime() {
+		return new Date(ctime.toMillis());
 	}
 
-	@Override public FileTime getModificationTime() {
-		// FileTime's JavaDoc says it is immutable so we don't need to clone().
-		return mtime;
+	@Override public Date getModificationTime() {
+		return new Date(mtime.toMillis());
 	}
 
 }

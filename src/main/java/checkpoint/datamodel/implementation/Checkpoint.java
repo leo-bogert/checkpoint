@@ -26,6 +26,7 @@ import org.apache.commons.codec.DecoderException;
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.ISHA256;
+import checkpoint.datamodel.ITimestamps;
 
 // FIXME: save() / load() don't support "(sha256sum failed!)" and
 // "(stat failed!)" fields which the Python implementation is capable of
@@ -115,8 +116,7 @@ public final class Checkpoint implements ICheckpoint {
 				w.write("\0\t");
 				w.write(n.getHash().toString());
 				
-				FileTimeToDateAdapter t
-					= new FileTimeToDateAdapter(n.getTimetamps());
+				ITimestamps t = n.getTimetamps();
 				
 				w.write("\tBirth: ");
 				Date btime = t.getBirthTime();

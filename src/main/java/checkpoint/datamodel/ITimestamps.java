@@ -1,11 +1,27 @@
 package checkpoint.datamodel;
 
 import java.nio.file.attribute.FileTime;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import checkpoint.datamodel.implementation.Checkpoint;
 
 /** Filesystem timestamps of a file/directory.
  * 
  *  Java does not support abstract static functions so there are commented-out
- *  functions which are also required to be implemented. */
+ *  functions which are also required to be implemented.
+ *  
+ *  Using {@link Date} instead of {@link FileTime} because Java 7 does not yet
+ *  support:
+ *   - class Instant
+ *   - {@link FileTime}.getInstant().
+ *   - class DateTimeFormatter to consume objects of Instant.
+ *  
+ *  Thus the only way to convert a FileTime to a String seems to be to use
+ *  {@link FileTime#toMillis()}, feed that into the legacy class
+ *  {@link Date} and use {@link SimpleDateFormat} upon it.
+ *  
+ *  TODO: Java 8: Deal with the above. */
 public abstract class ITimestamps {
 
 	/** Implementations must read all timestamps at once from disk to avoid
@@ -27,7 +43,7 @@ public abstract class ITimestamps {
 	 *  If you mount your filesystem with "noatime" then the access times
 	 *  won't ever be updated and thus are equal to the time of birth of each
 	 *  file. */
-	public abstract FileTime getAccessTime();
+	public abstract Date getAccessTime();
 
 	/** Always returns null currently because:
 	 *  - the Linux kernel does not currently support obtaining it in userspace.
@@ -38,12 +54,12 @@ public abstract class ITimestamps {
 	 *  it is possible to get the birth time from the kernel.
 	 *  Once you do that also make this abstract class an interface instead to
 	 *  match its name prefix. */
-	public final FileTime getBirthTime() {
+	public final Date getBirthTime() {
 		return null;
 	}
 
-	public abstract FileTime getStatusChangeTime();
+	public abstract Date getStatusChangeTime();
 
-	public abstract FileTime getModificationTime();
+	public abstract Date getModificationTime();
 
 }
