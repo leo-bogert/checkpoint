@@ -170,6 +170,10 @@ public final class Checkpoint implements ICheckpoint {
 		BufferedReader r = Files.newBufferedReader(inputFilePath, UTF_8);
 		try {
 			String l;
+			// FIXME: This won't work with paths which contain linebreaks!
+			//        NOTICE: readLine() respects different kinds of linebreaks!
+			// FIXME: Write a unit test for such paths.
+			// FIXME: Deal with the EOFMarkers.
 			while((l = r.readLine()) != null) {
 				// Albeit save() separates all fields by \t we cannot use that
 				// for splitting the whole line into tokens since Linux
