@@ -64,6 +64,9 @@ public final class Checkpoint implements ICheckpoint {
 	private final SimpleDateFormat dateFormat
 		= new SimpleDateFormat(DATE_FORMAT_STRING);
 
+	private static final String SHA256SUM_OF_DIRECTORY = "(directory)";
+	private static final String SHA256SUM_FAILED = "(sha256sum failed!)";
+
 	// TODO: Check git history of Python/Bash implementations and figure out
 	// why we add the \0 to them. It's probably to keep the line parser simple
 	// so it can always split upon \0 as that is what separates the filename
@@ -115,7 +118,12 @@ public final class Checkpoint implements ICheckpoint {
 				w.write(n.getPath().toString());
 				
 				w.write("\0\t");
-				w.write(n.getHash().toString());
+				if(n.isDirectory())
+					w.write(SHA256SUM_OF_DIRECTORY);
+				else {
+					ISHA256 hash = n.getHash();
+					w.write(hash != null ? hash.toString() : SHA256SUM_FAILED);
+				}
 				
 				ITimestamps t = n.getTimetamps();
 				
