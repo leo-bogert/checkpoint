@@ -66,6 +66,7 @@ public final class Checkpoint implements ICheckpoint {
 
 	private static final String SHA256SUM_OF_DIRECTORY = "(directory)";
 	private static final String SHA256SUM_FAILED = "(sha256sum failed!)";
+	private static final String STAT_FAILED = "(stat failed!)";
 
 	// TODO: Check git history of Python/Bash implementations and figure out
 	// why we add the \0 to them. It's probably to keep the line parser simple
@@ -127,6 +128,7 @@ public final class Checkpoint implements ICheckpoint {
 				
 				ITimestamps t = n.getTimetamps();
 				
+				if(t != null) {
 				w.write("\tBirth: ");
 				Date btime = t.getBirthTime();
 				// btime is currently not supported and will always be null,
@@ -144,6 +146,10 @@ public final class Checkpoint implements ICheckpoint {
 				w.write("\tChange: ");
 				Date ctime = t.getStatusChangeTime();
 				w.write(ctime != null ? dateFormat.format(ctime) : "-");
+				} else {
+					w.write("\t");
+					w.write(STAT_FAILED);
+				}
 				
 				w.write('\n');
 			}
