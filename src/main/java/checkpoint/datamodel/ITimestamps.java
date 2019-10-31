@@ -11,7 +11,8 @@ public abstract class ITimestamps {
 	/** Implementations must read all timestamps at once from disk to avoid
 	 *  unnecessary disk seeking! */
 	/*
-	public abstract static ITimestamps readTimestamps(Path p);
+	public abstract static ITimestamps readTimestamps(Path p)
+		throws IOException;
 	*/
 
 	/** We support including the access time in checkpoints even though
