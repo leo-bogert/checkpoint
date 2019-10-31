@@ -120,16 +120,21 @@ public final class Checkpoint implements ICheckpoint {
 				
 				w.write("\tBirth: ");
 				Date btime = t.getBirthTime();
+				// btime is currently not supported and will always be null,
+				// see ITimestamps.
 				w.write(btime == null ? "-" : dateFormat.format(btime));
 				
 				w.write("\tAccess: ");
-				w.write(dateFormat.format(t.getAccessTime()));
+				Date atime = t.getAccessTime();
+				w.write(atime != null ? dateFormat.format(atime) : "-");
 				
 				w.write("\tModify: ");
-				w.write(dateFormat.format(t.getModificationTime()));
+				Date mtime = t.getModificationTime();
+				w.write(mtime != null ? dateFormat.format(mtime) : "-");
 				
 				w.write("\tChange: ");
-				w.write(dateFormat.format(t.getStatusChangeTime()));
+				Date ctime = t.getStatusChangeTime();
+				w.write(ctime != null ? dateFormat.format(ctime) : "-");
 				
 				w.write('\n');
 			}
@@ -176,6 +181,10 @@ public final class Checkpoint implements ICheckpoint {
 					// trim().
 					String dateName = key_value.nextToken();
 					String date     = key_value.nextToken().trim();
+					
+					if(date.equals("-"))
+						continue;
+					
 					dates.put(dateName, dateFormat.parse(date));
 				}
 				
