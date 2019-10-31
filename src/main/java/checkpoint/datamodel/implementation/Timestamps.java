@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.Date;
 import java.util.Map;
 
 import checkpoint.datamodel.ITimestamps;
@@ -31,6 +32,22 @@ public final class Timestamps extends ITimestamps {
 
 	public static Timestamps readTimestamps(Path p) throws IOException {
 		return new Timestamps(p);
+	}
+
+	private Timestamps(FileTime atime, FileTime ctime, FileTime mtime) {
+		this.atime = atime;
+		this.ctime = ctime;
+		this.mtime = mtime;
+	}
+
+	/** TODO: Java 8: Use Instant instead of Date */
+	public static Timestamps timestampsFromDates(
+			Date atime, Date ctime, Date mtime) {
+		
+		return new Timestamps(
+			(atime != null ? FileTime.fromMillis(atime.getTime()) : null),
+			(ctime != null ? FileTime.fromMillis(ctime.getTime()) : null),
+			(mtime != null ? FileTime.fromMillis(mtime.getTime()) : null));
 	}
 
 	@Override public FileTime getAccessTime() {

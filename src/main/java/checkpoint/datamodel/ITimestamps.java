@@ -15,6 +15,11 @@ public abstract class ITimestamps {
 		throws IOException;
 	*/
 
+	/*
+	public abstract static ITimestamps timestampsFromDates(
+			Date atime, Date ctime, Date mtime);
+	*/
+
 	/** We support including the access time in checkpoints even though
 	 *  generating one will access all files because the access time is a
 	 *  very suitable replacement for {@link #getBirthTime()} which isn't

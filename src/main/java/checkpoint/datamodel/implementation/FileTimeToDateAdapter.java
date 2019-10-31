@@ -18,7 +18,8 @@ import checkpoint.datamodel.ITimestamps;
  *  Thus this adapter converts the return values of {@link ITimestamps}' getters
  *  from {@link FileTime} to {@link Date} objects.
  *  
- *  TODO: Java 8: Get rid of this. */
+ *  TODO: Java 8: Get rid of this.
+ *  Also adapt ITimestamps.timestampsFromDates() then to use Instant instead. */
 final class FileTimeToDateAdapter {
 
 	private final ITimestamps timestamps;
