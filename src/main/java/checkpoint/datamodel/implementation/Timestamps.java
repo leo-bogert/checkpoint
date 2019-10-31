@@ -18,6 +18,8 @@ public final class Timestamps extends ITimestamps {
 	private final FileTime mtime;
 
 	private Timestamps(Path p) throws IOException {
+		// TODO: Performance: Check if it is faster to read "unix:*", i.e.
+		// to avoid the parsing overhead of specifying individual attributes.
 		Map<String, Object> attrs = Files.readAttributes(p,
 			"unix:lastAccessTime,ctime,lastModifiedTime",
 			LinkOption.NOFOLLOW_LINKS);
