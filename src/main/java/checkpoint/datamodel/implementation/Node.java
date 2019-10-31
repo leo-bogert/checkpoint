@@ -31,19 +31,24 @@ public final class Node implements INode {
 	}
 
 	@Override public Path getPath() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// Path is immutable so we don't need to clone().
+		return path;
 	}
 
 	@Override public boolean isDirectory() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		return isDirectory;
 	}
 
 	@Override public ISHA256 getHash() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// FIXME: Decide and document considerations about mutability of ISHA256
+		// implementations and clone() if necessary.
+		return sha256;
 	}
 
 	@Override public ITimestamps getTimetamps() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// FIXME: Decide and document considerations about mutability of
+		// ITimestamps implementations and clone() if necessary.
+		return timestamps;
 	}
 
 }
