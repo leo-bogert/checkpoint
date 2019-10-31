@@ -34,15 +34,18 @@ public final class Timestamps extends ITimestamps {
 	}
 
 	@Override public FileTime getAccessTime() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// FileTime's JavaDoc says it is immutable so we don't need to clone().
+		return atime;
 	}
 
 	@Override public FileTime getStatusChangeTime() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// FileTime's JavaDoc says it is immutable so we don't need to clone().
+		return ctime;
 	}
 
 	@Override public FileTime getModificationTime() {
-		throw new UnsupportedOperationException("FIXME: Implement!");
+		// FileTime's JavaDoc says it is immutable so we don't need to clone().
+		return mtime;
 	}
 
 }
