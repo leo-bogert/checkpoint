@@ -29,9 +29,6 @@ import checkpoint.datamodel.INode;
 import checkpoint.datamodel.ISHA256;
 import checkpoint.datamodel.ITimestamps;
 
-// FIXME: save() / load() don't support "(sha256sum failed!)" and
-// "(stat failed!)" fields which the Python implementation is capable of
-// producing.
 public final class Checkpoint implements ICheckpoint {
 
 	/** Storage of the {@link INode}s which have been added via
@@ -193,9 +190,23 @@ public final class Checkpoint implements ICheckpoint {
 				
 				// TODO: Performance: Use ArrayMap from e.g. Apache Java Commons
 				HashMap<String, Date> dates = new HashMap<>();
+				boolean noTimestampsAvailable = false;
 				while(t.hasMoreTokens()) {
+					String timestampToken = t.nextToken();
+					noTimestampsAvailable = timestampToken.equals(STAT_FAILED);
+					if(noTimestampsAvailable) {
+						// The file timestamps are read all at once for a single
+						// file upon Checkpoint creation, so reading them either
+						// succeeded for all or for none of them - see
+						// ITimestamps.readTimestamps().
+						// So if it failed as indicated by STAT_FAILED then no
+						// dates will be available at all for parsing so we must
+						// break.
+						break;
+					}
+					
 					StringTokenizer key_value
-						= new StringTokenizer(t.nextToken(), ":");
+						= new StringTokenizer(timestampToken, ":");
 					
 					// TODO: Performance: Java 11: Use stripLeading() instead of
 					// trim().
@@ -208,15 +219,12 @@ public final class Checkpoint implements ICheckpoint {
 					dates.put(dateName, dateFormat.parse(date));
 				}
 				
-				Date atime = dates.get("Access");
-				// Class Timestamps does not support consuming this yet, see
-				// ITimestamps.getBirthTime()
-				/* Date btime = dates.get("Birth"); */
-				Date ctime = dates.get("Modify");
-				Date mtime = dates.get("Change");
-				
-				Timestamps timestamps
-					= timestampsFromDates(atime, ctime, mtime);
+				Timestamps timestamps = !noTimestampsAvailable
+					? timestampsFromDates(
+							dates.get("Access"),
+							dates.get("Change"),
+							dates.get("Modify"))
+					: null;
 				
 				// FIXME: Add new Node() once Node is implemented.
 				result.addNode(null);
