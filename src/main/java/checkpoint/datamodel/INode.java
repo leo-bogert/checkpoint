@@ -9,6 +9,8 @@ public interface INode {
 	/** Must never be null. */
 	Path getPath();
 
+	boolean isDirectory();
+
 	/** Returns null for directories.
 	 *  TODO: Actually do return a hash by hashing the hashes of all files and
 	 *  directories inside of it.

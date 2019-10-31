@@ -12,6 +12,10 @@ public final class Node implements INode {
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
 
+	@Override public boolean isDirectory() {
+		throw new UnsupportedOperationException("FIXME: Implement!");
+	}
+
 	@Override public ISHA256 getHash() {
 		throw new UnsupportedOperationException("FIXME: Implement!");
 	}
