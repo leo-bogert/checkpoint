@@ -51,14 +51,17 @@ public final class Timestamps extends ITimestamps {
 	}
 
 	@Override public Date getAccessTime() {
+		// We don't store the Date object because Date is not immutable.
 		return new Date(atime.toMillis());
 	}
 
 	@Override public Date getStatusChangeTime() {
+		// We don't store the Date object because Date is not immutable.
 		return new Date(ctime.toMillis());
 	}
 
 	@Override public Date getModificationTime() {
+		// We don't store the Date object because Date is not immutable.
 		return new Date(mtime.toMillis());
 	}
 
