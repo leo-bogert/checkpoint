@@ -190,7 +190,8 @@ public final class Checkpoint implements ICheckpoint {
 				}
 				
 				Date atime = dates.get("Access");
-				// Not supported yet, see ITimestamps.
+				// Class Timestamps does not support consuming this yet, see
+				// ITimestamps.getBirthTime()
 				/* Date btime = dates.get("Birth"); */
 				Date ctime = dates.get("Modify");
 				Date mtime = dates.get("Change");
