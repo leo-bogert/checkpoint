@@ -129,23 +129,23 @@ public final class Checkpoint implements ICheckpoint {
 				ITimestamps t = n.getTimetamps();
 				
 				if(t != null) {
-				w.write("\tBirth: ");
-				Date btime = t.getBirthTime();
-				// btime is currently not supported and will always be null,
-				// see ITimestamps.
-				w.write(btime == null ? "-" : dateFormat.format(btime));
-				
-				w.write("\tAccess: ");
-				Date atime = t.getAccessTime();
-				w.write(atime != null ? dateFormat.format(atime) : "-");
-				
-				w.write("\tModify: ");
-				Date mtime = t.getModificationTime();
-				w.write(mtime != null ? dateFormat.format(mtime) : "-");
-				
-				w.write("\tChange: ");
-				Date ctime = t.getStatusChangeTime();
-				w.write(ctime != null ? dateFormat.format(ctime) : "-");
+					w.write("\tBirth: ");
+					Date btime = t.getBirthTime();
+					// btime is currently not supported and will always be null,
+					// see ITimestamps.
+					w.write(btime == null ? "-" : dateFormat.format(btime));
+					
+					w.write("\tAccess: ");
+					Date atime = t.getAccessTime();
+					w.write(atime != null ? dateFormat.format(atime) : "-");
+					
+					w.write("\tModify: ");
+					Date mtime = t.getModificationTime();
+					w.write(mtime != null ? dateFormat.format(mtime) : "-");
+					
+					w.write("\tChange: ");
+					Date ctime = t.getStatusChangeTime();
+					w.write(ctime != null ? dateFormat.format(ctime) : "-");
 				} else {
 					w.write("\t");
 					w.write(STAT_FAILED);
