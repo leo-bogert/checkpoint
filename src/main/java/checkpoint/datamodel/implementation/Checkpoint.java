@@ -184,7 +184,12 @@ public final class Checkpoint implements ICheckpoint {
 				//   "\0\t" preceding the hash.
 				StringTokenizer t = new StringTokenizer(l, "\0");
 				Path path = Paths.get(t.nextToken());
-				ISHA256 hash = sha256fromString(t.nextToken("\t"));
+				String hashString = t.nextToken("\t");
+				boolean isDirectory = hashString.equals(SHA256SUM_OF_DIRECTORY);
+				ISHA256 hash =
+					(!isDirectory && !hashString.equals(SHA256SUM_FAILED))
+					? sha256fromString(hashString)
+					: null;
 				
 				// TODO: Performance: Use ArrayMap from e.g. Apache Java Commons
 				HashMap<String, Date> dates = new HashMap<>();
