@@ -1,6 +1,7 @@
 package checkpoint.datamodel.implementation;
 
 import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
+import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -29,9 +30,6 @@ import checkpoint.datamodel.INode;
 import checkpoint.datamodel.ISHA256;
 import checkpoint.datamodel.ITimestamps;
 
-// FIXME: save() / load() don't support "(sha256sum failed!)" and
-// "(stat failed!)" fields which the Python implementation is capable of
-// producing.
 public final class Checkpoint implements ICheckpoint {
 
 	/** Storage of the {@link INode}s which have been added via
@@ -63,6 +61,10 @@ public final class Checkpoint implements ICheckpoint {
 	 *  to access this concurrently. */
 	private final SimpleDateFormat dateFormat
 		= new SimpleDateFormat(DATE_FORMAT_STRING);
+
+	private static final String SHA256SUM_OF_DIRECTORY = "(directory)";
+	private static final String SHA256SUM_FAILED = "(sha256sum failed!)";
+	private static final String STAT_FAILED = "(stat failed!)";
 
 	// TODO: Check git history of Python/Bash implementations and figure out
 	// why we add the \0 to them. It's probably to keep the line parser simple
@@ -115,27 +117,37 @@ public final class Checkpoint implements ICheckpoint {
 				w.write(n.getPath().toString());
 				
 				w.write("\0\t");
-				w.write(n.getHash().toString());
+				if(n.isDirectory())
+					w.write(SHA256SUM_OF_DIRECTORY);
+				else {
+					ISHA256 hash = n.getHash();
+					w.write(hash != null ? hash.toString() : SHA256SUM_FAILED);
+				}
 				
 				ITimestamps t = n.getTimetamps();
 				
-				w.write("\tBirth: ");
-				Date btime = t.getBirthTime();
-				// btime is currently not supported and will always be null,
-				// see ITimestamps.
-				w.write(btime == null ? "-" : dateFormat.format(btime));
-				
-				w.write("\tAccess: ");
-				Date atime = t.getAccessTime();
-				w.write(atime != null ? dateFormat.format(atime) : "-");
-				
-				w.write("\tModify: ");
-				Date mtime = t.getModificationTime();
-				w.write(mtime != null ? dateFormat.format(mtime) : "-");
-				
-				w.write("\tChange: ");
-				Date ctime = t.getStatusChangeTime();
-				w.write(ctime != null ? dateFormat.format(ctime) : "-");
+				if(t != null) {
+					w.write("\tBirth: ");
+					Date btime = t.getBirthTime();
+					// btime is currently not supported and will always be null,
+					// see ITimestamps.
+					w.write(btime == null ? "-" : dateFormat.format(btime));
+					
+					w.write("\tAccess: ");
+					Date atime = t.getAccessTime();
+					w.write(atime != null ? dateFormat.format(atime) : "-");
+					
+					w.write("\tModify: ");
+					Date mtime = t.getModificationTime();
+					w.write(mtime != null ? dateFormat.format(mtime) : "-");
+					
+					w.write("\tChange: ");
+					Date ctime = t.getStatusChangeTime();
+					w.write(ctime != null ? dateFormat.format(ctime) : "-");
+				} else {
+					w.write("\t");
+					w.write(STAT_FAILED);
+				}
 				
 				w.write('\n');
 			}
@@ -158,6 +170,10 @@ public final class Checkpoint implements ICheckpoint {
 		BufferedReader r = Files.newBufferedReader(inputFilePath, UTF_8);
 		try {
 			String l;
+			// FIXME: This won't work with paths which contain linebreaks!
+			//        NOTICE: readLine() respects different kinds of linebreaks!
+			// FIXME: Write a unit test for such paths.
+			// FIXME: Deal with the EOFMarkers.
 			while((l = r.readLine()) != null) {
 				// Albeit save() separates all fields by \t we cannot use that
 				// for splitting the whole line into tokens since Linux
@@ -170,13 +186,32 @@ public final class Checkpoint implements ICheckpoint {
 				//   "\0\t" preceding the hash.
 				StringTokenizer t = new StringTokenizer(l, "\0");
 				Path path = Paths.get(t.nextToken());
-				ISHA256 hash = sha256fromString(t.nextToken("\t"));
+				String hashString = t.nextToken("\t");
+				boolean isDirectory = hashString.equals(SHA256SUM_OF_DIRECTORY);
+				ISHA256 hash =
+					(!isDirectory && !hashString.equals(SHA256SUM_FAILED))
+					? sha256fromString(hashString)
+					: null;
 				
 				// TODO: Performance: Use ArrayMap from e.g. Apache Java Commons
 				HashMap<String, Date> dates = new HashMap<>();
+				boolean noTimestampsAvailable = false;
 				while(t.hasMoreTokens()) {
+					String timestampToken = t.nextToken();
+					noTimestampsAvailable = timestampToken.equals(STAT_FAILED);
+					if(noTimestampsAvailable) {
+						// The file timestamps are read all at once for a single
+						// file upon Checkpoint creation, so reading them either
+						// succeeded for all or for none of them - see
+						// ITimestamps.readTimestamps().
+						// So if it failed as indicated by STAT_FAILED then no
+						// dates will be available at all for parsing so we must
+						// break.
+						break;
+					}
+					
 					StringTokenizer key_value
-						= new StringTokenizer(t.nextToken(), ":");
+						= new StringTokenizer(timestampToken, ":");
 					
 					// TODO: Performance: Java 11: Use stripLeading() instead of
 					// trim().
@@ -189,18 +224,15 @@ public final class Checkpoint implements ICheckpoint {
 					dates.put(dateName, dateFormat.parse(date));
 				}
 				
-				Date atime = dates.get("Access");
-				// Class Timestamps does not support consuming this yet, see
-				// ITimestamps.getBirthTime()
-				/* Date btime = dates.get("Birth"); */
-				Date ctime = dates.get("Modify");
-				Date mtime = dates.get("Change");
+				Timestamps timestamps = !noTimestampsAvailable
+					? timestampsFromDates(
+							dates.get("Access"),
+							dates.get("Change"),
+							dates.get("Modify"))
+					: null;
 				
-				Timestamps timestamps
-					= timestampsFromDates(atime, ctime, mtime);
-				
-				// FIXME: Add new Node() once Node is implemented.
-				result.addNode(null);
+				result.addNode(
+					constructNode(path, isDirectory, hash, timestamps));
 			}
 			
 			return result;
