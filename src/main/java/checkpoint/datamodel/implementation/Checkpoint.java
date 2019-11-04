@@ -19,9 +19,11 @@ import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 
@@ -48,10 +50,13 @@ public final class Checkpoint implements ICheckpoint {
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
 	private final TreeMap<Path, INode> nodes = new TreeMap<>();
 
+	/** @see ICheckpoint#isComplete() */
+	private boolean complete = false;
+
 	/** Used by {@link #dateFormat} and {@link #load(Path)}. */
 	private static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss Z";
 	
-	/** Used by {@link #save(Path, boolean)}.
+	/** Used by {@link #save(Path)}.
 	 * 
 	 *  WARNING: SimpleDateFormat is NOT thread-safe! Synchronize upon this
 	 *  Checkpoint when using this!
@@ -100,9 +105,7 @@ public final class Checkpoint implements ICheckpoint {
 		}
 	}
 
-	@Override public synchronized void save(Path checkpointDir,
-			boolean isComplete) throws IOException {
-		
+	@Override public synchronized void save(Path checkpointDir) throws IOException {
 		// TODO: Use Files.createTempFile() and move it into place once we're
 		// finished. This may ensure that intermediate saving will never result
 		// in a corrupted file if the system crashes: Either the old file will
@@ -152,8 +155,8 @@ public final class Checkpoint implements ICheckpoint {
 				w.write('\n');
 			}
 			
-			w.write(isComplete ? EOFPaths.CheckpointComplete
-			                   : EOFPaths.CheckpointIncomplete);
+			w.write(complete ? EOFPaths.CheckpointComplete
+			                 : EOFPaths.CheckpointIncomplete);
 			w.write('\0');
 		} finally {
 			w.close();
@@ -268,6 +271,14 @@ public final class Checkpoint implements ICheckpoint {
 				s.close();
 			r.close();
 		}
+	}
+
+	@Override public synchronized void setCompleteFlag(boolean complete) {
+		this.complete = complete;
+	}
+
+	@Override public synchronized boolean isComplete() {
+		return complete;
 	}
 
 }
