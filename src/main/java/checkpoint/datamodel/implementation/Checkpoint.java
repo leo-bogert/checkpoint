@@ -4,6 +4,7 @@ import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.TRUNCATE_EXISTING;
 import static java.nio.file.StandardOpenOption.WRITE;
@@ -125,8 +126,11 @@ public final class Checkpoint implements ICheckpoint {
 		// createDirectories() does not guarantee to throw if it exists as
 		// a non-dir already so do that first to ensure we don't change
 		// permissions of it if it is a file.
-		if(!Files.isDirectory(checkpointDir))
-			throw new FileAlreadyExistsException(checkpointDir.toString());
+		if(!Files.isDirectory(checkpointDir, NOFOLLOW_LINKS)) {
+			throw new FileAlreadyExistsException(
+				"Is not a directory, should be a non-symlink dir or not exist: "
+				+ checkpointDir.toString());
+		}
 		
 		Files.setPosixFilePermissions(checkpointDir,
 			PosixFilePermissions.fromString("rwx------"));
@@ -136,6 +140,11 @@ public final class Checkpoint implements ICheckpoint {
 		// in a corrupted file if the system crashes: Either the old file will
 		// still be there, or the new one, or none.
 		Path outputFilePath = checkpointDir.resolve("checkpoint.txt");
+		if(!Files.isRegularFile(outputFilePath, NOFOLLOW_LINKS)) {
+			throw new FileAlreadyExistsException(
+				"Is not a file, should be a non-symlink file or not exist: "
+				+ outputFilePath.toString());
+		}
 		// FIXME: Performance: Use a custom buffer size, default is 8192 which
 		// is a bit small.
 		BufferedWriter w = Files.newBufferedWriter(outputFilePath, UTF_8,
