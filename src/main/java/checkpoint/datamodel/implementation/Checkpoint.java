@@ -85,6 +85,14 @@ public final class Checkpoint implements ICheckpoint {
 	@Override public synchronized void addNode(INode n)
 			throws IllegalArgumentException {
 		
+		// To catch concurrency issues, specifically computation threads still
+		// running after the code which is supposed to call save() thought
+		// they've already finished.
+		if(complete) {
+			throw new IllegalStateException(
+				"Checkpoint was marked as complete already!");
+		}
+		
 		// Instead of using putIfAbsent() so we can throw if the key is already
 		// contained we put() the new INode and replace it with put()ing old one
 		// again if put()'s return value tells us that there already was an
