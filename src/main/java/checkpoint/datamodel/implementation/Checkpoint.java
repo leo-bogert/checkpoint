@@ -11,6 +11,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -114,10 +115,19 @@ public final class Checkpoint implements ICheckpoint {
 		}
 	}
 
-	@Override public synchronized void save(Path checkpointDir) throws IOException {
+	@Override public synchronized void save(Path checkpointDir)
+			throws IOException {
+		
+		// Don't pass the permissions to it but manually set them later to
+		// ensure they also get set when rewriting an existing checkpoint.
 		Files.createDirectories(checkpointDir);
-		// Don't pass the permissions to the above createDirectories() to ensure
-		// they also get set when rewriting an existing checkpoint.
+		
+		// creadeDirectories() does not guarantee to throw if it exists as
+		// a non-dir already so do that first to ensure we don't change
+		// permissions of it if it is a file.
+		if(!Files.isDirectory(checkpointDir))
+			throw new FileAlreadyExistsException(checkpointDir.toString());
+
 		Files.setPosixFilePermissions(checkpointDir,
 			PosixFilePermissions.fromString("rwx------"));
 		
