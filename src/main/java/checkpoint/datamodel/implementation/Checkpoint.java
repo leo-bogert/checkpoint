@@ -119,6 +119,11 @@ public final class Checkpoint implements ICheckpoint {
 	@Override public synchronized void save(Path checkpointDir)
 			throws IOException {
 		
+		// FIXME: The creation of the dir and setting of its permissions likely
+		// is not safe against race conditions caused by malicious processes
+		// which have e.g. group or others write permissions to the dir.
+		// Either fix that or document it.
+		
 		// Don't pass the permissions to it but manually set them later to
 		// ensure they also get set when rewriting an existing checkpoint.
 		Files.createDirectories(checkpointDir);
