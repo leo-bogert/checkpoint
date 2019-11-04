@@ -45,7 +45,7 @@ public final class CheckpointTest {
 		Path testCheckpoint = tempDir.newFolder().toPath();
 		Checkpoint original = new Checkpoint();
 		original.addNode(n);
-		original.save(testCheckpoint, true);
+		original.save(testCheckpoint);
 		
 		Checkpoint loaded = Checkpoint.load(testCheckpoint);
 		// FIXME: Validate the result of load()
