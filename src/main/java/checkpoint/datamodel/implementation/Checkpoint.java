@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
@@ -115,6 +116,10 @@ public final class Checkpoint implements ICheckpoint {
 
 	@Override public synchronized void save(Path checkpointDir) throws IOException {
 		Files.createDirectories(checkpointDir);
+		// Don't pass the permissions to the above createDirectories() to ensure
+		// they also get set when rewriting an existing checkpoint.
+		Files.setPosixFilePermissions(checkpointDir,
+			PosixFilePermissions.fromString("rwx------"));
 		
 		// TODO: Use Files.createTempFile() and move it into place once we're
 		// finished. This may ensure that intermediate saving will never result
