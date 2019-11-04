@@ -71,10 +71,10 @@ public final class Checkpoint implements ICheckpoint {
 	private static final String SHA256SUM_FAILED = "(sha256sum failed!)";
 	private static final String STAT_FAILED = "(stat failed!)";
 
-	// TODO: Check git history of Python/Bash implementations and figure out
-	// why we add the \0 to them. It's probably to keep the line parser simple
-	// so it can always split upon \0 as that is what separates the filename
-	// from the rest of each non-EOF line.
+	/** These, plus an additional \0, mark the end of a Checkpoint file.
+	 *  The additional \0 is so they can be parsed as if they were a path of
+	 *  a regular {@link Node} in the checkpoint which keeps the code of
+	 *  {@link Checkpoint#save(Path)} simple. */
 	private static final class EOFPaths {
 		static final String CheckpointComplete
 			= "This checkpoint is complete.\n";
