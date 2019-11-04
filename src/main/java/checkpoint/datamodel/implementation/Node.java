@@ -22,6 +22,9 @@ public final class Node implements INode {
 		this.isDirectory = isDirectory;
 		this.sha256      = sha256;
 		this.timestamps  = timestamps;
+		
+		if(isDirectory && sha256 != null)
+			throw new IllegalArgumentException();
 	}
 
 	public static Node constructNode(Path path, boolean isDirectory,
