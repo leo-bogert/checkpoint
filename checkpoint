@@ -248,6 +248,9 @@ write_output() {
 
 main() {
 	enable_errexit_and_errtrace
+	
+		# TODO: Fix this
+		echo "WARNING: This likely is NOT safe for usage upon arbitrary files, which might have dashes in their names, because it uses echo on their names instead of printf!" >&2
 
 		[ $# -eq 2 ] || fail "Syntax: checkpoint <dir to generate checkpoint for> <output dir of checkpoint files>"
 
