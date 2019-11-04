@@ -171,7 +171,11 @@ class Checkpoint:
 		self.abortion_requested = True
 	
 	def set_ioniceness(self):
-		psutil.Process(os.getpid()).set_ionice(psutil.IOPRIO_CLASS_IDLE)
+		process = psutil.Process(os.getpid())
+		if(hasattr(process, "ionice")):
+			process.ionice(psutil.IOPRIO_CLASS_IDLE)
+		else:
+			process.set_ionice(psutil.IOPRIO_CLASS_IDLE)
 	
 	def load_from_disk(self):
 		self.log.info("Loading existing checkpoint data to resume from it ...")
