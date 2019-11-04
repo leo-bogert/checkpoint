@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 import org.apache.commons.codec.DecoderException;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,13 +31,41 @@ public final class CheckpointTest {
 	@Rule
 	public final TemporaryFolder tempDir = new TemporaryFolder();
 
-
+	@Ignore("FIXME: Not implemented yet!")
 	@Test public void testAddNode() {
-		fail("Not yet implemented");
+		// DON'T FORGET TO REMOVE @Ignore WHEN IMPLEMENTING!
 	}
 
+	@Ignore("FIXME: Not implemented yet!")
 	@Test public void testSave() {
-		fail("Not yet implemented");
+		// Draft follows.
+		// DON'T FORGET TO REMOVE @Ignore WHEN IMPLEMENTING!
+		
+		/*
+		String filename1 = "/boot!",
+		       filename2 = "/boot/vmlinuz";
+		String hash1 =
+			"(directory)",
+		       hash2 =
+			"1111111111111111111111111111111111111111111111111111111111111111";
+		
+		String checkpointContents =
+			filename1
+				+ '\0'
+				+ '\t' + hash1
+				+ '\t' + "Access: 2019-01-23 12:34:56"
+				+ '\t' + "Modify: 2019-02-23 12:34:56"
+				+ '\t' + "Change: 2019-03-23 12:34:56"
+				+ '\n'
+			+ filename2
+				+ '\0'
+				+ '\t' + hash2
+				+ '\t' + "Access: 2019-04-23 12:34:56"
+				+ '\t' + "Modify: 2019-05-23 12:34:56"
+				+ '\t' + "Change: 2019-06-23 12:34:56"
+				+ '\n';
+			+ "This checkpoint is INCOMPLETE but can be resumed.\n\0"
+		*/
 	}
 
 	@Test public void testLoad() throws IOException, DecoderException {
