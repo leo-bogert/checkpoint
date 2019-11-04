@@ -3,6 +3,7 @@ package checkpoint.datamodel.implementation;
 import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
+import static java.nio.file.Files.readAllBytes;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.*;
 
@@ -48,7 +49,12 @@ public final class CheckpointTest {
 		original.save(testCheckpoint);
 		
 		Checkpoint loaded = Checkpoint.load(testCheckpoint);
-		// FIXME: Validate the result of load()
+		Path savedAgain = tempDir.newFolder().toPath();
+		loaded.save(savedAgain);
+		
+		assertArrayEquals(
+			readAllBytes(testCheckpoint.resolve("checkpoint.txt")),
+			readAllBytes(savedAgain.resolve("checkpoint.txt")));
 		
 		// FIXME: Add more tests
 	}
