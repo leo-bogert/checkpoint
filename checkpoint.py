@@ -236,7 +236,14 @@ class Checkpoint:
 		
 		with open(self.output_files.log, "a") as log_file:
 			with open(self.output_files.file_list, "w") as sort_output:
-				subprocess.check_call(("sort", "--zero-terminated", self.output_files.file_list_unsorted), cwd=self.output_dir, stderr=log_file, stdout=sort_output)
+				# LC_ALL=C is critically important to ensure files of the same
+				# directory will be next to each other in the output.
+				# As a bonus it also ensures the sorting is always the same
+				# indepedent of the local system's language configuration.
+				subprocess.check_call(
+					("sort", "--zero-terminated",
+					self.output_files.file_list_unsorted), env={"LC_ALL": "C"},
+					cwd=self.output_dir, stderr=log_file, stdout=sort_output)
 		
 		os.remove(self.output_files.file_list_unsorted)
 		
