@@ -227,11 +227,15 @@ write_output() {
 			# So we have to use pre-increment because we use "set -o errexit" and the exit failure of "let count++" would trigger it.
 			let ++count
 
+			# LC_ALL=C is critically important to ensure files of the same
+			# directory will be next to each other in the output.
+			# As a bonus it also ensures the sorting is always the same
+			# indepedent of the local system's language configuration.
 		done < <(
 				for filepath in "${!OUTPUT_LINES_BY_PATH_WITHOUT_PREFIX[@]}" ; do
 					echo -n "$filepath"
 					echo -n -e "\0"
-				done | sort --zero-terminated
+				done | LC_ALL=C sort --zero-terminated
 			)
 
 		write_eof_marker_to_output
@@ -244,6 +248,9 @@ write_output() {
 
 main() {
 	enable_errexit_and_errtrace
+	
+		# TODO: Fix this
+		echo "WARNING: This likely is NOT safe for usage upon arbitrary files, which might have dashes in their names, because it uses echo on their names instead of printf!" >&2
 
 		[ $# -eq 2 ] || fail "Syntax: checkpoint <dir to generate checkpoint for> <output dir of checkpoint files>"
 

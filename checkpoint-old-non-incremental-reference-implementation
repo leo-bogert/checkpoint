@@ -42,8 +42,8 @@ rotate "$ERRORS" &&
 touch "$SHA256" "$DATES" "$ERRORS" &&
 chmod 600 "$SHA256" "$DATES" "$ERRORS" &&
 cd "$CHECKPATH" &&
-( find . -mount \( -type f -o -type d \) -print0 | sort --stable -z | xargs -0 -n 1 stat --printf "%n\tBirth: %w\tAccess: %x\tModify: %y\tChange: %z\n" ) 1> "$DATES" 2>> "$ERRORS" &&
-( find . -mount -type f -print0 | sort --stable -z | xargs -0 -n 1 sha256sum -b ) 1> "$SHA256" 2>> "$ERRORS"
+( find . -mount \( -type f -o -type d \) -print0 | LC_ALL=C sort --stable -z | xargs -0 -n 1 stat --printf "%n\tBirth: %w\tAccess: %x\tModify: %y\tChange: %z\n" ) 1> "$DATES" 2>> "$ERRORS" &&
+( find . -mount -type f -print0 | LC_ALL=C sort --stable -z | xargs -0 -n 1 sha256sum -b ) 1> "$SHA256" 2>> "$ERRORS"
 
 if [ $? -ne 0 -o -s "$ERRORS" ] ; then
 	echo "Last exit code indicates failure! Errors log file contents:" >&2
