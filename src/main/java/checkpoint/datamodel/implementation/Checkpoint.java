@@ -114,6 +114,8 @@ public final class Checkpoint implements ICheckpoint {
 	}
 
 	@Override public synchronized void save(Path checkpointDir) throws IOException {
+		Files.createDirectories(checkpointDir);
+		
 		// TODO: Use Files.createTempFile() and move it into place once we're
 		// finished. This may ensure that intermediate saving will never result
 		// in a corrupted file if the system crashes: Either the old file will
