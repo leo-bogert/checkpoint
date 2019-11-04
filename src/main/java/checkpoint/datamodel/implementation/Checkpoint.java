@@ -140,7 +140,9 @@ public final class Checkpoint implements ICheckpoint {
 		// in a corrupted file if the system crashes: Either the old file will
 		// still be there, or the new one, or none.
 		Path outputFilePath = checkpointDir.resolve("checkpoint.txt");
-		if(!Files.isRegularFile(outputFilePath, NOFOLLOW_LINKS)) {
+		if(Files.exists(outputFilePath, NOFOLLOW_LINKS) &&
+				!Files.isRegularFile(outputFilePath, NOFOLLOW_LINKS)) {
+			
 			throw new FileAlreadyExistsException(
 				"Is not a file, should be a non-symlink file or not exist: "
 				+ outputFilePath.toString());
