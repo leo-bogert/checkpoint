@@ -7,6 +7,7 @@ import java.util.Date;
 import checkpoint.datamodel.implementation.Checkpoint;
 
 /** Filesystem timestamps of a file/directory.
+ *  Implementations of this must be immutable!
  * 
  *  Java does not support abstract static functions so there are commented-out
  *  functions which are also required to be implemented.

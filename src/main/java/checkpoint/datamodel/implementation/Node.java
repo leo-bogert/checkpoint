@@ -22,6 +22,9 @@ public final class Node implements INode {
 		this.isDirectory = isDirectory;
 		this.sha256      = sha256;
 		this.timestamps  = timestamps;
+		
+		if(isDirectory && sha256 != null)
+			throw new IllegalArgumentException();
 	}
 
 	public static Node constructNode(Path path, boolean isDirectory,
@@ -46,8 +49,7 @@ public final class Node implements INode {
 	}
 
 	@Override public ITimestamps getTimetamps() {
-		// FIXME: Decide and document considerations about mutability of
-		// ITimestamps implementations and clone() if necessary.
+		// ITimestamps is immutable so we don't need to clone().
 		return timestamps;
 	}
 

@@ -3,6 +3,8 @@ package checkpoint.datamodel;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import checkpoint.datamodel.implementation.Node;
+
 /** All functions are safe to be called concurrently both with regards to
  *  themselves and other functions of this interface. */
 public interface ICheckpoint {
@@ -18,14 +20,23 @@ public interface ICheckpoint {
 	 *       information is available for free anyway. */
 	void addNode(INode n) throws IllegalArgumentException;
 
-	/** @param isComplete The EOF-marker of the resulting plain-text file will
-	 *      tell the user if the checkpoint is complete or not, depending upon
-	 *      this boolean. You must thus set this to false if you're doing an
-	 *      intermediate save - which you might want to do every N minutes. */
-	void save(Path checkpointDir, boolean isComplete) throws IOException;
+	void save(Path checkpointDir) throws IOException;
 
 	// Java does not support static abstract interface methods, so the following
 	// is required but commented out:
 	/* static ICheckpoint load(Path checkpointDir) throws IOException; */
+
+	/** Set to true if all {@link Node}s which are available on the filesystem
+	 *  have been computed and stored in the checkpoint.
+	 *  Persisted by {@link #save(Path)} and loaded by load().
+	 * 
+	 *  The EOF-marker of the resulting plain-text files will tell the user if
+	 *  the checkpoint is complete or not, depending upon this boolean. You must
+	 *  thus keep this at the default value of false if you're doing an
+	 *  intermediate save - which you might want to do every N minutes. */
+	void setCompleteFlag(boolean isComplete);
+
+	/** @see #setCompleteFlag(boolean) */
+	boolean isComplete();
 
 }
