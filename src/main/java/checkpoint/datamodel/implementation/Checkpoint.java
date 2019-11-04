@@ -70,11 +70,11 @@ public final class Checkpoint implements ICheckpoint {
 	// why we add the \0 to them. It's probably to keep the line parser simple
 	// so it can always split upon \0 as that is what separates the filename
 	// from the rest of each non-EOF line.
-	private static final class EOFMarkers {
+	private static final class EOFPaths {
 		static final String CheckpointComplete
-			= "This checkpoint is complete.\n\0";
+			= "This checkpoint is complete.\n";
 		static final String CheckpointIncomplete
-			= "This checkpoint is INCOMPLETE but can be resumed.\n\0";
+			= "This checkpoint is INCOMPLETE but can be resumed.\n";
 	}
 
 	@Override public synchronized void addNode(INode n)
@@ -152,8 +152,9 @@ public final class Checkpoint implements ICheckpoint {
 				w.write('\n');
 			}
 			
-			w.write(isComplete ? EOFMarkers.CheckpointComplete
-			                   : EOFMarkers.CheckpointIncomplete);
+			w.write(isComplete ? EOFPaths.CheckpointComplete
+			                   : EOFPaths.CheckpointIncomplete);
+			w.write('\0');
 		} finally {
 			w.close();
 		}
@@ -162,30 +163,52 @@ public final class Checkpoint implements ICheckpoint {
 	public static Checkpoint load(Path checkpointDir)
 			throws IOException {
 		
+		// Albeit save() separates all fields by \t we cannot use that for
+		// splitting the whole line into tokens since Linux filenames may
+		// contain \t and even \n.
+		// So we first determine the file path by looking for \0, then the end
+		// of the line by \n, and split the parts in between by \t.
+		// TODO: Performance: Use something else than class Scanner for this
+		// because regular expressions are overkill here, we merely need
+		// splitting upon custom fixed strings or even characters.
+		// E.g. some implementation of Reader which supports a readLine() which
+		// allows specifying a fixed string as a custom end of line marker.
+		Pattern pathDelimiter = Pattern.compile("\0");
+		Pattern lineDelimiter = Pattern.compile("\n");
+		
 		Checkpoint result = new Checkpoint();
 		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
 		Path inputFilePath = checkpointDir.resolve("checkpoint.txt");
 		// FIXME: Performance: Use a custom buffer size, default is 8192 which
 		// is a bit small.
 		BufferedReader r = Files.newBufferedReader(inputFilePath, UTF_8);
+		Scanner s = null;
 		try {
-			String l;
-			// FIXME: This won't work with paths which contain linebreaks!
-			//        NOTICE: readLine() respects different kinds of linebreaks!
-			// FIXME: Deal with the EOFMarkers.
-			while((l = r.readLine()) != null) {
-				// Albeit save() separates all fields by \t we cannot use that
-				// for splitting the whole line into tokens since Linux
-				// filenames may contain \t.
-				// So first split by the additional \0 which terminates the path
-				// and then split the remainder of the line by \t.
-				// Notice:
-				// - nextToken("\t") updates the delimiter permanently.
-				// - nextToken("\t") skips empty tokens, which we need for the
-				//   "\0\t" preceding the hash.
-				StringTokenizer t = new StringTokenizer(l, "\0");
-				Path path = Paths.get(t.nextToken());
-				String hashString = t.nextToken("\t");
+			s = new Scanner(r);
+			while(true) {
+				s.useDelimiter(pathDelimiter);
+				String pathStr = s.next();
+				s.skip(pathDelimiter);
+				if(!s.hasNext()) {
+					if(pathStr.equals(EOFPaths.CheckpointComplete)) {
+						result.complete = true;
+						break;
+					} else if(pathStr.equals(EOFPaths.CheckpointIncomplete)) {
+						result.complete = false;
+						break;
+					} else
+						throw new IOException(
+							"Checkpoint is truncated, EOF marker is missing!");
+				}
+				Path path = Paths.get(pathStr);
+				
+				// TODO: Use longer variable names
+				s.useDelimiter(lineDelimiter);
+				String l = s.next();
+				s.skip(lineDelimiter);
+				
+				StringTokenizer t = new StringTokenizer(l, "\t");
+				String hashString = t.nextToken();
 				boolean isDirectory = hashString.equals(SHA256SUM_OF_DIRECTORY);
 				ISHA256 hash =
 					(!isDirectory && !hashString.equals(SHA256SUM_FAILED))
@@ -234,10 +257,15 @@ public final class Checkpoint implements ICheckpoint {
 					constructNode(path, isDirectory, hash, timestamps));
 			}
 			
+			if(s.ioException() != null)
+				throw s.ioException();
+			
 			return result;
 		} catch(DecoderException | ParseException | RuntimeException e) {
 			throw new IOException(e);
 		} finally {
+			if(s != null)
+				s.close();
 			r.close();
 		}
 	}
