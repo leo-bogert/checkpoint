@@ -122,12 +122,12 @@ public final class Checkpoint implements ICheckpoint {
 		// ensure they also get set when rewriting an existing checkpoint.
 		Files.createDirectories(checkpointDir);
 		
-		// creadeDirectories() does not guarantee to throw if it exists as
+		// createDirectories() does not guarantee to throw if it exists as
 		// a non-dir already so do that first to ensure we don't change
 		// permissions of it if it is a file.
 		if(!Files.isDirectory(checkpointDir))
 			throw new FileAlreadyExistsException(checkpointDir.toString());
-
+		
 		Files.setPosixFilePermissions(checkpointDir,
 			PosixFilePermissions.fromString("rwx------"));
 		
