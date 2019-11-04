@@ -49,8 +49,7 @@ public final class Node implements INode {
 	}
 
 	@Override public ITimestamps getTimetamps() {
-		// FIXME: Decide and document considerations about mutability of
-		// ITimestamps implementations and clone() if necessary.
+		// ITimestamps is immutable so we don't need to clone().
 		return timestamps;
 	}
 
