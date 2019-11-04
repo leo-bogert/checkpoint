@@ -200,6 +200,8 @@ public final class Checkpoint implements ICheckpoint {
 				s.useDelimiter(pathDelimiter);
 				String pathStr = s.next();
 				s.skip(pathDelimiter);
+				
+				s.useDelimiter(lineDelimiter);
 				if(!s.hasNext()) {
 					if(pathStr.equals(EOFPaths.CheckpointComplete)) {
 						result.complete = true;
@@ -214,7 +216,6 @@ public final class Checkpoint implements ICheckpoint {
 				Path path = Paths.get(pathStr);
 				
 				// TODO: Use longer variable names
-				s.useDelimiter(lineDelimiter);
 				String l = s.next();
 				s.skip(lineDelimiter);
 				
