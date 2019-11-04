@@ -243,13 +243,9 @@ public final class Checkpoint implements ICheckpoint {
 						break;
 					}
 					
-					StringTokenizer key_value
-						= new StringTokenizer(timestampToken, ":");
-					
-					// TODO: Performance: Java 11: Use stripLeading() instead of
-					// trim().
-					String dateName = key_value.nextToken();
-					String date     = key_value.nextToken().trim();
+					int splitAt = timestampToken.indexOf(':');
+					String dateName = timestampToken.substring(0, splitAt);
+					String date     = timestampToken.substring(splitAt + 2);
 					
 					if(date.equals("-"))
 						continue;
