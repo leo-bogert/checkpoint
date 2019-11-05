@@ -1,4 +1,4 @@
-package checkpoint.ui;
+package checkpoint.ui.shell;
 
 /** The terminal user interface. */
 public final class Shell {
