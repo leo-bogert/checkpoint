@@ -51,12 +51,12 @@ final class CheckFsFeaturesCommand extends Command {
 		
 		if(!fs.supportedFileAttributeViews().contains("unix")) {
 			err.println(
-				"WARNING: Your Java does not support the 'unix' " +
-				"FileAttributeView, which is necessary to obtain the ctime!");
+				"ERROR: Your Java does not support the 'unix' " +
+				"FileAttributeView so checkpoint likely will not work!");
 		} else {
 			out.println(
 				"Good: The 'unix' FileAttributeView is supported, this is " +
-				"checkpoint's desired view.");
+				"the view which checkpoint uses currently.");
 		}
 		out.println();
 		
