@@ -13,6 +13,10 @@ import checkpoint.datamodel.implementation.Checkpoint;
 
 final class InspectCommand extends Command {
 
+	@Override String getShortSyntax() {
+		return '\t' + getCommandName() + " CHECKPOINT";
+	}
+
 	@Override int run(List<String> args) {
 		if(args.size() != 1) {
 			err.println("Syntax:");
@@ -37,10 +41,6 @@ final class InspectCommand extends Command {
 			e.printStackTrace(err);
 			return 1;
 		}
-	}
-
-	@Override String getShortSyntax() {
-		return '\t' + getCommandName() + " CHECKPOINT";
 	}
 
 }

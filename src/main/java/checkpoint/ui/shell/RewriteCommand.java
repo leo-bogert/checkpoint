@@ -12,6 +12,11 @@ import checkpoint.datamodel.implementation.Checkpoint;
 
 final class RewriteCommand extends Command {
 
+	@Override String getShortSyntax() {
+		return '\t' + getCommandName()
+			+ " CHECKPOINT [DIFFERENT_OUTPUT_PATH]";
+	}
+
 	@Override int run(List<String> args) {
 		if(args.size() < 1 || args.size() > 2) {
 			err.println("Syntax:");
@@ -54,11 +59,6 @@ final class RewriteCommand extends Command {
 			e.printStackTrace(err);
 			return 1;
 		}
-	}
-
-	@Override String getShortSyntax() {
-		return '\t' + getCommandName()
-			+ " CHECKPOINT [DIFFERENT_OUTPUT_PATH]";
 	}
 
 }
