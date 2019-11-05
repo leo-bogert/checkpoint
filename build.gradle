@@ -6,6 +6,10 @@ dependencies {
 	testImplementation files('/usr/share/java/junit4.jar')
 }
 
+test.testLogging {
+	events "passed", "skipped", "failed"
+}
+
 jar.manifest.attributes(
 	'Main-Class': 'checkpoint.ui.shell.Shell',
 	'Class-Path':
