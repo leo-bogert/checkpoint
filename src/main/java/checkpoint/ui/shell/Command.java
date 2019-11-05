@@ -49,6 +49,8 @@ abstract class Command {
 
 	/**
 	 * Must return 0 upon success, > 0 otherwise.
+	 * Should catch all potential exceptions already and convert them into such
+	 * a return value.
 	 * 
 	 * @param args The arguments of the command, with the command name already
 	 *  	having been removed from the beginning of the list. */
