@@ -1,0 +1,25 @@
+language: java
+# FIXME: Java 8: Use a newer Ubuntu since we're only on trusty for Java 7
+dist: trusty
+# Disabling sudo routes the build to Docker instead of a VM which is faster.
+sudo: false
+
+addons:
+	apt:
+		packages:
+			- libcommons-codec-java
+			- junit4
+
+jdk:
+	- openjdk7
+	- openjdk8
+	- openjdk9
+	- openjdk10
+	- openjdk11
+	- openjdk12
+	- openjdk13
+
+script:
+	- set -o errexit
+	- gradle clean test jar
+	- sha256sum -b build/lib/checkpoint.jar
