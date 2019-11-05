@@ -102,8 +102,8 @@ public final class JavaSHA256 implements ISHA256 {
 				+ hexEncoded.length());
 		}
 		
-		// TODO: Remove the toCharArray() once we're fine with requiring a
-		// more recent Apache Java Commons Codec library.
+		// TODO: Performance: Remove the toCharArray() once we're fine with
+		// requiring a more recent Apache Java Commons Codec library.
 		return new JavaSHA256(decodeHex(hexEncoded.toCharArray()));
 	}
 
