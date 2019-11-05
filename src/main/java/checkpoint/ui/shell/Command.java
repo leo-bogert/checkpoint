@@ -24,7 +24,7 @@ abstract class Command {
 	 *  - a space plus a human-readable list of arguments for the command.
 	 *  
 	 *  E.g:
-	 *      return '\t' + getCommandName() + " INPUT_DIR OUTPUT_CHECKPOINT"; */
+	 *      return '\t' + getCommandName() + " INPUT_DIR [OUTPUT_DIR]"; */
 	abstract String getShortSyntax();
 
 	/**
