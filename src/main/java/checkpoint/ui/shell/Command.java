@@ -10,12 +10,14 @@ import java.util.Map;
  *  Instances MUST BE stateless because they will be statically constructed by
  *  {@link Shell} and future implementations may thus re-use them.
  *  
- *  The class name MUST BE "NAME_OF_COMMAND" plus "Command" as
+ *  The class name should be "NAME_OF_COMMAND" plus "Command" as
  *  {@link #getCommandName()} uses the class name to automatically compute the
- *  command name. The case needs not to be lower/upper, it will be ignored. */
+ *  command name. The case needs not to be lower/upper, it will be ignored.
+ *  If you want the name to be different from the class name then override
+ *  {@link #getCommandName()}. */
 abstract class Command {
 
-	final String getCommandName() {
+	String getCommandName() {
 		return this.getClass().getSimpleName()
 				.replace("Command", "").toLowerCase();
 	}
