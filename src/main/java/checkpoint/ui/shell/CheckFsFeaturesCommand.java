@@ -60,6 +60,7 @@ final class CheckFsFeaturesCommand extends Command {
 		}
 		out.println();
 		
+		// TODO: Only run this loop with "--verbose".
 		for(String view : fs.supportedFileAttributeViews()) {
 			out.println("Supported timestamps for FileAttributeView '"
 				+ view + "':");
