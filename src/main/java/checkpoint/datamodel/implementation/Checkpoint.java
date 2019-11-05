@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -51,7 +52,36 @@ public final class Checkpoint implements ICheckpoint {
 	 *  FIXME: Performance: Replace with data structure which supports fast
 	 *  concurrent adding so our many generator threads can deal with the
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
-	private final TreeMap<Path, INode> nodes = new TreeMap<>();
+	private final TreeMap<Path, INode> nodes
+		= new TreeMap<>(new PathComparator());
+
+	/** Our Python/Bash reference implementations use the shell command
+	 *  "LC_ALL=C sort --zero-terminated" for sorting paths.
+	 *  
+	 *  This comparator emulates the "LC_ALL=C" part, i.e. sorting paths in a
+	 *  way which:
+	 *  - ensures files in the same directory are sorted next to each other,
+	 *    which was the main goal of LC_ALL=C:
+	 *    The "sort" command without LC_ALL=C would ignore the "/" in paths for
+	 *    its comparisons under certain conditions which would cause files of
+	 *    the same directory not be listed next to each other in the sorted
+	 *    output.
+	 *  - as a bonus is constant independent of system language configuration.
+	 *  
+	 *  "--zero-terminated" needs not be emulated since our Java code tracks the
+	 *  paths as separate objects each. */
+	private static final class PathComparator implements Comparator<Path> {
+		@Override public int compare(Path p1, Path p2) {
+			// The manpage of sort as of GNU coreutils 8.28 states:
+			//     Set LC_ALL=C to get the traditional sort order that uses
+			//     native byte values.
+			// So converting the path strings to byte[] and sorting on that is
+			// likely the right thing to do.
+			byte[] a = p1.toString().getBytes(UTF_8);
+			byte[] b = p2.toString().getBytes(UTF_8);
+			return Arrays.compare(a, b);
+		}
+	}
 
 	/** @see ICheckpoint#isComplete() */
 	private boolean complete = false;
