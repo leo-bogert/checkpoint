@@ -332,7 +332,14 @@ public final class Checkpoint implements ICheckpoint {
 				throw s.ioException();
 			
 			return result;
-		} catch(DecoderException | ParseException | RuntimeException e) {
+		} catch(DecoderException | ParseException | RuntimeException
+				| OutOfMemoryError e) {
+			
+			// Free up some memory before we try to construct the IOException to
+			// ensure we don't get OOM again due to the constructing.
+			result = null;
+			System.gc();
+			
 			throw new IOException(e);
 		} finally {
 			if(s != null)
