@@ -7,7 +7,7 @@ dependencies {
 }
 
 jar.manifest.attributes(
-	'Main-Class': 'checkpoint.ui.Shell',
+	'Main-Class': 'checkpoint.ui.shell.Shell',
 	'Class-Path':
 		configurations.runtimeClasspath.collect { it.getPath() }.join(' ')
 )
