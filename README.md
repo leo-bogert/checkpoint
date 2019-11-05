@@ -30,6 +30,13 @@ FIXME
 
 Install the package `python-psutil` before usage.
 
+## Usage
+
+**WARNING:** The Java, Python and Bash implementations each have a completely
+different syntax of their shell command!    
+You can run the shell command of each implementation without arguments to get an
+overview of its syntax.
+
 ## License
 
 - You can use and relicense this however you want to. This may be limited by
