@@ -2,7 +2,6 @@ package checkpoint.ui.shell;
 
 import static java.lang.System.err;
 import static java.lang.System.out;
-import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
@@ -68,7 +67,7 @@ final class CheckFsFeaturesCommand extends Command {
 			try {
 				SortedMap<String, Object> attrs
 					= new TreeMap<>( // Wrap Map in TreeMap to sort it.
-						Files.readAttributes(p, view + ":*", NOFOLLOW_LINKS));
+						Files.readAttributes(p, view + ":*"));
 				
 				for(Entry<String, Object> e : attrs.entrySet()) {
 					if(e.getValue() instanceof FileTime)
