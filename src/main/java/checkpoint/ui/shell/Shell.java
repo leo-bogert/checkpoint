@@ -15,7 +15,8 @@ public final class Shell {
 	 *  class to this list. The following code will automatically construct an
 	 *  object of it and register its name for usage. */
 	private static final List<Class<? extends Command>> commandClasses = asList(
-		InspectCommand.class);
+		InspectCommand.class,
+		RewriteCommand.class);
 
 	private static final Map<String, Command> commandMap
 		= Command.getCommandMap(commandClasses);
