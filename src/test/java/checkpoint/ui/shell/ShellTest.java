@@ -1,4 +1,4 @@
-package checkpoint.ui;
+package checkpoint.ui.shell;
 
 import static org.junit.Assert.*;
 
