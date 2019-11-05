@@ -17,6 +17,9 @@ final class InspectCommand extends Command {
 		if(args.size() != 1) {
 			err.println("Syntax:");
 			err.println(getShortSyntax());
+			err.println();
+			err.println("- Tests if the file format of a checkpoint is valid.");
+			err.println("- Prints info about its contents.");
 			return 1;
 		}
 		

@@ -59,6 +59,9 @@ public final class Shell {
 		err.println("COMMAND can be:");
 		for(Command c : commandMap.values())
 			err.println(c.getShortSyntax());
+		err.println();
+		err.println(
+			"To get more help about a COMMAND run it without any arguments.");
 	}
 
 }
