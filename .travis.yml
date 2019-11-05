@@ -19,4 +19,4 @@ jdk:
 script:
   - set -o errexit
   - gradle clean test jar
-  - sha256sum -b build/lib/checkpoint.jar
+  - sha256sum -b build/libs/checkpoint.jar
