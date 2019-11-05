@@ -3,6 +3,7 @@ package checkpoint.datamodel.implementation;
 import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
+import static java.lang.Math.min;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -19,7 +20,6 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -79,7 +79,27 @@ public final class Checkpoint implements ICheckpoint {
 			// likely the right thing to do.
 			byte[] a = p1.toString().getBytes(UTF_8);
 			byte[] b = p2.toString().getBytes(UTF_8);
-			return Arrays.compare(a, b);
+			return compare(a, b);
+		}
+
+		/** TODO: Java 9: Replace with Arrays.compare() */
+		private static int compare(byte[] a, byte[] b) {
+			if(a == b)
+				return 0;
+			
+			int mismatch = -1;
+			int len = min(a.length, b.length);
+			for(int i = 0; i < len; ++i) {
+				if(a[i] != b[i]) {
+					mismatch = i;
+					break;
+				}
+			}
+			
+			if(mismatch != -1)
+				return Byte.compare(a[mismatch], b[mismatch]);
+			
+			return a.length - b.length;
 		}
 	}
 
