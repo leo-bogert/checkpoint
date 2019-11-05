@@ -13,7 +13,7 @@ import checkpoint.datamodel.implementation.Checkpoint;
 
 final class InspectCommand extends Command {
 
-	@Override public int run(List<String> args) {
+	@Override int run(List<String> args) {
 		if(args.size() != 1) {
 			err.println("Syntax:");
 			err.println(getShortSyntax());
