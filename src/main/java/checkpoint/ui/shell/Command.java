@@ -1,6 +1,8 @@
 package checkpoint.ui.shell;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /** Represents a single shell command which is executable via
  *  "checkpoint NAME_OF_COMMAND".
@@ -16,6 +18,24 @@ abstract class Command {
 	final String getCommandName() {
 		return this.getClass().getSimpleName()
 				.replace("Command", "").toLowerCase();
+	}
+
+	/** Returns a map where the key is the name of each Command and the value
+	 *  is a new instance of it. */
+	static Map<String, Command> getCommandMap(
+			List<Class<? extends Command>> classes) {
+		
+		// TODO: Performance: Use ArrayMap once we have one from Java Commons
+		HashMap<String, Command> map = new HashMap<>();
+		for(Class<? extends Command> c : classes) {
+			try {
+				Command command = c.getDeclaredConstructor().newInstance();
+				map.put(command.getCommandName(), command);
+			} catch(Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return map;
 	}
 
 	/** Must return a single line consisting of:
