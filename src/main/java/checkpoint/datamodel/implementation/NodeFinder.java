@@ -41,6 +41,14 @@ final class NodeFinder extends SimpleFileVisitor<Path>
 		
 		Files.walkFileTree(inputDir, this);
 		
+		Collection<INode> result = this.result;
+		// Null our members, especially result, to prevent huge memory leak
+		// which would occur if a caller kept the NodeFinder object alive after
+		// we've returned.
+		this.inputDir = null;
+		this.inputDirFilesystem = null;
+		this.result = null;
+		
 		return result;
 	}
 
