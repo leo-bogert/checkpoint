@@ -77,7 +77,7 @@ public final class ConcurrentCheckpointGenerator
 			if(availableWork == 0)
 				break;
 			
-			ArrayList<WorkType> batchWork = new ArrayList<>(workPerBatch);
+			ArrayList<WorkType> batchWork = new ArrayList<>(availableWork);
 			for(int workPiece = 0; workPiece < availableWork; ++workPiece)
 				batchWork.add(removeFrom.remove(0));
 			
