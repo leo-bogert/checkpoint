@@ -376,4 +376,8 @@ public final class Checkpoint implements ICheckpoint {
 		return complete;
 	}
 
+	@Override public synchronized int getNodeCount() {
+		return nodes.size();
+	}
+
 }
