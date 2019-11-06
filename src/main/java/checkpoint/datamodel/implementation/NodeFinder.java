@@ -84,10 +84,16 @@ final class NodeFinder extends SimpleFileVisitor<Path>
 			// directory I have in fact encountered *files* in /tmp being a
 			// mount point on my live system, so we need to check
 			// isOnInputDirFilesystem() here as well.
+			// FIXME: Performance: This is actually even ignored by
+			// "find -mount", and thus by the Python/Bash implementations,
+			// perhaps do so here as well?
 			if(isOnInputDirFilesystem(file))
 				result.add(Node.constructNode(adjustPath(file), false));
 			else
 				err.println("Ignoring file on different filesystem: " + file);
+		} else {
+			// TODO: Log ignored special files somehow?
+			// The Python/Bash implementations didn't either.
 		}
 		
 		return CONTINUE;
