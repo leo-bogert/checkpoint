@@ -17,8 +17,14 @@ public final class ConcurrentCheckpointGenerator
 	private final Checkpoint checkpoint;
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir) {
-		this.inputDir   = requireNonNull(inputDir);
-		this.outputDir  = requireNonNull(outputDir);
+		// Convert paths to clean absolute dirs since I suspect their usage
+		// might be faster with the lots of processing we'll do with those paths
+		// TODO: Performance: Validate that.
+		this.inputDir
+			= requireNonNull(inputDir).toAbsolutePath().normalize();
+		this.outputDir
+			= requireNonNull(outputDir).toAbsolutePath().normalize();
+		
 		// FIXME: Allow resuming an incomplete one.
 		this.checkpoint = new Checkpoint();
 	}
