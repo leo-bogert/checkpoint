@@ -18,7 +18,7 @@ public final class ConcurrentCheckpointGenerator
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir) {
 		this.inputDir   = inputDir;
 		this.outputDir  = outputDir;
-		// FIXME: Allow re-using an incomplete one.
+		// FIXME: Allow resuming an incomplete one.
 		this.checkpoint = new Checkpoint();
 	}
 
