@@ -12,8 +12,8 @@ public final class Node implements INode {
 
 	private final Path        path;
 	private final boolean     isDirectory;
-	private final ISHA256     sha256;
-	private final ITimestamps timestamps;
+	private       ISHA256     sha256;
+	private       ITimestamps timestamps;
 
 	private Node(Path path, boolean isDirectory, ISHA256 sha256,
 			ITimestamps timestamps) {
@@ -33,6 +33,10 @@ public final class Node implements INode {
 		return new Node(path, isDirectory, sha256, timestamps);
 	}
 
+	public static Node constructNode(Path path, boolean isDirectory) {
+		return new Node(path, isDirectory, null, null);
+	}
+
 	@Override public Path getPath() {
 		// Path is immutable so we don't need to clone().
 		return path;
@@ -48,9 +52,17 @@ public final class Node implements INode {
 		return sha256;
 	}
 
+	@Override public void setHash(ISHA256 sha256) {
+		this.sha256 = sha256;
+	}
+
 	@Override public ITimestamps getTimetamps() {
 		// ITimestamps is immutable so we don't need to clone().
 		return timestamps;
+	}
+
+	@Override public void setTimestamps(ITimestamps timestamps) {
+		this.timestamps = timestamps;
 	}
 
 }

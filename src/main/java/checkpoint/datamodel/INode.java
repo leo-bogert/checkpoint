@@ -16,6 +16,11 @@ public interface INode {
 		ITimestamps timestamps);
 	*/
 
+	/** Initializes the ISHA256 and ITimestamps to null. */
+	/*
+	static INode constructNode(Path path, boolean isDirectory);
+	*/
+
 	/** Must never be null. */
 	Path getPath();
 
@@ -26,11 +31,15 @@ public interface INode {
 	 *  directories inside of it.
 	 *  
 	 *  For non-directories may return null if computing the ISHA256 failed
-	 *  due to e.g. IOException. */
+	 *  due to e.g. IOException, or if the ISHA256 has not been computed yet. */
 	ISHA256 getHash();
 
+	void setHash(ISHA256 sha256);
+
 	/** May return null if reading the ITimestamps failed due to e.g.
-	 *  IOException. */
+	 *  IOException or if the ITimestamps have not been read yet. */
 	ITimestamps getTimetamps();
+
+	void setTimestamps(ITimestamps timestamps);
 
 }
