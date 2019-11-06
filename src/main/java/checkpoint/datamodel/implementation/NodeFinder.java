@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.INodeFinder;
 
-final class NodeFinder extends SimpleFileVisitor<Path>
+public final class NodeFinder extends SimpleFileVisitor<Path>
 		implements INodeFinder {
 
 	private static final Path currentDir = Paths.get(".");
