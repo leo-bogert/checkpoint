@@ -73,12 +73,12 @@ public final class ConcurrentCheckpointGenerator
 		ArrayList<ArrayList<WorkType>> result = new ArrayList<>(batches);
 		
 		for(int batch = 0; batch < batches; ++batch) {
-			int availableWork = min(workPerBatch, removeFrom.size());
-			if(availableWork == 0)
+			int batchSize = min(workPerBatch, removeFrom.size());
+			if(batchSize == 0)
 				break;
 			
-			ArrayList<WorkType> batchWork = new ArrayList<>(availableWork);
-			for(int workPiece = 0; workPiece < availableWork; ++workPiece) {
+			ArrayList<WorkType> batchWork = new ArrayList<>(batchSize);
+			for(int workPiece = 0; workPiece < batchSize; ++workPiece) {
 				// Must remove() the last, otherwise all would be copied around.
 				batchWork.add(removeFrom.remove(removeFrom.size() - 1));
 			}
