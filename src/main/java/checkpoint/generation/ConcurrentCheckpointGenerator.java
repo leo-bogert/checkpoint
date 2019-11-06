@@ -1,5 +1,6 @@
 package checkpoint.generation;
 
+import static java.util.Objects.requireNonNull;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -16,8 +17,8 @@ public final class ConcurrentCheckpointGenerator
 	private final Checkpoint checkpoint;
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir) {
-		this.inputDir   = inputDir;
-		this.outputDir  = outputDir;
+		this.inputDir   = requireNonNull(inputDir);
+		this.outputDir  = requireNonNull(outputDir);
 		// FIXME: Allow resuming an incomplete one.
 		this.checkpoint = new Checkpoint();
 	}
