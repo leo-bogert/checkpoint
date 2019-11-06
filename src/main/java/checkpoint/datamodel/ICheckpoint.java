@@ -39,4 +39,6 @@ public interface ICheckpoint {
 	/** @see #setCompleteFlag(boolean) */
 	boolean isComplete();
 
+	int getNodeCount();
+
 }
