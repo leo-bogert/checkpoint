@@ -10,18 +10,25 @@ import java.nio.file.Path;
 public interface INode {
 
 	/** The path must not be null, sha256 and timestamps may be null for the
-	 *  reasons explained at their getters. */
+	 *  reasons explained at their getters.
+	 *  
+	 *  The given path must follow the constraints specified at getPath(). */
 	/*
 	static INode constructNode(Path path, boolean isDirectory, ISHA256 sha256,
 		ITimestamps timestamps);
 	*/
 
-	/** Initializes the ISHA256 and ITimestamps to null. */
+	/** Initializes the ISHA256 and ITimestamps to null.
+	 *  The given path must follow the constraints specified at getPath(). */
 	/*
 	static INode constructNode(Path path, boolean isDirectory);
 	*/
 
-	/** Must never be null. */
+	/** Must never be null.
+	 *  Must be relative to the checkpoints input directory and prefixed with
+	 *  "./".
+	 *  E.g. when creating a checkpoint upon directory "/a", the file "/a/b/c"
+	 *  should have a getPath() value of "./b/c" */
 	Path getPath();
 
 	boolean isDirectory();
