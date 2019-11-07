@@ -25,7 +25,7 @@ public interface INode {
 	*/
 
 	/** Must never be null.
-	 *  Must be relative to the checkpoints input directory and prefixed with
+	 *  Must be relative to the checkpoint's input directory and prefixed with
 	 *  "./".
 	 *  E.g. when creating a checkpoint upon directory "/a", the file "/a/b/c"
 	 *  should have a getPath() value of "./b/c" */
