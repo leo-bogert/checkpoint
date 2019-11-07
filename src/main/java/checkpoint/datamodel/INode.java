@@ -12,7 +12,9 @@ public interface INode {
 	/** The path must not be null, sha256 and timestamps may be null for the
 	 *  reasons explained at their getters.
 	 *  
-	 *  The given path must follow the constraints specified at getPath(). */
+	 *  The given path must follow the constraints specified at getPath().
+	 *  FIXME: We don't actually validate whether it does when loading an
+	 *  existing Chechkpoint from disk. */
 	/*
 	static INode constructNode(Path path, boolean isDirectory, ISHA256 sha256,
 		ITimestamps timestamps);
