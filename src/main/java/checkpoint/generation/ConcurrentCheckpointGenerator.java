@@ -1,6 +1,7 @@
 package checkpoint.generation;
 
 import static java.lang.Math.min;
+import static java.lang.System.err;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
@@ -8,7 +9,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import checkpoint.datamodel.INode;
 import checkpoint.datamodel.implementation.Checkpoint;
+import checkpoint.datamodel.implementation.JavaSHA256;
+import checkpoint.datamodel.implementation.Timestamps;
 
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
@@ -33,9 +37,70 @@ public final class ConcurrentCheckpointGenerator
 		this.checkpoint = new Checkpoint();
 	}
 
+	/** Our worker threads run these Runnables. */
+	private final class Worker implements Runnable {
+
+		private final ArrayList<INode> work;
+
+		Worker(ArrayList<INode> work) {
+			this.work = work;
+		}
+
+		@Override public void run() {
+			for(INode node : work) {
+				// INode.getPath() is relative to the inputDir so we must
+				// prefix it with the inputDir.
+				Path pathOnDisk = inputDir.resolve(node.getPath());
+				
+				if(!node.isDirectory()) {
+					try {
+						node.setHash(JavaSHA256.sha256ofFile(pathOnDisk));
+					} catch(IOException e) {
+						// Set Timestamps to null to mark computation as failed.
+						// This must be done explicitly instead of just leaving
+						// it at the default because we might be resuming an
+						// existing checkpoint where it wasn't null.
+						node.setHash(null);
+						
+						err.println("SHA256 computation failed for '"
+							+ node.getPath() + "': " + e);
+					} catch(InterruptedException e) {
+						// Shutdown requested, return.
+						// Return without adding the INode to the Checkpoint
+						// because we would have to keep the hash at null, which
+						// would cause "(sha256sum failed!)" to be written to
+						// the output file, which would be wrong - it didn't
+						// fail, we just didn't try.
+						return;
+					}
+				}
+				
+				// Read timestamps after hash computation because computing the
+				// hash can take a long time so there is plenty of time for the
+				// timestamps to be modified.
+				// TODO: Read them twice - before hash computation and after -
+				// and recompute if they have changed in between.
+				// Or perhaps just store the current time before hash
+				// computation and compare it against the timestamps?
+				try {
+					node.setTimestamps(Timestamps.readTimestamps(pathOnDisk));
+				} catch(IOException e) {
+					// Same as for the hash.
+					node.setTimestamps(null);
+					
+					err.println("Reading timestamps failed for '"
+						+ node.getPath() + "': " + e);
+				}
+				
+				// This is thread-safe by contract of ICheckpoint.
+				checkpoint.addNode(node);
+			}
+		}
+	}
+
 	/** Function for splitting a set of work, in our case of files/directories
 	 *  to include in the checkpoint, into a set of batches for submission to a
-	 *  different thread each.
+	 *  different {@link Worker} thread each.
 	 *  
 	 *  Removes all work from the given ArrayList and returns an ArrayList which
 	 *  contains the given batch-amount of sub-ArrayLists where each contains an
