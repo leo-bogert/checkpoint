@@ -2,16 +2,23 @@ package checkpoint.generation;
 
 import static java.lang.Math.min;
 import static java.lang.System.err;
+import static java.lang.System.out;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.implementation.Checkpoint;
 import checkpoint.datamodel.implementation.JavaSHA256;
+import checkpoint.datamodel.implementation.NodeFinder;
 import checkpoint.datamodel.implementation.Timestamps;
 
 public final class ConcurrentCheckpointGenerator
@@ -163,6 +170,57 @@ public final class ConcurrentCheckpointGenerator
 	}
 
 	@Override public void run() throws InterruptedException, IOException {
-		throw new UnsupportedOperationException("FIXME: Implement");
+		// FIXME: Support Thread.interrupt().
+		
+		out.print("Finding input files and directories in '"
+			+ inputDir + "'... ");
+		// Convert to ArrayList since removeAndDivideWork() does shuffle() which
+		// needs a list which implements RandomAccess.
+		ArrayList<INode> nodes
+			= new ArrayList<INode>(new NodeFinder().findNodes(inputDir));
+		final int nodeCount = nodes.size();
+		out.println(nodeCount);
+		
+		out.println("Dividing into " + THREAD_COUNT + " batches of work...");
+		ArrayList<ArrayList<INode>> work
+			= removeAndDivideWork(nodes, THREAD_COUNT);
+		nodes = null;
+		
+		out.println("Creating " + THREAD_COUNT + " threads...");
+		// TODO: Performance: Try newWorkStealingPool().
+		ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
+		
+		out.println("Submitting work to threads...");
+		ArrayList<Future<?>> workResults = new ArrayList<>(THREAD_COUNT);
+		for(ArrayList<INode> batch : work)
+			workResults.add(executor.submit(new Worker(batch)));
+		
+		out.println("Working...");
+		executor.shutdown();
+		executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+		
+		out.println("Work finished, checking results...");
+		for(Future<?> result : workResults) {
+			try {
+				result.get();
+				// FIXME: Catch the other exceptions this can throw.
+			} catch(ExecutionException e) {
+				throw new RuntimeException(
+					"BUG: Worker thread threw! Please report this!",
+					e.getCause());
+			}
+		}
+		
+		if(checkpoint.getNodeCount() != nodeCount) {
+			throw new RuntimeException(
+				"BUG: Workers submitted less results than expected! " +
+				"Please report this!");
+		} else
+			checkpoint.setCompleteFlag(true);
+		
+		out.println("Saving checkpoint to '" + outputDir + "'...");
+		checkpoint.save(outputDir);
+		out.println("Done.");
 	}
+
 }
