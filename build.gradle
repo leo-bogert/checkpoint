@@ -10,8 +10,13 @@ test.testLogging {
 	events "passed", "skipped", "failed"
 }
 
-jar.manifest.attributes(
-	'Main-Class': 'checkpoint.ui.shell.Shell',
-	'Class-Path':
-		configurations.runtimeClasspath.collect { it.getPath() }.join(' ')
-)
+jar {
+	preserveFileTimestamps = false
+	reproducibleFileOrder = true
+	
+	manifest.attributes(
+		'Main-Class': 'checkpoint.ui.shell.Shell',
+		'Class-Path':
+			configurations.runtimeClasspath.collect { it.getPath() }.join(' ')
+	)
+}
