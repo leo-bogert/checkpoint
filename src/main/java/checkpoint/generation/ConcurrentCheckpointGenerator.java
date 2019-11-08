@@ -171,6 +171,7 @@ public final class ConcurrentCheckpointGenerator
 
 	@Override public void run() throws InterruptedException, IOException {
 		// FIXME: Support Thread.interrupt().
+		// FIXME: Save every 15 minutes.
 		
 		out.print("Finding input files and directories in '"
 			+ inputDir + "'... ");
@@ -202,6 +203,8 @@ public final class ConcurrentCheckpointGenerator
 		out.println("Work finished, checking results...");
 		for(Future<?> result : workResults) {
 			try {
+				// Returning without throwing means success w.r.t. the submit()
+				// version we used.
 				result.get();
 				// FIXME: Catch the other exceptions this can throw.
 			} catch(ExecutionException e) {
