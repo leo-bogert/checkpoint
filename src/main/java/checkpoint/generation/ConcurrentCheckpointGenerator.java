@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -205,7 +206,6 @@ public final class ConcurrentCheckpointGenerator
 			try {
 				// Returning null means success w.r.t. the submit() version we
 				// used.
-				// FIXME: Catch the other exceptions this can throw.
 				if(result.get() != null) {
 					throw new RuntimeException("BUG: Worker thread failed! "
 						+ "Future<?>.get() value: " + result.get());
@@ -214,6 +214,9 @@ public final class ConcurrentCheckpointGenerator
 				throw new RuntimeException(
 					"BUG: Worker thread threw! Please report this!",
 					e.getCause());
+			} catch(CancellationException e) {
+				throw new RuntimeException(
+					"BUG: Worker thread cancelled! Please report this!", e);
 			}
 		}
 		
