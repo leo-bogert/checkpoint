@@ -37,8 +37,7 @@ final class RewriteCommand extends Command {
 			input = Paths.get(args.get(0));
 			output = args.size() == 2 ? Paths.get(args.get(1)) : input;
 		} catch(InvalidPathException e) {
-			err.println("Invalid path:");
-			e.printStackTrace(err);
+			err.println("Invalid path: " + e.getMessage());
 			return 1;
 		}
 		

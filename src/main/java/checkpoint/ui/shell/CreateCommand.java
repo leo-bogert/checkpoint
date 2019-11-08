@@ -33,7 +33,7 @@ final class CreateCommand extends Command {
 			input = Paths.get(args.get(0));
 			output = Paths.get(args.get(1));
 		} catch(InvalidPathException e) {
-			err.println("Invalid path: " + e.getInput());
+			err.println("Invalid path: " + e.getMessage());
 			return 1;
 		}
 		
