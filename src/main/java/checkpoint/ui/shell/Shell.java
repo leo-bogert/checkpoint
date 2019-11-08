@@ -7,6 +7,8 @@ import static java.util.Arrays.asList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /** The terminal user interface. */
 public final class Shell {
@@ -60,7 +62,8 @@ public final class Shell {
 		err.println("\tcheckpoint COMMAND");
 		err.println();
 		err.println("COMMAND can be:");
-		for(Command c : commandMap.values())
+		SortedMap<String, Command> sortedCommands = new TreeMap<>(commandMap);
+		for(Command c : sortedCommands.values())
 			err.println(c.getShortSyntax());
 		err.println();
 		err.println(
