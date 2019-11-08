@@ -1,4 +1,5 @@
 apply plugin: 'java'
+sourceCompatibility = targetCompatibility = 7
 defaultTasks 'jar', 'test'
 
 dependencies {
