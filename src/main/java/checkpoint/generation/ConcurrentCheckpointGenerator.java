@@ -203,10 +203,13 @@ public final class ConcurrentCheckpointGenerator
 		out.println("Work finished, checking results...");
 		for(Future<?> result : workResults) {
 			try {
-				// Returning without throwing means success w.r.t. the submit()
-				// version we used.
-				result.get();
+				// Returning null means success w.r.t. the submit() version we
+				// used.
 				// FIXME: Catch the other exceptions this can throw.
+				if(result.get() != null) {
+					throw new RuntimeException("BUG: Worker thread failed! "
+						+ "Future<?>.get() value: " + result.get());
+				}
 			} catch(ExecutionException e) {
 				throw new RuntimeException(
 					"BUG: Worker thread threw! Please report this!",
