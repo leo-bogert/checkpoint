@@ -36,7 +36,10 @@ final class InspectCommand extends Command {
 			// - print number of Nodes.
 			// - print number of failed SHA256/Timestamps computations.
 			return 0;
-		} catch(InvalidPathException | IOException e) {
+		} catch(InvalidPathException e) {
+			err.println("Invalid path: " + e.getMessage());
+			return 1;
+		} catch(IOException e) {
 			err.println("Checkpoint cannot be loaded:");
 			e.printStackTrace(err);
 			return 1;

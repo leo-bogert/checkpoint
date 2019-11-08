@@ -39,8 +39,7 @@ final class CheckFsFeaturesCommand extends Command {
 			p = Paths.get(args.get(0));
 			fs = p.getFileSystem();
 		} catch(InvalidPathException e) {
-			err.println("Invalid path given:");
-			e.printStackTrace(err);
+			err.println("Invalid path: " + e.getMessage());
 			return 1;
 		}
 		

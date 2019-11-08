@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.INodeFinder;
 
-final class NodeFinder extends SimpleFileVisitor<Path>
+public final class NodeFinder extends SimpleFileVisitor<Path>
 		implements INodeFinder {
 
 	private static final Path currentDir = Paths.get(".");
@@ -34,7 +34,10 @@ final class NodeFinder extends SimpleFileVisitor<Path>
 		if(!Files.isDirectory(inputDir, NOFOLLOW_LINKS))
 			throw new IOException("Input path is not a directory: " + inputDir);
 		
-		this.inputDir           = inputDir;
+		// Sanitize path to ease the work of adjustPath() which we will call a
+		// lot. TODO: Performance: Check with debugger if this actually makes
+		// sense.
+		this.inputDir           = inputDir.toAbsolutePath().normalize();
 		this.inputDirFilesystem = Files.getFileStore(inputDir);
 		// TODO: Performance: Try different data structures.
 		this.result             = new LinkedList<INode>();

@@ -5,7 +5,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 
 /** Searches the filesystem for {@link INode}s eligible for inclusion when
- *  creating a {@link ICheckpoint}. */
+ *  creating a {@link ICheckpoint}.
+ *  TODO: Move this and implementation to package checkpoint.generation? */
 public interface INodeFinder {
 
 	/** The set and Paths of the resulting INodes must be equal to the shell
