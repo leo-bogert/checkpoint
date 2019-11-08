@@ -56,7 +56,7 @@ public final class ConcurrentCheckpointGenerator
 					try {
 						node.setHash(JavaSHA256.sha256ofFile(pathOnDisk));
 					} catch(IOException e) {
-						// Set Timestamps to null to mark computation as failed.
+						// Set hash to null to mark computation as failed.
 						// This must be done explicitly instead of just leaving
 						// it at the default because we might be resuming an
 						// existing checkpoint where it wasn't null.
@@ -65,7 +65,7 @@ public final class ConcurrentCheckpointGenerator
 						err.println("SHA256 computation failed for '"
 							+ node.getPath() + "': " + e);
 					} catch(InterruptedException e) {
-						// Shutdown requested, return.
+						// Shutdown requested, exit thread.
 						// Return without adding the INode to the Checkpoint
 						// because we would have to keep the hash at null, which
 						// would cause "(sha256sum failed!)" to be written to
