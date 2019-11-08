@@ -16,6 +16,7 @@ public final class Shell {
 	 *  object of it and register its name for usage. */
 	private static final List<Class<? extends Command>> commandClasses = asList(
 		CheckFsFeaturesCommand.class,
+		CreateCommand.class,
 		InspectCommand.class,
 		RewriteCommand.class);
 
