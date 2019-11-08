@@ -223,7 +223,8 @@ public final class ConcurrentCheckpointGenerator
 		
 		if(checkpoint.getNodeCount() != nodeCount) {
 			throw new RuntimeException(
-				"BUG: Workers submitted less results than expected! " +
+				"BUG: Workers submitted an unexpected result count! " +
+				checkpoint.getNodeCount() + " != " + nodeCount + ". " +
 				"Please report this!");
 		} else
 			checkpoint.setCompleteFlag(true);
