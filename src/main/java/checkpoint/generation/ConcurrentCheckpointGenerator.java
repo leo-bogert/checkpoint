@@ -111,8 +111,9 @@ public final class ConcurrentCheckpointGenerator
 	 *  different {@link Worker} thread each.
 	 *  
 	 *  Removes all work from the given ArrayList and returns an ArrayList which
-	 *  contains the given batch-amount of sub-ArrayLists where each contains an
-	 *  approximately equal amount of work.
+	 *  contains the given batch-amount (or less for small work-sets) of
+	 *  sub-ArrayLists where each contains an approximately equal amount of
+	 *  work.
 	 *  
 	 *  The work is randomly distributed across the batches and randomly ordered
 	 *  inside each batch.
@@ -184,7 +185,8 @@ public final class ConcurrentCheckpointGenerator
 		final int nodeCount = nodes.size();
 		out.println(nodeCount);
 		
-		out.println("Dividing into " + THREAD_COUNT + " batches of work...");
+		out.println("Dividing into up to " + THREAD_COUNT
+			+ " batches of work...");
 		ArrayList<ArrayList<INode>> work
 			= removeAndDivideWork(nodes, THREAD_COUNT);
 		nodes = null;
