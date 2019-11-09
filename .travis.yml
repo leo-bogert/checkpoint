@@ -7,6 +7,7 @@ addons:
     packages:
       - libcommons-codec-java
       - junit4
+      - python-psutil
 
 matrix:
   include:
@@ -23,4 +24,19 @@ matrix:
 script:
   - set -o errexit
   - gradle clean test jar
+  
+  # Create a checkpoint of the Checkpoint source code, using the Java version.
+  - TEST_INPUT="$TRAVIS_BUILD_DIR"
+  - TEST_OUTPUT_JAVA="$(mktemp --directory)"
+  - java -jar build/libs/checkpoint.jar create "$TEST_INPUT" "$TEST_OUTPUT_JAVA"
+  
+  # ... and create a checkpoint of the same dir using the Python version.
+  - TEST_OUTPUT_PYTHON="$(mktemp --directory)"
+  - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PYTHON"
+  
+  # ... and test if both checkpoints are non-empty and equal.
+  - test -s "$TEST_OUTPUT_JAVA/checkpoint.txt"
+  - test -s "$TEST_OUTPUT_PYTHON/checkpoint.txt"
+  - cmp "$TEST_OUTPUT_JAVA/checkpoint.txt" "$TEST_OUTPUT_PYTHON/checkpoint.txt"
+  
   - sha256sum -b build/libs/checkpoint.jar
