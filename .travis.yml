@@ -1,8 +1,4 @@
 language: java
-# FIXME: Java 8: Use a newer Ubuntu since we're only on trusty for Java 7
-# Then also enable Java versions > 8 because the Gradle on trusty was too old
-# for those.
-dist: trusty
 # Disabling sudo routes the build to Docker instead of a VM which is faster.
 sudo: false
 
@@ -12,9 +8,17 @@ addons:
       - libcommons-codec-java
       - junit4
 
-jdk:
-  - openjdk7
-  - openjdk8
+matrix:
+  include:
+    - jdk: openjdk7
+      dist: trusty # Java 7 is only available there.
+    - jdk: openjdk8
+    - jdk: openjdk9
+    - jdk: openjdk10
+    - jdk: openjdk11
+    - jdk: openjdk12
+    # Gradle doesn't work there yet.
+    # - jdk: openjdk13
 
 script:
   - set -o errexit
