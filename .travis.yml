@@ -29,4 +29,8 @@ script:
   - TEST_OUTPUT_JAVA="$(mktemp --directory)"
   - java -jar build/libs/checkpoint.jar create "$TEST_INPUT" "$TEST_OUTPUT_JAVA"
   
+  # ... and create a checkpoint of the same dir using the Python version.
+  - TEST_OUTPUT_PYTHON="$(mktemp --directory)"
+  - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PYTHON"
+  
   - sha256sum -b build/libs/checkpoint.jar
