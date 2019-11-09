@@ -27,7 +27,6 @@ script:
   # Create a checkpoint of the Checkpoint source code, using the Java version.
   - TEST_INPUT="$TRAVIS_BUILD_DIR"
   - TEST_OUTPUT_JAVA="$(mktemp --directory)"
-  - chmod +x build/libs/checkpoint.jar
-  - build/libs/checkpoint.jar create "$TEST_INPUT" "$TEST_OUTPUT_JAVA"
+  - java -jar build/libs/checkpoint.jar create "$TEST_INPUT" "$TEST_OUTPUT_JAVA"
   
   - sha256sum -b build/libs/checkpoint.jar
