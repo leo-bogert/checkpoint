@@ -191,12 +191,14 @@ public final class ConcurrentCheckpointGenerator
 			= removeAndDivideWork(nodes, THREAD_COUNT);
 		nodes = null;
 		
-		out.println("Creating " + THREAD_COUNT + " threads...");
+		final int threadCount = work.size();
+		out.println("Divided into " + threadCount +
+			" batches, creating as many threads...");
 		// TODO: Performance: Try newWorkStealingPool().
-		ExecutorService executor = Executors.newFixedThreadPool(THREAD_COUNT);
+		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 		
 		out.println("Submitting work to threads...");
-		ArrayList<Future<?>> workResults = new ArrayList<>(THREAD_COUNT);
+		ArrayList<Future<?>> workResults = new ArrayList<>(threadCount);
 		for(ArrayList<INode> batch : work)
 			workResults.add(executor.submit(new Worker(batch)));
 		
