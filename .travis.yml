@@ -17,8 +17,8 @@ matrix:
     - jdk: openjdk10
     - jdk: openjdk11
     - jdk: openjdk12
-    - jdk: openjdk13
-      dist: bionic # To get a newer Gradle which works on openjdk13
+    # Gradle doesn't work there yet.
+    # - jdk: openjdk13
 
 script:
   - set -o errexit
