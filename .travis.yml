@@ -23,4 +23,10 @@ matrix:
 script:
   - set -o errexit
   - gradle clean test jar
+  
+  # Create a checkpoint of the Checkpoint source code, using the Java version.
+  - TEST_INPUT="$TRAVIS_BUILD_DIR"
+  - TEST_OUTPUT_JAVA="$(mktemp --directory)"
+  - build/libs/checkpoint.jar create "$TEST_INPUT" "$TEST_OUTPUT_JAVA"
+  
   - sha256sum -b build/libs/checkpoint.jar
