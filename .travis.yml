@@ -35,8 +35,8 @@ script:
   - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PYTHON"
   
   # ... and test if both checkpoints are non-empty and equal.
-  - [ -s "$TEST_OUTPUT_JAVA"/checkpoint.txt ]
-  - [ -s "$TEST_OUTPUT_PYTHON"/checkpoint.txt ]
-  - cmp "$TEST_OUTPUT_JAVA"/checkpoint.txt "$TEST_OUTPUT_PYTHON"/checkpoint.txt
+  - [ -s "$TEST_OUTPUT_JAVA/checkpoint.txt" ]
+  - [ -s "$TEST_OUTPUT_PYTHON/checkpoint.txt" ]
+  - cmp "$TEST_OUTPUT_JAVA/checkpoint.txt" "$TEST_OUTPUT_PYTHON/checkpoint.txt"
   
   - sha256sum -b build/libs/checkpoint.jar
