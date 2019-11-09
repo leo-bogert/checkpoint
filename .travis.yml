@@ -34,6 +34,8 @@ script:
   - TEST_OUTPUT_PYTHON="$(mktemp --directory)"
   - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PYTHON"
   
+  - truncate --size 0 "$TEST_OUTPUT_JAVA/checkpoint.txt"
+  
   # ... and test if both checkpoints are non-empty and equal.
   - test -s "$TEST_OUTPUT_JAVA/checkpoint.txt"
   - test -s "$TEST_OUTPUT_PYTHON/checkpoint.txt"
