@@ -15,7 +15,8 @@ second most recent one.
 The Java implementation has the most features, the other ones are not maintained
 anymore.  
 They are preserved for testing the Java implementation against it.  
-This is currently **not** automated by the unit tests!
+This is currently **not** automated by the unit tests!  
+Travis CI tests the Java implementation against the Python one though.
 
 ## Installation
 
