@@ -104,9 +104,10 @@ implementation and compensate for their lack as described.
   ionice -c 3 nice -n 10 java -jar build/libs/checkpoint.jar create INPUT OUTPUT
   ```
 
-- Excluding timestamps such as especially btime and ctime selectively. After
-  the Java version has finished creating a checkpoint you can use the Python one
-  upon it to accomplish this.
+- Excluding certain timestamps such as ctime selectively. After the Java version
+  has finished creating a checkpoint you can use the Python implementation
+  with `--rewrite-only --exclude-times ...` upon the checkpoint to accomplish
+  this.
 
 - Abort and resume. Use the Python version if you really need that. Be aware
   that it is slower by many hundred percent as compared to the Java one!  
