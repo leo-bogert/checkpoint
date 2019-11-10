@@ -93,10 +93,25 @@ implementation to create checkpoints as will currently use 1 GiB as I/O cache.
 (It may or may not work with less or more RAM, the 2 GiB have not been tested
 yet, this is merely an estimate.)
 
-For features which are still lacking in the Java implementation, most notably
-removing timestamps selectively, you can pass the output checkpoint of the
-Java implementation into the Python implementation and use its features to fill
-in that gap.
+Please take notice of the following features which are lacking in the Java
+implementation and compensate for their lack as described.
+
+### Features lacking in the Java implementation for now
+
+- Reducing kernel I/O and process priority when creating a checkpoint. To not
+  slow your system down a lot run checkpoint like this:  
+  ```bash
+  ionice -c 3 nice -n 10 java -jar build/libs/checkpoint.jar create INPUT OUTPUT
+  ```
+
+- Excluding timestamps such as especially btime and ctime selectively. After
+  the Java version has finished creating a checkpoint you can use the Python one
+  upon it to accomplish this.
+
+- Abort and resume. Use the Python version if you really need that. Be aware
+  that it is slower by many hundred percent as compared to the Java one!  
+  In some instances creating a checkpoint can take a whole day with Python and
+  just 15 minutes with Java.
 
 ## License
 
