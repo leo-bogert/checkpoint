@@ -73,9 +73,25 @@ src/main/python/checkpoint.py
 ## Usage
 
 **WARNING:** The Java, Python and Bash implementations each have a completely
-different syntax of their shell command!    
-You can run the shell command of each implementation without arguments to get an
-overview of its syntax.
+different syntax of their shell command!  
+
+The first thing you should do is check if your Java version supports reading all
+file timestamps on your particular filesystem:
+
+```bash
+# Notice that anything after the "checkpoint.jar" are arguments to checkpoint,
+# not to Java.
+java -jar build/libs/checkpoint.jar check-fs-features /
+```
+
+For any further usage instructions run checkpoint without arguments to get an
+overview of its syntax.  
+This works for all implementations.
+
+For features which are still lacking in the Java implementation, most notably
+removing timestamps selectively, you can pass the output checkpoint of the
+Java implementation into the Python implementation and use its features to fill
+in that gap.
 
 ## License
 
