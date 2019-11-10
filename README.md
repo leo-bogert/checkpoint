@@ -56,7 +56,19 @@ java -jar build/libs/checkpoint.jar
 
 ### Python implementation
 
-Install the package `python-psutil` before usage.
+Download the source code as described in the section for installing the Java
+implementation.
+
+Then:
+
+```bash
+# Install runtime dependencies
+apt install python python-psutil
+
+# To run it you can now use the following:
+cd checkpoint
+src/main/python/checkpoint.py
+```
 
 ## Usage
 
