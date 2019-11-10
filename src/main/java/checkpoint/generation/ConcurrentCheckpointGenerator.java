@@ -26,6 +26,10 @@ public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
 	// FIXME: Performance: Make thread count configurable
+	// Once you do that make sure to adapt the README's statements about how
+	// much free RAM is needed. The 1 GiB IO cache it mentions was calculated
+	// from the fact that each thread will generate a JavaSHA256 instance, which
+	// allocates 1 MiB of RAM as buffer for reading the input file.
 	private static final int THREAD_COUNT = 1024;
 
 	private final Path       inputDir;
