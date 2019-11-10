@@ -63,7 +63,7 @@ implementation.
 Then:
 
 ```bash
-# Install runtime dependencies
+# Install runtime dependencies.
 apt install python python-psutil
 
 # To run it you can now use the following:
@@ -90,7 +90,8 @@ overview of its syntax.
 This works for all implementations.
 
 Please ensure your system has at least ~ 2 GiB of free RAM when using the Java
-implementation to create checkpoints as will currently use 1 GiB as I/O cache.  
+implementation to create checkpoints as it will currently use 1 GiB as I/O
+cache.    
 (It may or may not work with less or more RAM, the 2 GiB have not been tested
 yet, this is merely an estimate.)
 
