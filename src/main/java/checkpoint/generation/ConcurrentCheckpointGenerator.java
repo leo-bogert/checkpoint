@@ -59,6 +59,9 @@ public final class ConcurrentCheckpointGenerator
 		}
 
 		@Override public void run() {
+			Thread.currentThread().setName(
+				"ConcurrentCheckpointGenerator.Worker");
+			
 			for(INode node : work) {
 				// INode.getPath() is relative to the inputDir so we must
 				// prefix it with the inputDir.
