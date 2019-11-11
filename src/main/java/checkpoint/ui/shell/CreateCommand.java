@@ -70,11 +70,8 @@ final class CreateCommand extends Command {
 			jc.parse(args.toArray(new String[args.size()]));
 			o.validate();
 		} catch(ParameterException | IllegalArgumentException e) {
-			if(e instanceof IllegalArgumentException) {
-				err.println(e.getMessage());
-				err.println();
-			}
-			
+			err.println(e.getMessage());
+			err.println();
 			printUsage(jc);
 			return 1;
 		}
