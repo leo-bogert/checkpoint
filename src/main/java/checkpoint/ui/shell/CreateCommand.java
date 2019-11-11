@@ -28,7 +28,7 @@ final class CreateCommand extends Command {
 
 		@Parameter(names = { "--buffer" }, order = 1, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
-			+ "Making it divisible by 4096 is a good idea.")
+			+ "Making it divisible by 4096 (= x86 pagesize) is a good idea.")
 		private int buffer = 1024*1024;
 
 		@Parameter(description =
