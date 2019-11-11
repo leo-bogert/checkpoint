@@ -21,7 +21,7 @@ import checkpoint.datamodel.ISHA256;
 /** Implements {@link ISHA256} using Java's default SHA256 implementation. */
 public final class JavaSHA256 implements ISHA256 {
 
-	public static final int READ_BUFFER_SIZE = 1024 * 1024;
+	public static int READ_BUFFER_SIZE = 1024 * 1024;
 
 	private final byte[] sha256;
 

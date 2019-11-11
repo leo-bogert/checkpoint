@@ -14,6 +14,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
+import checkpoint.datamodel.implementation.JavaSHA256;
 import checkpoint.generation.ConcurrentCheckpointGenerator;
 
 final class CreateCommand extends Command {
@@ -94,6 +95,10 @@ final class CreateCommand extends Command {
 		out.println("Output:  " + output);
 		out.println("Threads: " + o.threads);
 		out.println("Buffer:  " + o.buffer);
+		
+		// FIXME: Don't use global variable, pass it into
+		// ConcurrentCheckpointGenerator instead!
+		JavaSHA256.READ_BUFFER_SIZE = o.buffer;
 		
 		try {
 			new ConcurrentCheckpointGenerator(input, output).run();
