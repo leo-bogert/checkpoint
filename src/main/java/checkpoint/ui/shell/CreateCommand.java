@@ -41,6 +41,20 @@ final class CreateCommand extends Command {
 		@Parameter(description =
 			"INPUT_DIR OUTPUT_CHECKPOINT_DIR")
 		List<String> args = new ArrayList<>(2);
+
+		void validate() throws IllegalArgumentException {
+			if(threads < 1)
+				throw new IllegalArgumentException("--threads is too low!");
+			
+			if(buffer < 4096)
+				throw new IllegalArgumentException("--buffer is too low!");
+			
+			// TODO: As of 2019-11-11 with JCommander 1.71 @Parameter(arity = 2)
+			// doesn't work for unnamed parameters it seems so we check it
+			// manually, try again in some years.
+			if(args.size() != 2)
+				throw new IllegalArgumentException("Missing input/ouput dir!");
+		}
 	}
 
 	@Override int run(List<String> args) {
@@ -49,13 +63,12 @@ final class CreateCommand extends Command {
 		jc.setProgramName(getCommandName());
 		try {
 			jc.parse(args.toArray(new String[args.size()]));
-			
-			// TODO: As of 2019-11-11 with JCommander 1.71 @Parameter(arity = 2)
-			// doesn't work for unnamed parameters it seems so we check it
-			// manually, try again in some years.
-			if(o.args.size() != 2)
-				throw new ParameterException("");
-		} catch(ParameterException e) {
+			o.validate();
+		} catch(ParameterException | IllegalArgumentException e) {
+			if(e instanceof IllegalArgumentException) {
+				err.println(e.getMessage());
+				err.println();
+			}
 			jc.usage();
 			err.println(
 				"Searches all files and directories in the INPUT_DIR and " +
