@@ -53,7 +53,7 @@ final class CreateCommand extends Command {
 			// doesn't work for unnamed parameters it seems so we check it
 			// manually, try again in some years.
 			if(args.size() < 2)
-				throw new IllegalArgumentException("Missing input/ouput dir!");
+				throw new IllegalArgumentException("Missing input/output dir!");
 			else if(args.size() > 2) {
 				throw new IllegalArgumentException(
 					"Too many/unknown arguments: " + args);
