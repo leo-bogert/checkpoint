@@ -77,6 +77,8 @@ final class CreateCommand extends Command {
 			return 1;
 		}
 		
+		// TODO: Use IStringConverterFactory of JCommander instead of manually
+		// processing paths.
 		Path input;
 		Path output;
 		try {
