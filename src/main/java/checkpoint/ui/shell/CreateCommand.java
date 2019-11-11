@@ -22,14 +22,18 @@ final class CreateCommand extends Command {
 			+ " [options] INPUT_DIR OUTPUT_CHECKPOINT_DIR";
 	}
 
+	/** TODO: As of 2019-11-11 Travis CI uses JCommander 1.48 which does not
+	 *  support "order = integer" to specify the order in which the Parameters
+	 *  appear in the help, try again in some years.
+	 *  See the commit which added this comment for what the orders were. */
 	private static final class Options {
-		@Parameter(names = { "--threads" }, order = 0, description =
+		@Parameter(names = { "--threads" }, description =
 			  "Number of threads to process files/directories with. "
 			+ "Each thread will use as much memory as given via --buffer. "
 			+ "Must be at least 1.")
 		int threads = 1024;
 
-		@Parameter(names = { "--buffer" }, order = 1, description =
+		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
 			+ "Making it divisible by 4096 (= x86 pagesize) is a good idea.")
 		int buffer = 1024*1024;
