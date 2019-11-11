@@ -18,6 +18,7 @@ final class CreateCommand extends Command {
 
 	@Override String getShortSyntax() {
 		return '\t' + getCommandName() + " INPUT_DIR OUTPUT_CHECKPOINT_DIR";
+	}
 
 	private static final class Options {
 		@Parameter(names = { "--threads" }, order = 0, description =
