@@ -63,7 +63,8 @@ final class CreateCommand extends Command {
 
 	@Override int run(List<String> args) {
 		Options o = new Options();
-		JCommander jc = JCommander.newBuilder().addObject(o).build();
+		JCommander jc = new JCommander();
+		jc.addObject(o);
 		jc.setProgramName(getCommandName());
 		try {
 			jc.parse(args.toArray(new String[args.size()]));
