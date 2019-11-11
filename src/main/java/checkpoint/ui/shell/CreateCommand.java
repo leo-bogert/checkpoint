@@ -12,12 +12,14 @@ import java.util.List;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+
 import checkpoint.generation.ConcurrentCheckpointGenerator;
 
 final class CreateCommand extends Command {
 
 	@Override String getShortSyntax() {
-		return '\t' + getCommandName() + " INPUT_DIR OUTPUT_CHECKPOINT_DIR";
+		return '\t' + getCommandName()
+			+ " [options] INPUT_DIR OUTPUT_CHECKPOINT_DIR";
 	}
 
 	private static final class Options {
@@ -38,10 +40,19 @@ final class CreateCommand extends Command {
 	}
 
 	@Override int run(List<String> args) {
-		if(args.size() != 2) {
-			err.println("Syntax:");
-			err.println(getShortSyntax());
-			err.println();
+		Options o = new Options();
+		JCommander jc = JCommander.newBuilder().addObject(o).build();
+		jc.setProgramName(getCommandName());
+		try {
+			jc.parse(args.toArray(new String[args.size()]));
+			
+			// TODO: As of 2019-11-11 with JCommander 1.71 @Parameter(arity = 2)
+			// doesn't work for unnamed parameters it seems so we check it
+			// manually, try again in some years.
+			if(o.args.size() != 2)
+				throw new ParameterException("");
+		} catch(ParameterException e) {
+			jc.usage();
 			err.println(
 				"Searches all files and directories in the INPUT_DIR and " +
 				"writes a checkpoint for them to the OUTPUT_CHECKPOINT_DIR.");
