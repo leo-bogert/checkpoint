@@ -69,10 +69,8 @@ final class CreateCommand extends Command {
 				err.println(e.getMessage());
 				err.println();
 			}
-			jc.usage();
-			err.println(
-				"Searches all files and directories in the INPUT_DIR and " +
-				"writes a checkpoint for them to the OUTPUT_CHECKPOINT_DIR.");
+			
+			printUsage(jc);
 			return 1;
 		}
 		
@@ -94,6 +92,20 @@ final class CreateCommand extends Command {
 			e.printStackTrace(err);
 			return 1;
 		}
+	}
+
+	private static void printUsage(JCommander jc) {
+		// TODO: As of 2019-11-11 with JCommander 1.71 JCommander.usage()
+		// will print to stdout, not stderr, which is bad. So we fix that by
+		// using the version which consumes a StrinBuilder and printing on our
+		// own. Try again in some years, file a bug if it still is wrong then.
+		StringBuilder sb = new StringBuilder();
+		jc.usage(sb);
+		err.println(sb);
+		
+		err.println(
+			"Searches all files and directories in the INPUT_DIR and " +
+			"writes a checkpoint for them to the OUTPUT_CHECKPOINT_DIR.");
 	}
 
 }
