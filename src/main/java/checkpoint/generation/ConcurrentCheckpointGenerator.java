@@ -25,18 +25,20 @@ import checkpoint.datamodel.implementation.Timestamps;
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
-	// FIXME: Performance: Make thread count configurable
-	// Once you do that make sure to adapt the README's statements about how
-	// much free RAM is needed. The 1 GiB IO cache it mentions was calculated
-	// from the fact that each thread will generate a JavaSHA256 instance, which
-	// allocates 1 MiB of RAM as buffer for reading the input file.
-	private static final int THREAD_COUNT = 1024;
-
 	private final Path       inputDir;
 	private final Path       outputDir;
 	private final Checkpoint checkpoint;
 
-	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir) {
+	/** The value may be decreased by {@link #run()} if there is less work
+	 *  available than the desired amount of threads
+	 *  Each each thread will generate a JavaSHA256 instance, which by default
+	 *  allocates 1 MiB of RAM as buffer for reading the input file. This
+	 *  can be overriden by "--buffer" on the command line. */
+	private int threadCount;
+
+	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
+			int threads) {
+		
 		// Convert paths to clean absolute dirs since I suspect their usage
 		// might be faster with the lots of processing we'll do with those paths
 		// TODO: Performance: Validate that.
@@ -44,6 +46,7 @@ public final class ConcurrentCheckpointGenerator
 			= requireNonNull(inputDir).toAbsolutePath().normalize();
 		this.outputDir
 			= requireNonNull(outputDir).toAbsolutePath().normalize();
+		this.threadCount = threads;
 		
 		// FIXME: Allow resuming an incomplete one.
 		this.checkpoint = new Checkpoint();
@@ -192,13 +195,13 @@ public final class ConcurrentCheckpointGenerator
 		final int nodeCount = nodes.size();
 		out.println(nodeCount);
 		
-		out.println("Dividing into up to " + THREAD_COUNT
+		out.println("Dividing into up to " + threadCount
 			+ " batches of work...");
 		ArrayList<ArrayList<INode>> work
-			= removeAndDivideWork(nodes, THREAD_COUNT);
+			= removeAndDivideWork(nodes, threadCount);
 		nodes = null;
 		
-		final int threadCount = work.size();
+		threadCount = work.size();
 		out.println("Divided into " + threadCount +
 			" batches, creating as many threads...");
 		// TODO: Performance: Try newWorkStealingPool().

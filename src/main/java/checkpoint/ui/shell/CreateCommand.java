@@ -101,7 +101,7 @@ final class CreateCommand extends Command {
 		JavaSHA256.READ_BUFFER_SIZE = o.buffer;
 		
 		try {
-			new ConcurrentCheckpointGenerator(input, output).run();
+			new ConcurrentCheckpointGenerator(input, output, o.threads).run();
 			return 0;
 		} catch (IOException | InterruptedException e) {
 			err.println("Generating checkpoint failed:");

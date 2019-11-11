@@ -91,7 +91,8 @@ This works for all implementations.
 
 Please ensure your system has at least ~ 2 GiB of free RAM when using the Java
 implementation to create checkpoints as it will currently use 1 GiB as I/O
-cache.    
+cache. You can adjust this using the `--threads` and `--buffer` options of
+the `create` command.  
 (It may or may not work with less or more RAM, the 2 GiB have not been tested
 yet, this is merely an estimate.)
 
