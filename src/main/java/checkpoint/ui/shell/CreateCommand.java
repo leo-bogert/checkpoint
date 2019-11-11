@@ -69,6 +69,7 @@ final class CreateCommand extends Command {
 		try {
 			jc.parse(args.toArray(new String[args.size()]));
 			o.validate();
+			args = null; // Prevent accidental usage instead of Options.args
 		} catch(ParameterException | IllegalArgumentException e) {
 			err.println(e.getMessage());
 			err.println();
@@ -79,8 +80,8 @@ final class CreateCommand extends Command {
 		Path input;
 		Path output;
 		try {
-			input = Paths.get(args.get(0));
-			output = Paths.get(args.get(1));
+			input = Paths.get(o.args.get(0));
+			output = Paths.get(o.args.get(1));
 		} catch(InvalidPathException e) {
 			err.println("Invalid path: " + e.getMessage());
 			return 1;
