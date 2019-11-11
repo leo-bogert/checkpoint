@@ -30,8 +30,8 @@ public final class ConcurrentCheckpointGenerator
 	private final Checkpoint checkpoint;
 
 	/** The value may be decreased by {@link #run()} if there is less work
-	 *  available than the desired amount of threads
-	 *  Each each thread will generate a JavaSHA256 instance, which by default
+	 *  available than the desired amount of threads.
+	 *  Each thread will generate a JavaSHA256 instance, which by default
 	 *  allocates 1 MiB of RAM as buffer for reading the input file. This
 	 *  can be overriden by "--buffer" on the command line. */
 	private int threadCount;
