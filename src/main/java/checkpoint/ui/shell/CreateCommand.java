@@ -93,7 +93,7 @@ final class CreateCommand extends Command {
 		out.println("Input:   " + input);
 		out.println("Output:  " + output);
 		out.println("Threads: " + o.threads);
-		out.println("Bufffer: " + o.buffer);
+		out.println("Buffer:  " + o.buffer);
 		
 		try {
 			new ConcurrentCheckpointGenerator(input, output).run();
