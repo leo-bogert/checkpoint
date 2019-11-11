@@ -52,8 +52,12 @@ final class CreateCommand extends Command {
 			// TODO: As of 2019-11-11 with JCommander 1.71 @Parameter(arity = 2)
 			// doesn't work for unnamed parameters it seems so we check it
 			// manually, try again in some years.
-			if(args.size() != 2)
+			if(args.size() < 2)
 				throw new IllegalArgumentException("Missing input/ouput dir!");
+			else if(args.size() > 2) {
+				throw new IllegalArgumentException(
+					"Too many/unknown arguments: " + args);
+			}
 		}
 	}
 
