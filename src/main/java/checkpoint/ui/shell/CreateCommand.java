@@ -19,21 +19,21 @@ final class CreateCommand extends Command {
 	@Override String getShortSyntax() {
 		return '\t' + getCommandName() + " INPUT_DIR OUTPUT_CHECKPOINT_DIR";
 
-	private class Options {
+	private static final class Options {
 		@Parameter(names = { "--threads" }, order = 0, description =
 			  "Number of threads to process files/directories with. "
 			+ "Each thread will use as much memory as given via --buffer. "
 			+ "Must be at least 1.")
-		private int threads = 1024;
+		int threads = 1024;
 
 		@Parameter(names = { "--buffer" }, order = 1, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
 			+ "Making it divisible by 4096 (= x86 pagesize) is a good idea.")
-		private int buffer = 1024*1024;
+		int buffer = 1024*1024;
 
 		@Parameter(description =
 			"INPUT_DIR OUTPUT_CHECKPOINT_DIR")
-		private List<String> args = new ArrayList<>(2);
+		List<String> args = new ArrayList<>(2);
 	}
 
 	@Override int run(List<String> args) {
