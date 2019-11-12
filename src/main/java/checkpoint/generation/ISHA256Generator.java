@@ -5,7 +5,7 @@ import java.nio.file.Path;
 
 import checkpoint.datamodel.ISHA256;
 
-/** Generates the {@link ISHA256} value of files on disk.
+/** Generates the {@link ISHA256} values of files on disk.
  *  Thus this can be seen as a builder for {@link ISHA256} instances, and those
  *  can be seen as immutable storage objects for the hash.
  * 
