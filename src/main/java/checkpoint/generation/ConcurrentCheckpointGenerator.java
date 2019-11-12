@@ -69,6 +69,12 @@ public final class ConcurrentCheckpointGenerator
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
 			
+			// Re-use across whole lifetime of thread to prevent memory
+			// allocation churn since the byte-size of the buffer it uses
+			// may be large.
+			JavaSHA256Generator hasher
+				= new JavaSHA256Generator(readBufferBytes);
+			
 			for(INode node : work) {
 				// INode.getPath() is relative to the inputDir so we must
 				// prefix it with the inputDir.
@@ -76,8 +82,7 @@ public final class ConcurrentCheckpointGenerator
 				
 				if(!node.isDirectory()) {
 					try {
-						node.setHash(
-							new JavaSHA256Generator().sha256ofFile(pathOnDisk));
+						node.setHash(hasher.sha256ofFile(pathOnDisk));
 					} catch(IOException e) {
 						// Set hash to null to mark computation as failed.
 						// This must be done explicitly instead of just leaving
