@@ -2,7 +2,7 @@ package checkpoint.datamodel;
 
 import java.util.Arrays;
 
-import checkpoint.datamodel.implementation.JavaSHA256;
+import checkpoint.generation.ISHA256Generator;
 
 /** Interface for storage classes for SHA256 hashes.
  *  Generation happens via {@link ISHA256Generator} instead.
@@ -36,8 +36,7 @@ public interface ISHA256 {
 	 *  arrays are not immutable even if final! */
 	byte[] toBytes();
 
-	/**
-	 *  Same as {@link Arrays#hashCode(byte[])} upon {@link #toBytes()} with
+	/** Same as {@link Arrays#hashCode(byte[])} upon {@link #toBytes()} with
 	 *  one difference:
 	 *  If {@link #toBytes()} would return null or throw
 	 *  {@link NullPointerException} then {@link NullPointerException} must be
