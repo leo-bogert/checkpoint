@@ -1,9 +1,6 @@
-package checkpoint.datamodel.implementation;
+package checkpoint.generation;
 
 import static java.nio.file.StandardOpenOption.READ;
-import static java.util.Objects.requireNonNull;
-import static org.apache.commons.codec.binary.Hex.decodeHex;
-import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -12,28 +9,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
-import org.apache.commons.codec.DecoderException;
+import checkpoint.datamodel.implementation.SHA256;
 
-import checkpoint.datamodel.ISHA256;
+// FIXME: Trim visibility after SHA256 doesn't need to access it anymore.
+/** Implements {@link ISHA256Generator} using Java's default SHA256
+ *  implementation.
+ *  
+ *  TODO: Performance: Provide alternate implementations and benchmark which one
+ *  is the fastest. Candidates: BouncyCastle, Apache Java Commons. */
+public final class JavaSHA256Generator implements ISHA256Generator {
 
-/** Implements {@link ISHA256} using Java's default SHA256 implementation. */
-public final class JavaSHA256 implements ISHA256 {
+	public static int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
 
-	public static int READ_BUFFER_SIZE = 1024 * 1024;
-
-	private final byte[] sha256;
-
-	private JavaSHA256(byte[] sha256) {
-		this.sha256 = sha256;
-	}
-
-	static JavaSHA256 constructForUnitTestOnly(byte[] sha256) {
-		return new JavaSHA256(sha256);
-	}
-
-	public static JavaSHA256 sha256ofFile(Path p)
+	public SHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
 		// TODO: Performance: Recycle the MessageDigest objects using reset(),
@@ -60,7 +49,7 @@ public final class JavaSHA256 implements ISHA256 {
 			// allocateDirect(), speeds up the function.
 			// First make sure to read the warnings about that at ByteBuffer's
 			// top-level JavaDoc.
-			ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
+			ByteBuffer buffer = ByteBuffer.allocate(DEFAULT_READ_BUFFER_SIZE);
 			while(channel.read(buffer) > 0) {
 				// FIXME: The Oracle Java tutorial wrongly says we should
 				// rewind() the buffer before md.update() and then flip() it
@@ -83,53 +72,10 @@ public final class JavaSHA256 implements ISHA256 {
 					throw new InterruptedException();
 			}
 			
-			return new JavaSHA256(md.digest());
+			return new SHA256(md.digest());
 		} finally {
 			channel.close();
 		}
-	}
-
-	@Override public String toString() {
-		return encodeHexString(sha256);
-	}
-
-	public static JavaSHA256 sha256fromString(String hexEncoded)
-			throws DecoderException {
-		
-		if(hexEncoded.length() != 64) {
-			throw new DecoderException(
-				"Invalid length for hex-encoded SHA256, should be 64: "
-				+ hexEncoded.length());
-		}
-		
-		// TODO: Performance: Remove the toCharArray() once we're fine with
-		// requiring a more recent Apache Java Commons Codec library.
-		return new JavaSHA256(decodeHex(hexEncoded.toCharArray()));
-	}
-
-	public byte[] toBytes() {
-		return sha256.clone();
-	}
-
-	@Override public int hashCode() {
-		requireNonNull(sha256);
-		return Arrays.hashCode(sha256);
-	}
-
-	@Override public boolean equals(Object obj) {
-		requireNonNull(obj);
-		
-		if(!(obj instanceof ISHA256)) {
-			throw new UnsupportedOperationException(
-					"Does not implement ISHA256: " + obj);
-		}
-		
-		// Arrays.equals() returns true for two null-pointers as argument so
-		// make sure we don't pass null.
-		byte[] a = requireNonNull(sha256);
-		byte[] b = requireNonNull(((ISHA256)obj).toBytes());
-		
-		return Arrays.equals(a, b);
 	}
 
 }

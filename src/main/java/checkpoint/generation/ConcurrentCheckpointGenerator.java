@@ -18,7 +18,6 @@ import java.util.concurrent.TimeUnit;
 
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.implementation.Checkpoint;
-import checkpoint.datamodel.implementation.JavaSHA256;
 import checkpoint.datamodel.implementation.NodeFinder;
 import checkpoint.datamodel.implementation.Timestamps;
 
@@ -31,9 +30,9 @@ public final class ConcurrentCheckpointGenerator
 
 	/** The value may be decreased by {@link #run()} if there is less work
 	 *  available than the desired amount of threads.
-	 *  Each thread will generate a JavaSHA256 instance, which by default
-	 *  allocates 1 MiB of RAM as buffer for reading the input file. This
-	 *  can be overriden by "--buffer" on the command line. */
+	 *  Each thread will generate a JavaSHA256Generator instance, which by
+	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
+	 *  This can be overriden by "--buffer" on the command line. */
 	private int threadCount;
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
@@ -72,7 +71,8 @@ public final class ConcurrentCheckpointGenerator
 				
 				if(!node.isDirectory()) {
 					try {
-						node.setHash(JavaSHA256.sha256ofFile(pathOnDisk));
+						node.setHash(
+							new JavaSHA256Generator().sha256ofFile(pathOnDisk));
 					} catch(IOException e) {
 						// Set hash to null to mark computation as failed.
 						// This must be done explicitly instead of just leaving
