@@ -1,6 +1,6 @@
 package checkpoint.datamodel.implementation;
 
-import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
+import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.nio.file.Files.readAllBytes;
