@@ -38,7 +38,7 @@ final class CreateCommand extends Command {
 		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
 			+ "Making it divisible by 4096 (= x86 pagesize) is a good idea.")
-		int buffer = 1024*1024;
+		int buffer = JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE;
 
 		@Parameter(description =
 			"INPUT_DIR OUTPUT_CHECKPOINT_DIR")
