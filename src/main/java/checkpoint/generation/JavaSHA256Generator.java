@@ -17,6 +17,8 @@ import checkpoint.datamodel.implementation.JavaSHA256;
  *  implementation. */
 public final class JavaSHA256Generator implements ISHA256Generator {
 
+	public static int READ_BUFFER_SIZE = 1024 * 1024;
+
 	public JavaSHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
@@ -44,7 +46,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 			// allocateDirect(), speeds up the function.
 			// First make sure to read the warnings about that at ByteBuffer's
 			// top-level JavaDoc.
-			ByteBuffer buffer = ByteBuffer.allocate(JavaSHA256.READ_BUFFER_SIZE);
+			ByteBuffer buffer = ByteBuffer.allocate(READ_BUFFER_SIZE);
 			while(channel.read(buffer) > 0) {
 				// FIXME: The Oracle Java tutorial wrongly says we should
 				// rewind() the buffer before md.update() and then flip() it
