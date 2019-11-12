@@ -70,8 +70,13 @@ public final class ConcurrentCheckpointGenerator
 				"ConcurrentCheckpointGenerator.Worker");
 			
 			// Re-use across whole lifetime of thread to prevent memory
-			// allocation churn since the byte-size of the buffer it uses
-			// may be large.
+			// allocation churn since the buffer size we pass it was given by
+			// the user and may be very large to match the typical size of files
+			// to expect.
+			// We don't put this into a member variable intentionally:
+			// The loop which creates the Worker objects is single-threaded so
+			// allocating lots of memory may take longer there than having each
+			// Worker do it concurrently on their thread in run().
 			JavaSHA256Generator hasher
 				= new JavaSHA256Generator(readBufferBytes);
 			
