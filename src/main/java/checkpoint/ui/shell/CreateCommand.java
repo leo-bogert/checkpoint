@@ -98,7 +98,7 @@ final class CreateCommand extends Command {
 		
 		// FIXME: Don't use global variable, pass it into
 		// ConcurrentCheckpointGenerator instead!
-		JavaSHA256Generator.READ_BUFFER_SIZE = o.buffer;
+		JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE = o.buffer;
 		
 		try {
 			new ConcurrentCheckpointGenerator(input, output, o.threads).run();

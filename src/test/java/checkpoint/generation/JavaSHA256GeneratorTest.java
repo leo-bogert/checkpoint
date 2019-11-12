@@ -38,7 +38,8 @@ public final class JavaSHA256GeneratorTest {
 		
 		// Test with a file larger than the read buffer of sha256ofFile() to
 		// ensure bugs related to the "while(read(buffer..." loop are caught.
-		byte[] bytes = new byte[JavaSHA256Generator.READ_BUFFER_SIZE * 3];
+		byte[] bytes
+			= new byte[JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE * 3];
 		long seed = new Random().nextLong();
 		new Random(seed).nextBytes(bytes);
 		Path largeFile = tempDir.newFile().toPath();
