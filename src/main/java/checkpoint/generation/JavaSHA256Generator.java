@@ -22,7 +22,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 
 	/** In bytes.
 	 *  FIXME: Performance: Determine a good default. */
-	public static int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
+	public static final int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
 
 	/** Re-used to prevent memory allocation churn since we will hash **many**
 	 *  files in typical usage of Checkpoint. */
