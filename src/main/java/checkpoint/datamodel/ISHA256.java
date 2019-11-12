@@ -8,7 +8,10 @@ import checkpoint.datamodel.implementation.JavaSHA256;
  *  Generation happens via {@link ISHA256Generator} instead.
  *  
  *  Java does not support static abstract interface functions so there are
- *  commented-out functions which are also required to be implemented. */
+ *  commented-out functions which are also required to be implemented.
+ *  
+ *  TODO: Rename to IHash and implement support for using different algorithms
+ *  than SHA256. */
 public interface ISHA256 {
 
 	/** Must obey {@link Thread#isInterrupted()} by throwing
