@@ -31,8 +31,9 @@ final class CreateCommand extends Command {
 	private static final class Options {
 		@Parameter(names = { "--threads" }, description =
 			  "Number of threads to process files/directories with. "
-			+ "Each thread will use as much memory as given via --buffer. "
-			+ "Must be at least 1.")
+			+ "Must be at least 1. "
+			+ "Each thread will use as much memory as given via --buffer, in "
+			+ "addition to about 1 MiB for Java's default stack size.")
 		int threads = ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT;
 
 		@Parameter(names = { "--buffer" }, description =
