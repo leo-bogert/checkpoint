@@ -13,18 +13,18 @@ import org.apache.commons.codec.DecoderException;
 import checkpoint.datamodel.ISHA256;
 import checkpoint.generation.JavaSHA256Generator;
 
-public final class JavaSHA256 implements ISHA256 {
+public final class SHA256 implements ISHA256 {
 
 	private final byte[] sha256;
 
 	// FIXME: Make private and add factory function for JavaSHA256Generator to
 	// use instead
-	public JavaSHA256(byte[] sha256) {
+	public SHA256(byte[] sha256) {
 		this.sha256 = sha256;
 	}
 
-	static JavaSHA256 constructForUnitTestOnly(byte[] sha256) {
-		return new JavaSHA256(sha256);
+	static SHA256 constructForUnitTestOnly(byte[] sha256) {
+		return new SHA256(sha256);
 	}
 
 	/**
@@ -32,7 +32,7 @@ public final class JavaSHA256 implements ISHA256 {
 	 *     FIXME: Replace everywhere
 	 */
 	@Deprecated
-	public static JavaSHA256 sha256ofFile(Path p)
+	public static SHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
 		return new JavaSHA256Generator().sha256ofFile(p);
@@ -42,7 +42,7 @@ public final class JavaSHA256 implements ISHA256 {
 		return encodeHexString(sha256);
 	}
 
-	public static JavaSHA256 sha256fromString(String hexEncoded)
+	public static SHA256 sha256fromString(String hexEncoded)
 			throws DecoderException {
 		
 		if(hexEncoded.length() != 64) {
@@ -53,7 +53,7 @@ public final class JavaSHA256 implements ISHA256 {
 		
 		// TODO: Performance: Remove the toCharArray() once we're fine with
 		// requiring a more recent Apache Java Commons Codec library.
-		return new JavaSHA256(decodeHex(hexEncoded.toCharArray()));
+		return new SHA256(decodeHex(hexEncoded.toCharArray()));
 	}
 
 	public byte[] toBytes() {
