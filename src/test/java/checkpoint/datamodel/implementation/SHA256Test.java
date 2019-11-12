@@ -47,7 +47,7 @@ public final class SHA256Test {
 			"0000000000000000000000000000000000000000000000000000000000000001";
 		
 		SHA256 shaA = sha256fromString(hashA),
-		           shaB = sha256fromString(hashB);
+		       shaB = sha256fromString(hashB);
 		
 		assertFalse(shaA.equals(shaB));
 		assertTrue( shaA.equals(shaA));
@@ -70,11 +70,9 @@ public final class SHA256Test {
 		}
 		
 		// Arrays.equals() returns true when passing two null pointers instead
-		// of two byte[], and the implementation of SHA256 uses that
-		// function.
-		// Thus check SHA256.equals() to be safe against the internal
-		// byte[] of the object being null, which constructForUnitTestOnly(null)
-		// does.
+		// of two byte[], and the implementation of SHA256 uses that function.
+		// Thus check SHA256.equals() to be safe against the internal byte[] of
+		// the object being null, which constructForUnitTestOnly(null) does.
 		// We only use constructForUnitTestOnly(null) to construct the left-hand
 		// object of equals() and instead pass an anonymous class into the
 		// right-hand argument because SHA256.toBytes() would throw a
@@ -105,8 +103,8 @@ public final class SHA256Test {
 			"3ea600325ec065453cad9753910a8e811822aa93b479073a269cc497e17b0fec";
 		
 		SHA256 shaA1 = sha256fromString(hashA),
-		           shaA2 = sha256fromString(hashA),
-		           shaB = sha256fromString(hashB);
+		       shaA2 = sha256fromString(hashA),
+		       shaB = sha256fromString(hashB);
 		
 		assertNotEquals(shaA1.hashCode(), shaB.hashCode());
 		assertEquals(shaA1.hashCode(), shaA1.hashCode());
