@@ -10,10 +10,11 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import checkpoint.datamodel.ISHA256;
 import checkpoint.datamodel.implementation.JavaSHA256;
 
 // FIXME: Trim visibility after JavaSHA256 doesn't need to access it anymore.
+/** Implements {@link ISHA256Generator} using Java's default SHA256
+ *  implementation. */
 public final class JavaSHA256Generator implements ISHA256Generator {
 
 	public JavaSHA256 sha256ofFile(Path p)

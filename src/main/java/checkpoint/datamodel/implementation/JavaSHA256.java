@@ -13,7 +13,6 @@ import org.apache.commons.codec.DecoderException;
 import checkpoint.datamodel.ISHA256;
 import checkpoint.generation.JavaSHA256Generator;
 
-/** Implements {@link ISHA256} using Java's default SHA256 implementation. */
 public final class JavaSHA256 implements ISHA256 {
 
 	public static int READ_BUFFER_SIZE = 1024 * 1024;
