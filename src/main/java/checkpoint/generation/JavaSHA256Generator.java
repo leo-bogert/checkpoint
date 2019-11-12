@@ -12,9 +12,12 @@ import java.security.NoSuchAlgorithmException;
 
 import checkpoint.datamodel.implementation.JavaSHA256;
 
-// FIXME: Trim visibility after JavaSHA256 doesn't need to access it anymore.
+// FIXME: Trim visibility after SHA256 doesn't need to access it anymore.
 /** Implements {@link ISHA256Generator} using Java's default SHA256
- *  implementation. */
+ *  implementation.
+ *  
+ *  TODO: Performance: Provide alternate implementations and benchmark which one
+ *  is the fastest. Candidates: BouncyCastle, Apache Java Commons. */
 public final class JavaSHA256Generator implements ISHA256Generator {
 
 	public static int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;

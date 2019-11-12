@@ -4,15 +4,11 @@ import java.util.Arrays;
 
 import checkpoint.datamodel.implementation.JavaSHA256;
 
-/** Provides the same hash values as GNU coreutils' sha256sum command with the
- *  '--binary' flag.
+/** Interface for storage classes for SHA256 hashes.
+ *  Generation happens via {@link ISHA256Generator} instead.
  *  
  *  Java does not support static abstract interface functions so there are
- *  commented-out functions which are also required to be implemented.
- *  
- *  Implemented at {@link JavaSHA256} using Java's SHA256 implementation.
- *  TODO: Performance: Provide alternate implementations and benchmark which one
- *  is the fastest. Candidates: BouncyCastle, Apache Java Commons. */
+ *  commented-out functions which are also required to be implemented. */
 public interface ISHA256 {
 
 	/** Must obey {@link Thread#isInterrupted()} by throwing

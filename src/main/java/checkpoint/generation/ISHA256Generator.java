@@ -15,7 +15,10 @@ import checkpoint.datamodel.ISHA256;
  *  large I/O buffers. */
 public interface ISHA256Generator {
 
-	/** Must obey {@link Thread#isInterrupted()} by throwing
+	/** Provides the same hash values as GNU coreutils' sha256sum command with
+	 *  the '--binary' flag.
+	 *  
+	 *  Must obey {@link Thread#isInterrupted()} by throwing
 	 *  {@link InterruptedException} because we will use it upon arbitrarily
 	 *  large user-supplied files. */
 	ISHA256 sha256ofFile(Path p) throws IOException, InterruptedException;
