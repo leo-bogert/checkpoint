@@ -14,14 +14,6 @@ import checkpoint.generation.ISHA256Generator;
  *  than SHA256. */
 public interface ISHA256 {
 
-	/** Must obey {@link Thread#isInterrupted()} by throwing
-	 *  {@link InterruptedException} because we will use it upon arbitrarily
-	 *  large user-supplied files. */
-	/*
-	static ISHA256 sha256ofFile(Path p)
-		throws IOException, InterruptedException;
-	 */
-
 	/** Returns a hex-encoded string which can be decoded using
 	 *  {@link #sha256fromString(String)}. */
 	String toString();

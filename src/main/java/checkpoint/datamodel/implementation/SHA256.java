@@ -4,14 +4,11 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.codec.binary.Hex.decodeHex;
 import static org.apache.commons.codec.binary.Hex.encodeHexString;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 
 import org.apache.commons.codec.DecoderException;
 
 import checkpoint.datamodel.ISHA256;
-import checkpoint.generation.JavaSHA256Generator;
 
 public final class SHA256 implements ISHA256 {
 
@@ -25,17 +22,6 @@ public final class SHA256 implements ISHA256 {
 
 	static SHA256 constructForUnitTestOnly(byte[] sha256) {
 		return new SHA256(sha256);
-	}
-
-	/**
-	 * @deprecated Use {@link JavaSHA256Generator#sha256ofFile(Path)} instead
-	 *     FIXME: Replace everywhere
-	 */
-	@Deprecated
-	public static SHA256 sha256ofFile(Path p)
-			throws IOException, InterruptedException {
-		
-		return new JavaSHA256Generator().sha256ofFile(p);
 	}
 
 	@Override public String toString() {
