@@ -96,12 +96,9 @@ final class CreateCommand extends Command {
 		out.println("Threads: " + o.threads);
 		out.println("Buffer:  " + o.buffer);
 		
-		// FIXME: Don't use global variable, pass it into
-		// ConcurrentCheckpointGenerator instead!
-		JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE = o.buffer;
-		
 		try {
-			new ConcurrentCheckpointGenerator(input, output, o.threads).run();
+			new ConcurrentCheckpointGenerator(input, output,
+				o.threads, o.buffer).run();
 			return 0;
 		} catch (IOException | InterruptedException e) {
 			err.println("Generating checkpoint failed:");

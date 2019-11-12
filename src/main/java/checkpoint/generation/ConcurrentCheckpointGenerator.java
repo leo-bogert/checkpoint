@@ -29,14 +29,18 @@ public final class ConcurrentCheckpointGenerator
 	private final Checkpoint checkpoint;
 
 	/** The value may be decreased by {@link #run()} if there is less work
-	 *  available than the desired amount of threads.
-	 *  Each thread will generate a JavaSHA256Generator instance, which by
-	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
-	 *  This can be overriden by "--buffer" on the command line. */
+	 *  available than the desired amount of threads. */
 	private int threadCount;
+	
+	/** Each thread will generate a JavaSHA256Generator instance, which by
+	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
+	 *  This can be overriden by "--buffer" on the command line, which is
+	 *  passed into this variable as bytes. */
+	private final int readBufferBytes;
+
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
-			int threads) {
+			int threads, int readBufferBytes) {
 		
 		// Convert paths to clean absolute dirs since I suspect their usage
 		// might be faster with the lots of processing we'll do with those paths
@@ -46,6 +50,7 @@ public final class ConcurrentCheckpointGenerator
 		this.outputDir
 			= requireNonNull(outputDir).toAbsolutePath().normalize();
 		this.threadCount = threads;
+		this.readBufferBytes = readBufferBytes;
 		
 		// FIXME: Allow resuming an incomplete one.
 		this.checkpoint = new Checkpoint();
