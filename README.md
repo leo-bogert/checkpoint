@@ -89,12 +89,12 @@ For any further usage instructions run checkpoint without arguments to get an
 overview of its syntax.  
 This works for all implementations.
 
-Please ensure your system has at least ~ 2 GiB of free RAM when using the Java
-implementation to create checkpoints as it will currently use 1 GiB as I/O
-cache. You can adjust this using the `--threads` and `--buffer` options of
-the `create` command.  
-(It may or may not work with less or more RAM, the 2 GiB have not been tested
-yet, this is merely an estimate.)
+Please ensure your system has at least ~ 3 GiB of free RAM when using the Java
+implementation to create checkpoints. You can adjust this using the `--threads`
+and `--buffer` options of the `create` command.  
+(It may or may not work with less or more RAM, the 3 GiB have not been tested
+yet, this is merely an estimate from the defaults for the said parameters plus
+some headroom to keep the file/directory list in memory.)
 
 Please take notice of the following features which are lacking in the Java
 implementation and compensate for their lack as described.
