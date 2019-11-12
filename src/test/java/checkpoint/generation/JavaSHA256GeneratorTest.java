@@ -25,6 +25,10 @@ public final class JavaSHA256GeneratorTest {
 	@Test public void testSha256ofFile()
 			throws IOException, InterruptedException, NoSuchAlgorithmException {
 		
+		// We will re-use the object for generating multiple hashes to ensure
+		// the implementation is safe w.r.t. that.
+		final JavaSHA256Generator g = new JavaSHA256Generator();
+		
 		Path p = tempDir.newFile().toPath();
 		// Append CRLF to test data to see if the binary mode which ISHA256
 		// requires is obeyed.
@@ -32,7 +36,7 @@ public final class JavaSHA256GeneratorTest {
 		// echo -ne "Test\r\n" | sha256sum --binary
 		assertEquals(
 			"7dd91e07f0341646d53f6938278a4d3e87961fabea066f7e6f40b7398f3b0b0f",
-			new JavaSHA256Generator().sha256ofFile(p).toString());
+			g.sha256ofFile(p).toString());
 		
 		// Test with a file larger than the read buffer of sha256ofFile() to
 		// ensure bugs related to the "while(read(buffer..." loop are caught.
@@ -43,7 +47,7 @@ public final class JavaSHA256GeneratorTest {
 		write(largeFile, bytes);
 		assertEquals("Failed for seed: " + seed,
 			encodeHexString(MessageDigest.getInstance("SHA-256").digest(bytes)),
-			new JavaSHA256Generator().sha256ofFile(largeFile).toString());
+			g.sha256ofFile(largeFile).toString());
 	}
 
 }
