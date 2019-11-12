@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import checkpoint.datamodel.implementation.JavaSHA256;
+import checkpoint.datamodel.implementation.SHA256;
 
 // FIXME: Trim visibility after SHA256 doesn't need to access it anymore.
 /** Implements {@link ISHA256Generator} using Java's default SHA256
@@ -22,7 +22,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 
 	public static int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
 
-	public JavaSHA256 sha256ofFile(Path p)
+	public SHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
 		
 		// TODO: Performance: Recycle the MessageDigest objects using reset(),
@@ -72,7 +72,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 					throw new InterruptedException();
 			}
 			
-			return new JavaSHA256(md.digest());
+			return new SHA256(md.digest());
 		} finally {
 			channel.close();
 		}
