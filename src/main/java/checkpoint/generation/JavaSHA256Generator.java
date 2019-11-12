@@ -20,7 +20,21 @@ import checkpoint.datamodel.implementation.SHA256;
  *  is the fastest. Candidates: BouncyCastle, Apache Java Commons. */
 public final class JavaSHA256Generator implements ISHA256Generator {
 
+	/** In bytes.
+	 *  FIXME: Performance: Determine a good default. */
 	public static int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
+
+	/** Re-used to prevent memory allocation churn since we will hash **many**
+	 *  files in typical usage of Checkpoint. */
+	private final ByteBuffer buffer;
+
+	public JavaSHA256Generator() {
+		this(DEFAULT_READ_BUFFER_SIZE);
+	}
+
+	public JavaSHA256Generator(int readBufferBytes) {
+		buffer = ByteBuffer.allocate(readBufferBytes);
+	}
 
 	public SHA256 sha256ofFile(Path p)
 			throws IOException, InterruptedException {
@@ -40,16 +54,14 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 		
 		SeekableByteChannel channel = Files.newByteChannel(p, READ);
 		try {
-			// FIXME: Performance: Support overriding buffer size on command
-			// line and determine a good one.
-			// FIXME: Adjust buffer size automatically from channel.size().
+			// FIXME: Adjust buffer size automatically from channel.size()?
 			// FIXME: Performance: Use two buffers and while hashing one of
 			// them read into the other one asynchronously.
 			// FIXME: Performance: Try if a direct buffer, obtainable using
 			// allocateDirect(), speeds up the function.
 			// First make sure to read the warnings about that at ByteBuffer's
 			// top-level JavaDoc.
-			ByteBuffer buffer = ByteBuffer.allocate(DEFAULT_READ_BUFFER_SIZE);
+			buffer.clear();
 			while(channel.read(buffer) > 0) {
 				// FIXME: The Oracle Java tutorial wrongly says we should
 				// rewind() the buffer before md.update() and then flip() it
