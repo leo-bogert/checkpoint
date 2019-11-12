@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import checkpoint.datamodel.implementation.NodeFinder;
 import checkpoint.datamodel.implementation.SHA256;
 
 // FIXME: Trim visibility after SHA256 doesn't need to access it anymore.
@@ -21,7 +22,14 @@ import checkpoint.datamodel.implementation.SHA256;
 public final class JavaSHA256Generator implements ISHA256Generator {
 
 	/** In bytes.
-	 *  FIXME: Performance: Determine a good default. */
+	 *  FIXME: Performance: Determine a good default.
+	 *  TODO: Performance: Measure file size in {@link NodeFinder} and choose
+	 *  buffer size to be large enough so that the majority of files, e.g. 80%,
+	 *  will fit into it.
+	 *  This will require some heuristics to choose an upper boundary though
+	 *  because it may not fit into memory otherwise, especially considering
+	 *  that {@link ConcurrentCheckpointGenerator} generates multiple threads
+	 *  where each has a JavaSHA256Generator. */
 	public static final int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
 
 	/** Re-used to prevent memory allocation churn since we will hash **many**
