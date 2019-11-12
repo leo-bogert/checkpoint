@@ -1,7 +1,8 @@
 package checkpoint.datamodel.implementation;
 
-import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
+import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static org.junit.Assert.*;
+
 import java.util.Arrays;
 
 import org.apache.commons.codec.DecoderException;
@@ -9,18 +10,18 @@ import org.junit.Test;
 
 import checkpoint.datamodel.ISHA256;
 
-/** Tests {@link JavaSHA256}. */
-public final class JavaSHA256Test {
+/** Tests {@link SHA256}. */
+public final class SHA256Test {
 
 	@Test public void testSha256ToAndFromString() throws DecoderException {
 		String hash =
 			"7dd91e07f0341646d53f6938278a4d3e87961fabea066f7e6f40b7398f3b0b0f";
 		
-		assertEquals(hash, JavaSHA256.sha256fromString(hash).toString());
+		assertEquals(hash, SHA256.sha256fromString(hash).toString());
 		
 		try {
 			// Too short input
-			JavaSHA256.sha256fromString("00");
+			SHA256.sha256fromString("00");
 			fail();
 		} catch(DecoderException e) {}
 	}
@@ -45,7 +46,7 @@ public final class JavaSHA256Test {
 		       hashB = // Different by one bit
 			"0000000000000000000000000000000000000000000000000000000000000001";
 		
-		JavaSHA256 shaA = sha256fromString(hashA),
+		SHA256 shaA = sha256fromString(hashA),
 		           shaB = sha256fromString(hashB);
 		
 		assertFalse(shaA.equals(shaB));
@@ -69,19 +70,19 @@ public final class JavaSHA256Test {
 		}
 		
 		// Arrays.equals() returns true when passing two null pointers instead
-		// of two byte[], and the implementation of JavaSHA256 uses that
+		// of two byte[], and the implementation of SHA256 uses that
 		// function.
-		// Thus check JavaSHA256.equals() to be safe against the internal
+		// Thus check SHA256.equals() to be safe against the internal
 		// byte[] of the object being null, which constructForUnitTestOnly(null)
 		// does.
 		// We only use constructForUnitTestOnly(null) to construct the left-hand
 		// object of equals() and instead pass an anonymous class into the
-		// right-hand argument because JavaSHA256.toBytes() would throw a
-		// NullPointerException if we passed a JavaSHA256 at the right side.
+		// right-hand argument because SHA256.toBytes() would throw a
+		// NullPointerException if we passed a SHA256 at the right side.
 		// That NullPointerException would hide the fact that a bogus
 		// equals() implementation would not throw it for the case we hereby
 		// test, i.e. toBytes() returning null.
-		ISHA256 x = JavaSHA256.constructForUnitTestOnly(null);
+		ISHA256 x = SHA256.constructForUnitTestOnly(null);
 		ISHA256 y = new ISHA256() {
 			@Override public byte[] toBytes() {
 				return null;
@@ -103,7 +104,7 @@ public final class JavaSHA256Test {
 		       hashB =
 			"3ea600325ec065453cad9753910a8e811822aa93b479073a269cc497e17b0fec";
 		
-		JavaSHA256 shaA1 = sha256fromString(hashA),
+		SHA256 shaA1 = sha256fromString(hashA),
 		           shaA2 = sha256fromString(hashA),
 		           shaB = sha256fromString(hashB);
 		
@@ -112,7 +113,7 @@ public final class JavaSHA256Test {
 		assertNotSame(shaA1, shaA2);
 		assertEquals(shaA1.hashCode(), shaA2.hashCode());
 		
-		JavaSHA256 x = JavaSHA256.constructForUnitTestOnly(null);
+		SHA256 x = SHA256.constructForUnitTestOnly(null);
 		assertNotNull(x);
 		try {
 			x.hashCode();
