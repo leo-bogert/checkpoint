@@ -33,7 +33,7 @@ final class CreateCommand extends Command {
 			  "Number of threads to process files/directories with. "
 			+ "Each thread will use as much memory as given via --buffer. "
 			+ "Must be at least 1.")
-		int threads = 1024;
+		int threads = ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT;
 
 		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "

@@ -24,6 +24,10 @@ import checkpoint.datamodel.implementation.Timestamps;
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
+	/** Used by the shell UI.
+	 *  FIXME: Performance: Determine a reasonable value. */
+	public static final int DEFAULT_THREAD_COUNT = 1024;
+
 	private final Path       inputDir;
 	private final Path       outputDir;
 	private final Checkpoint checkpoint;
