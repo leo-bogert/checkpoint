@@ -29,14 +29,18 @@ public final class ConcurrentCheckpointGenerator
 	private final Checkpoint checkpoint;
 
 	/** The value may be decreased by {@link #run()} if there is less work
-	 *  available than the desired amount of threads.
-	 *  Each thread will generate a JavaSHA256Generator instance, which by
-	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
-	 *  This can be overriden by "--buffer" on the command line. */
+	 *  available than the desired amount of threads. */
 	private int threadCount;
+	
+	/** Each thread will generate a JavaSHA256Generator instance, which by
+	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
+	 *  This can be overriden by "--buffer" on the command line, which is
+	 *  passed into this variable as bytes. */
+	private final int readBufferBytes;
+
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
-			int threads) {
+			int threads, int readBufferBytes) {
 		
 		// Convert paths to clean absolute dirs since I suspect their usage
 		// might be faster with the lots of processing we'll do with those paths
@@ -46,6 +50,7 @@ public final class ConcurrentCheckpointGenerator
 		this.outputDir
 			= requireNonNull(outputDir).toAbsolutePath().normalize();
 		this.threadCount = threads;
+		this.readBufferBytes = readBufferBytes;
 		
 		// FIXME: Allow resuming an incomplete one.
 		this.checkpoint = new Checkpoint();
@@ -64,6 +69,17 @@ public final class ConcurrentCheckpointGenerator
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
 			
+			// Re-use across whole lifetime of thread to prevent memory
+			// allocation churn since the buffer size we pass it was given by
+			// the user and may be very large to match the typical size of files
+			// to expect.
+			// We don't put this into a member variable intentionally:
+			// The loop which creates the Worker objects is single-threaded so
+			// allocating lots of memory may take longer there than having each
+			// Worker do it concurrently on their thread in run().
+			JavaSHA256Generator hasher
+				= new JavaSHA256Generator(readBufferBytes);
+			
 			for(INode node : work) {
 				// INode.getPath() is relative to the inputDir so we must
 				// prefix it with the inputDir.
@@ -71,8 +87,7 @@ public final class ConcurrentCheckpointGenerator
 				
 				if(!node.isDirectory()) {
 					try {
-						node.setHash(
-							new JavaSHA256Generator().sha256ofFile(pathOnDisk));
+						node.setHash(hasher.sha256ofFile(pathOnDisk));
 					} catch(IOException e) {
 						// Set hash to null to mark computation as failed.
 						// This must be done explicitly instead of just leaving

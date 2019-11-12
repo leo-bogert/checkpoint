@@ -20,6 +20,22 @@ public final class JavaSHA256GeneratorTest {
 	@Rule
 	public final TemporaryFolder tempDir = new TemporaryFolder();
 
+	@Test public void testDefaultReadBufferSize() {
+		// The buffer size should be choosen while regarding the default memory
+		// page size.
+		// TODO: As of 2019-11-12 it isn't possible to obtain the page size from
+		// Java so I've hardcoded the default page size of x86_64 Linux.
+		// An intermediate solution would be to execute the shell command
+		//     getconf PAGESIZE
+		// It is part of libc-bin so it will probably be available everywhere.
+		int pageSize = 4096;
+		
+		assertTrue(
+			JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE >= pageSize);
+		assertTrue(
+			JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE % pageSize == 0);
+	}
+
 	@Test public void testSha256ofFile()
 			throws IOException, InterruptedException, NoSuchAlgorithmException {
 		
