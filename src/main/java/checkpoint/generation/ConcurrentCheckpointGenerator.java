@@ -32,10 +32,17 @@ public final class ConcurrentCheckpointGenerator
 	private final Path       outputDir;
 	private final Checkpoint checkpoint;
 
+	/** Is the disk we read from a SSD?
+	 *  If false it is assumed to be a rotational disk.
+	 *  
+	 *  The way we process files needs to be different for rotational disks due
+	 *  to their limitation of random access being very slow. */
+	private final boolean solidStateDrive;
+
 	/** The value may be decreased by {@link #run()} if there is less work
 	 *  available than the desired amount of threads. */
 	private int threadCount;
-	
+
 	/** Each thread will generate a JavaSHA256Generator instance, which by
 	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
 	 *  This can be overriden by "--buffer" on the command line, which is
@@ -44,7 +51,7 @@ public final class ConcurrentCheckpointGenerator
 
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
-			int threads, int readBufferBytes) {
+			boolean solidStateDrive, int threads, int readBufferBytes) {
 		
 		// Convert paths to clean absolute dirs since I suspect their usage
 		// might be faster with the lots of processing we'll do with those paths
@@ -53,6 +60,7 @@ public final class ConcurrentCheckpointGenerator
 			= requireNonNull(inputDir).toAbsolutePath().normalize();
 		this.outputDir
 			= requireNonNull(outputDir).toAbsolutePath().normalize();
+		this.solidStateDrive = solidStateDrive;
 		this.threadCount = threads;
 		this.readBufferBytes = readBufferBytes;
 		

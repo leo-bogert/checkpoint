@@ -29,6 +29,15 @@ final class CreateCommand extends Command {
 	 *  appear in the help, try again in some years.
 	 *  See the commit which added this comment for what the orders were. */
 	private static final class Options {
+		/** TODO: As of 2019-11-13 it does not seem trivially possible to query
+		 *  this from Java. Try again in some years. */
+		@Parameter(names = { "--ssd" }, description =
+			  "Assume the input disk to be a Solid State Drive. If not given "
+			+ "it is assumed to be a rotational disk instead. The way files "
+			+ "are processed needs to be different for each in order to get "
+			+ "good performance so you should ensure your choice is correct.")
+		boolean ssd = false;
+
 		@Parameter(names = { "--threads" }, description =
 			  "Number of threads to process files/directories with. "
 			+ "Must be at least 1. "
@@ -94,12 +103,13 @@ final class CreateCommand extends Command {
 		
 		out.println("Input:   " + input);
 		out.println("Output:  " + output);
+		out.println("Is SSD:  " + o.ssd);
 		out.println("Threads: " + o.threads);
 		out.println("Buffer:  " + o.buffer);
 		
 		try {
 			new ConcurrentCheckpointGenerator(input, output,
-				o.threads, o.buffer).run();
+				o.ssd, o.threads, o.buffer).run();
 			return 0;
 		} catch (IOException | InterruptedException e) {
 			err.println("Generating checkpoint failed:");
