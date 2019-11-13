@@ -193,16 +193,13 @@ public final class ConcurrentCheckpointGenerator
 			// same directory are next to each other in the sorted output.
 			// This is what we want for ext4 as it puts files in the same dir
 			// close to each other on disk.
-			final Comparator<Path> pathCmp = new Checkpoint.PathComparator();
-			// Our input is full INodes which contain a Path, so we need to wrap
-			// it in a comparator for INodes to extract the Paths and sort by
-			// them.
-			Comparator<INode> cmp = new Comparator<INode>() {
-				@Override public int compare(INode o1, INode o2) {
-					return pathCmp.compare(o1.getPath(), o2.getPath());
+			final Comparator<Path>  pathCmp = new Checkpoint.PathComparator();
+			      Comparator<INode> nodeCmp = new Comparator<INode>() {
+				@Override public int compare(INode n1, INode n2) {
+					return pathCmp.compare(n1.getPath(), n2.getPath());
 				}
 			};
-			Collections.sort(removeFrom, cmp);
+			Collections.sort(removeFrom, nodeCmp);
 		}
 		
 		// Add 1 to ensure the remainder of the division will also get
