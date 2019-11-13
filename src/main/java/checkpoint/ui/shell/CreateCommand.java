@@ -1,7 +1,6 @@
 package checkpoint.ui.shell;
 
 import static java.lang.System.err;
-import static java.lang.System.out;
 
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
