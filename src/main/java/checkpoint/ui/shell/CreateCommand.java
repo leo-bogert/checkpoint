@@ -43,7 +43,7 @@ final class CreateCommand extends Command {
 			+ "Must be at least 1. "
 			+ "Each thread will use as much memory as given via --buffer, in "
 			+ "addition to about 1 MiB for Java's default stack size.")
-		int threads = ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_SSD;
+		Integer threads = null; // No default because it depends on --ssd
 
 		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
@@ -100,12 +100,6 @@ final class CreateCommand extends Command {
 			err.println("Invalid path: " + e.getMessage());
 			return 1;
 		}
-		
-		out.println("Input:   " + input);
-		out.println("Output:  " + output);
-		out.println("Is SSD:  " + o.ssd);
-		out.println("Threads: " + o.threads);
-		out.println("Buffer:  " + o.buffer);
 		
 		try {
 			new ConcurrentCheckpointGenerator(input, output,

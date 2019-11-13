@@ -248,6 +248,12 @@ public final class ConcurrentCheckpointGenerator
 	}
 
 	@Override public void run() throws InterruptedException, IOException {
+		out.println("Input:   " + inputDir);
+		out.println("Output:  " + outputDir);
+		out.println("Is SSD:  " + solidStateDrive);
+		out.println("Threads: " + threadCount);
+		out.println("Buffer:  " + readBufferBytes);
+		
 		// FIXME: Handle Thread.interrupt() gracefully, i.e. save the current
 		// progress.
 		// FIXME: Save every 15 minutes.
