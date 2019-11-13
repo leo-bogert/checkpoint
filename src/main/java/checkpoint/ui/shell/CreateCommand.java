@@ -55,7 +55,7 @@ final class CreateCommand extends Command {
 		List<String> args = new ArrayList<>(2);
 
 		void validate() throws IllegalArgumentException {
-			if(threads < 1)
+			if(threads != null && threads < 1)
 				throw new IllegalArgumentException("--threads is too low!");
 			
 			if(buffer < 4096)
