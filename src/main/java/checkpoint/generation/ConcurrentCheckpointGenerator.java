@@ -188,12 +188,12 @@ public final class ConcurrentCheckpointGenerator
 		} else {
 			// A hard disk usually has a single head which is slow to move
 			// around. So ideally a single worker thread would read files which
-			// a close to each other on disk.
+			// are close to each other on disk.
 			// Checkpoint.PathComparator sorts in a way such that files in the
 			// same directory are next to each other in the sorted output.
 			// This is what we want for ext4 as it puts files in the same dir
 			// close to each other on disk.
-			final Comparator<Path>  pathCmp = new Checkpoint.PathComparator();
+			final Comparator<Path> pathCmp = new Checkpoint.PathComparator();
 			// Our input is full INodes which contain a Path, so we need to wrap
 			// it in a comparator for INodes to extract the Paths and sort by
 			// them.
