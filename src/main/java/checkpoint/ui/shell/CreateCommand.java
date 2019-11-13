@@ -43,7 +43,7 @@ final class CreateCommand extends Command {
 			+ "Must be at least 1. "
 			+ "Each thread will use as much memory as given via --buffer, in "
 			+ "addition to about 1 MiB for Java's default stack size.")
-		int threads = ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT;
+		int threads = ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_SSD;
 
 		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "

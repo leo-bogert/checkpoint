@@ -25,9 +25,16 @@ import checkpoint.datamodel.implementation.Timestamps;
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
-	/** Used by the shell UI.
-	 *  FIXME: Performance: Determine a reasonable value. */
-	public static final int DEFAULT_THREAD_COUNT = 1024;
+    /** A HDD typically only has 1 head so to avoid seeking we only run 1
+     *  thread.
+     *  Notice that this applies even to disks with multiple platters:
+     *  The ones I've disassembled with multiple heads, one for each platter,
+     *  could typically only move them all together, not separately.
+     *  I.e. they would be oriented in a parallel stack and moving them would
+     *  move the whole stack at once. */
+	public static final int DEFAULT_THREAD_COUNT_HDD = 1;
+	/**  FIXME: Performance: Determine a reasonable value. */
+	public static final int DEFAULT_THREAD_COUNT_SSD = 1024;
 
 	private final Path       inputDir;
 	private final Path       outputDir;
@@ -52,7 +59,7 @@ public final class ConcurrentCheckpointGenerator
 
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
-			boolean solidStateDrive, int threads, int readBufferBytes) {
+			boolean solidStateDrive, Integer threads, int readBufferBytes) {
 		
 		// Convert paths to clean absolute dirs since I suspect their usage
 		// might be faster with the lots of processing we'll do with those paths
@@ -62,7 +69,12 @@ public final class ConcurrentCheckpointGenerator
 		this.outputDir
 			= requireNonNull(outputDir).toAbsolutePath().normalize();
 		this.solidStateDrive = solidStateDrive;
-		this.threadCount = threads;
+		if(threads != null)
+			this.threadCount = threads;
+		else {
+			this.threadCount = solidStateDrive ?
+				DEFAULT_THREAD_COUNT_SSD : DEFAULT_THREAD_COUNT_HDD;
+		}
 		this.readBufferBytes = readBufferBytes;
 		
 		// FIXME: Allow resuming an incomplete one.
