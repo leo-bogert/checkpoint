@@ -40,7 +40,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 	 *  
 	 *  FIXME: Performance: Use two buffers and while hashing one of them read
 	 *  into the other one using asynchronous I/O. This will allow us to do more
-	 *  reading ahead than the kernel's small 128 KiB.
+	 *  reading ahead than the kernel's small 128 KB.
 	 *  Once this is implemented remove the comment about the kernel read ahead
 	 *  buffer in CreateCommand's description for --buffer.
 	 *  Then perhaps even measure file size in {@link NodeFinder} and choose
