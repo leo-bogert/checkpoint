@@ -26,18 +26,24 @@ script:
   - set -o errexit
   - gradle clean test jar
   
-  # Create a checkpoint of the Checkpoint source code, using the Java version.
+  # Create checkpoints of the Checkpoint source code, using the Java version.
+  # Both with "--ssd" and without because the codepaths are quite different.
   - TEST_INPUT="$TRAVIS_BUILD_DIR"
-  - TEST_OUTPUT_JAVA="$(mktemp --directory)"
-  - java -jar build/libs/checkpoint.jar create "$TEST_INPUT" "$TEST_OUTPUT_JAVA"
+  - TEST_OUTPUT_JAVA_1="$(mktemp --directory)"
+  - TEST_OUTPUT_JAVA_2="$(mktemp --directory)"
+  - CMD=( java -jar build/libs/checkpoint.jar )
+  - "${CMD[@]}" create --ssd "$TEST_INPUT" "$TEST_OUTPUT_JAVA_1"
+  - "${CMD[@]}" create       "$TEST_INPUT" "$TEST_OUTPUT_JAVA_2"
   
   # ... and create a checkpoint of the same dir using the Python version.
-  - TEST_OUTPUT_PYTHON="$(mktemp --directory)"
-  - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PYTHON"
+  - TEST_OUTPUT_PY="$(mktemp --directory)"
+  - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PY"
   
-  # ... and test if both checkpoints are non-empty and equal.
-  - test -s "$TEST_OUTPUT_JAVA/checkpoint.txt"
-  - test -s "$TEST_OUTPUT_PYTHON/checkpoint.txt"
-  - cmp "$TEST_OUTPUT_JAVA/checkpoint.txt" "$TEST_OUTPUT_PYTHON/checkpoint.txt"
+  # ... and test if the checkpoints are non-empty and equal.
+  - test -s "$TEST_OUTPUT_JAVA_1/checkpoint.txt"
+  - test -s "$TEST_OUTPUT_JAVA_2/checkpoint.txt"
+  - test -s "$TEST_OUTPUT_PY/checkpoint.txt"
+  - cmp "$TEST_OUTPUT_JAVA_1/checkpoint.txt" "$TEST_OUTPUT_PY/checkpoint.txt"
+  - cmp "$TEST_OUTPUT_JAVA_2/checkpoint.txt" "$TEST_OUTPUT_PY/checkpoint.txt"
   
   - sha256sum -b build/libs/checkpoint.jar
