@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,18 +25,32 @@ import checkpoint.datamodel.implementation.Timestamps;
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
-	/** Used by the shell UI.
-	 *  FIXME: Performance: Determine a reasonable value. */
-	public static final int DEFAULT_THREAD_COUNT = 1024;
+    /** A HDD typically only has 1 head so to avoid seeking we only run 1
+     *  thread.
+     *  Notice that this applies even to disks with multiple platters:
+     *  The ones I've disassembled with multiple heads, one for each platter,
+     *  could typically only move them all together, not separately.
+     *  I.e. they would be oriented in a parallel stack and moving them would
+     *  move the whole stack at once. */
+	public static final int DEFAULT_THREAD_COUNT_HDD = 1;
+	/**  FIXME: Performance: Determine a reasonable value. */
+	public static final int DEFAULT_THREAD_COUNT_SSD = 1024;
 
 	private final Path       inputDir;
 	private final Path       outputDir;
 	private final Checkpoint checkpoint;
 
+	/** Is the disk we read from a SSD?
+	 *  If false it is assumed to be a rotational disk.
+	 *  
+	 *  The way we process files needs to be different for rotational disks due
+	 *  to their limitation of random access being very slow. */
+	private final boolean solidStateDrive;
+
 	/** The value may be decreased by {@link #run()} if there is less work
 	 *  available than the desired amount of threads. */
 	private int threadCount;
-	
+
 	/** Each thread will generate a JavaSHA256Generator instance, which by
 	 *  default allocates 1 MiB of RAM as buffer for reading the input file.
 	 *  This can be overriden by "--buffer" on the command line, which is
@@ -44,7 +59,7 @@ public final class ConcurrentCheckpointGenerator
 
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
-			int threads, int readBufferBytes) {
+			boolean solidStateDrive, Integer threads, int readBufferBytes) {
 		
 		// Convert paths to clean absolute dirs since I suspect their usage
 		// might be faster with the lots of processing we'll do with those paths
@@ -53,7 +68,13 @@ public final class ConcurrentCheckpointGenerator
 			= requireNonNull(inputDir).toAbsolutePath().normalize();
 		this.outputDir
 			= requireNonNull(outputDir).toAbsolutePath().normalize();
-		this.threadCount = threads;
+		this.solidStateDrive = solidStateDrive;
+		if(threads != null)
+			this.threadCount = threads;
+		else {
+			this.threadCount = solidStateDrive ?
+				DEFAULT_THREAD_COUNT_SSD : DEFAULT_THREAD_COUNT_HDD;
+		}
 		this.readBufferBytes = readBufferBytes;
 		
 		// FIXME: Allow resuming an incomplete one.
@@ -144,6 +165,9 @@ public final class ConcurrentCheckpointGenerator
 	 *  sub-ArrayLists where each contains an approximately equal amount of
 	 *  work.
 	 *  
+	 *  FIXME: The below is outdated, whether we do this depends on the
+	 *  solidStateDrive parameter.
+	 *  
 	 *  The work is randomly distributed across the batches and randomly ordered
 	 *  inside each batch.
 	 *  (This is also why the input must be an ArrayList: It implements
@@ -162,10 +186,33 @@ public final class ConcurrentCheckpointGenerator
 	 *  in each sweep the heads can get as much data as possible.
 	 *  Our random distribution of work = files/directories guarantees that this
 	 *  applies to each sweep. */
-	private static <WorkType> ArrayList<ArrayList<WorkType>>
-			removeAndDivideWork(ArrayList<WorkType> removeFrom, int batches) {
+	private static ArrayList<ArrayList<INode>>
+			removeAndDivideWork(ArrayList<INode> removeFrom, int batches,
+			boolean solidStateDrive) {
 		
-		Collections.shuffle(removeFrom);
+		if(solidStateDrive) {
+			// If I remember correctly SSDs are organized into cells where each
+			// cell is like a "thread" which can read independently of the
+			// others. So to utilize all of them we need to query files from
+			// random locations. Hence randomize the work.
+			// TODO: Validate the above.
+			Collections.shuffle(removeFrom);
+		} else {
+			// A hard disk usually has a single head which is slow to move
+			// around. So ideally a single worker thread would read files which
+			// are close to each other on disk.
+			// Checkpoint.PathComparator sorts in a way such that files in the
+			// same directory are next to each other in the sorted output.
+			// This is what we want for ext4 as it puts files in the same dir
+			// close to each other on disk.
+			final Comparator<Path>  pathCmp = new Checkpoint.PathComparator();
+			      Comparator<INode> nodeCmp = new Comparator<INode>() {
+				@Override public int compare(INode n1, INode n2) {
+					return pathCmp.compare(n1.getPath(), n2.getPath());
+				}
+			};
+			Collections.sort(removeFrom, nodeCmp);
+		}
 		
 		// Add 1 to ensure the remainder of the division will also get
 		// distributed across the batches.
@@ -173,7 +220,7 @@ public final class ConcurrentCheckpointGenerator
 		// batches. And the division remainder of dividing by the batch count
 		// here cannot be larger than that.
 		int workPerBatch = (removeFrom.size() / batches) + 1;
-		ArrayList<ArrayList<WorkType>> result = new ArrayList<>(batches);
+		ArrayList<ArrayList<INode>> result = new ArrayList<>(batches);
 		
 		for(int batch = 0; batch < batches; ++batch) {
 			int availableWork = removeFrom.size();
@@ -181,7 +228,7 @@ public final class ConcurrentCheckpointGenerator
 			if(batchSize == 0)
 				break;
 			
-			ArrayList<WorkType> batchWork = new ArrayList<>(batchSize);
+			ArrayList<INode> batchWork = new ArrayList<>(batchSize);
 			for(int workPiece = 0; workPiece < batchSize; ++workPiece) {
 				// Must remove() the last, otherwise all would be copied around.
 				batchWork.add(removeFrom.remove(removeFrom.size() - 1));
@@ -201,6 +248,12 @@ public final class ConcurrentCheckpointGenerator
 	}
 
 	@Override public void run() throws InterruptedException, IOException {
+		out.println("Input:   " + inputDir);
+		out.println("Output:  " + outputDir);
+		out.println("Is SSD:  " + solidStateDrive);
+		out.println("Threads: " + threadCount);
+		out.println("Buffer:  " + readBufferBytes);
+		
 		// FIXME: Handle Thread.interrupt() gracefully, i.e. save the current
 		// progress.
 		// FIXME: Save every 15 minutes.
@@ -217,7 +270,7 @@ public final class ConcurrentCheckpointGenerator
 		out.println("Dividing into up to " + threadCount
 			+ " batches of work...");
 		ArrayList<ArrayList<INode>> work
-			= removeAndDivideWork(nodes, threadCount);
+			= removeAndDivideWork(nodes, threadCount, solidStateDrive);
 		nodes = null;
 		
 		threadCount = work.size();

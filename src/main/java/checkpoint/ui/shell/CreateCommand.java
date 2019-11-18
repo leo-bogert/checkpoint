@@ -1,7 +1,6 @@
 package checkpoint.ui.shell;
 
 import static java.lang.System.err;
-import static java.lang.System.out;
 
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
@@ -29,12 +28,29 @@ final class CreateCommand extends Command {
 	 *  appear in the help, try again in some years.
 	 *  See the commit which added this comment for what the orders were. */
 	private static final class Options {
+		/** TODO: As of 2019-11-13 it does not seem trivially possible to query
+		 *  this from Java. Try again in some years. */
+		@Parameter(names = { "--ssd" }, description =
+			  "Assume the input disk to be a Solid State Drive. If not given "
+			+ "it is assumed to be a rotational disk instead. The way files "
+			+ "are processed needs to be different for each in order to get "
+			+ "good performance so you should ensure your choice is correct. "
+			+ "This also affects the default thread count, see '--threads'.")
+		boolean ssd = false;
+
 		@Parameter(names = { "--threads" }, description =
 			  "Number of threads to process files/directories with. "
-			+ "Must be at least 1. "
+			+ "Must be at least 1. Default for rotational disks: "
+			+ ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_HDD + ". "
+			+ "If --ssd is used, default is: " +
+			+ ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_SSD + ". "
+			+ "For RAID1 on rotational disks set this to the number of disks. "
+			+ "For other RAID types which can read different data from "
+			+ "different disks in parallel set this to the number of disks "
+			+ "which can be used concurrently. "
 			+ "Each thread will use as much memory as given via --buffer, in "
 			+ "addition to about 1 MiB for Java's default stack size.")
-		int threads = ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT;
+		Integer threads = null; // No default because it depends on --ssd
 
 		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
@@ -46,7 +62,7 @@ final class CreateCommand extends Command {
 		List<String> args = new ArrayList<>(2);
 
 		void validate() throws IllegalArgumentException {
-			if(threads < 1)
+			if(threads != null && threads < 1)
 				throw new IllegalArgumentException("--threads is too low!");
 			
 			if(buffer < 4096)
@@ -92,14 +108,9 @@ final class CreateCommand extends Command {
 			return 1;
 		}
 		
-		out.println("Input:   " + input);
-		out.println("Output:  " + output);
-		out.println("Threads: " + o.threads);
-		out.println("Buffer:  " + o.buffer);
-		
 		try {
 			new ConcurrentCheckpointGenerator(input, output,
-				o.threads, o.buffer).run();
+				o.ssd, o.threads, o.buffer).run();
 			return 0;
 		} catch (IOException | InterruptedException e) {
 			err.println("Generating checkpoint failed:");
