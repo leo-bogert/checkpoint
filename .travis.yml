@@ -31,9 +31,9 @@ script:
   - TEST_INPUT="$TRAVIS_BUILD_DIR"
   - TEST_OUTPUT_JAVA_1="$(mktemp --directory)"
   - TEST_OUTPUT_JAVA_2="$(mktemp --directory)"
-  - CMD=( java -jar build/libs/checkpoint.jar )
-  - "${CMD[@]}" create --ssd "$TEST_INPUT" "$TEST_OUTPUT_JAVA_1"
-  - "${CMD[@]}" create       "$TEST_INPUT" "$TEST_OUTPUT_JAVA_2"
+  - JAR="build/libs/checkpoint.jar"
+  - java -jar "$JAR" create --ssd "$TEST_INPUT" "$TEST_OUTPUT_JAVA_1"
+  - java -jar "$JAR" create       "$TEST_INPUT" "$TEST_OUTPUT_JAVA_2"
   
   # ... and create a checkpoint of the same dir using the Python version.
   - TEST_OUTPUT_PY="$(mktemp --directory)"
@@ -46,4 +46,4 @@ script:
   - cmp "$TEST_OUTPUT_JAVA_1/checkpoint.txt" "$TEST_OUTPUT_PY/checkpoint.txt"
   - cmp "$TEST_OUTPUT_JAVA_2/checkpoint.txt" "$TEST_OUTPUT_PY/checkpoint.txt"
   
-  - sha256sum -b build/libs/checkpoint.jar
+  - sha256sum -b "$JAR"
