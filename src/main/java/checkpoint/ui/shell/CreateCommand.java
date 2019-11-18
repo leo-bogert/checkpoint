@@ -54,7 +54,18 @@ final class CreateCommand extends Command {
 
 		@Parameter(names = { "--buffer" }, description =
 			  "I/O buffer per thread, in bytes. Must at least 4096. "
-			+ "Making it divisible by 4096 (= x86 pagesize) is a good idea.")
+			+ "Making it divisible by 4096 (= x86 pagesize) is a good idea. "
+			+ "The default matches Linux 4.15's default disk read ahead value "
+			+ "at '/sys/block/DISK/queue/read_ahead_kb'. "
+			+ "Setting this higher than your kernel's read ahead amount can "
+			+ "result in poor performance for files larger than the buffer "
+			+ "because the processing threads will do SHA256 hashing in "
+			+ "between buffer reads so then the kernel won't read ahead enough "
+			+ "data during that time to fill the next buffer instantly. "
+			+ "Thus if you increase the buffer size consider setting the sysfs "
+			+ "value at least as high. Also consider what is said about memory "
+			+ "usage at '--threads' before increasing the buffer size! "
+			+ "You may also have to allow Java to use more memory with -Xmx.")
 		int buffer = JavaSHA256Generator.DEFAULT_READ_BUFFER_SIZE;
 
 		@Parameter(description =

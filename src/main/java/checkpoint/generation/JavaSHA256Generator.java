@@ -22,15 +22,35 @@ import checkpoint.datamodel.implementation.SHA256;
 public final class JavaSHA256Generator implements ISHA256Generator {
 
 	/** In bytes.
-	 *  FIXME: Performance: Determine a good default.
-	 *  TODO: Performance: Measure file size in {@link NodeFinder} and choose
+	 *  Default is equal to the default read ahead amount of Linux 4.15 as
+	 *  observed from '/sys/block/sda/queue/read_ahead_kb'. The documentation
+	 *  for that is at:
+	 *  https://www.kernel.org/doc/Documentation/block/queue-sysfs.txt
+	 *  
+	 *  Choosing this to be equal to the read ahead is a good idea because after
+	 *  each time we read into the buffer we will be spending some time upon
+	 *  applying SHA256 to it, so the kernel should be able to read ahead a full
+	 *  buffer during that.
+	 *  If we did choose more than the kernel's read ahead it wouldn't be able
+	 *  to instantly satisfy our next request after applying SHA256.
+	 *  
+	 *  TODO: Performance: Benchmark using slightly less than the kernel
+	 *  read-ahead to ensure we constantly request data from the kernel even
+	 *  if there is some jitter.
+	 *  
+	 *  FIXME: Performance: Use two buffers and while hashing one of them read
+	 *  into the other one using asynchronous I/O. This will allow us to do more
+	 *  reading ahead than the kernel's small 128 KiB.
+	 *  Once this is implemented remove the comment about the kernel read ahead
+	 *  buffer in CreateCommand's description for --buffer.
+	 *  Then perhaps even measure file size in {@link NodeFinder} and choose
 	 *  buffer size to be large enough so that the majority of files, e.g. 80%,
 	 *  will fit into it.
 	 *  This will require some heuristics to choose an upper boundary though
 	 *  because it may not fit into memory otherwise, especially considering
 	 *  that {@link ConcurrentCheckpointGenerator} generates multiple threads
 	 *  where each has a JavaSHA256Generator. */
-	public static final int DEFAULT_READ_BUFFER_SIZE = 1024 * 1024;
+	public static final int DEFAULT_READ_BUFFER_SIZE = 128 * 1024;
 
 	/** Re-used to prevent memory allocation churn since we will hash **many**
 	 *  files in typical usage of Checkpoint. */
@@ -63,8 +83,6 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 		SeekableByteChannel channel = Files.newByteChannel(p, READ);
 		try {
 			// FIXME: Adjust buffer size automatically from channel.size()?
-			// FIXME: Performance: Use two buffers and while hashing one of
-			// them read into the other one asynchronously.
 			// FIXME: Performance: Try if a direct buffer, obtainable using
 			// allocateDirect(), speeds up the function.
 			// First make sure to read the warnings about that at ByteBuffer's
