@@ -39,7 +39,14 @@ final class CreateCommand extends Command {
 
 		@Parameter(names = { "--threads" }, description =
 			  "Number of threads to process files/directories with. "
-			+ "Must be at least 1. "
+			+ "Must be at least 1. Default for rotational disks: "
+			+ ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_HDD + ". "
+			+ "If --ssd is used, default is: " +
+			+ ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_SSD + ". "
+			+ "For RAID1 on rotational disks set this to the number of disks. "
+			+ "For other RAID types which can read different data from "
+			+ "different disks in parallel set this to the number of disks "
+			+ "which can be used concurrently. "
 			+ "Each thread will use as much memory as given via --buffer, in "
 			+ "addition to about 1 MiB for Java's default stack size.")
 		Integer threads = null; // No default because it depends on --ssd
