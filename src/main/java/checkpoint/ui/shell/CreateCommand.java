@@ -34,7 +34,8 @@ final class CreateCommand extends Command {
 			  "Assume the input disk to be a Solid State Drive. If not given "
 			+ "it is assumed to be a rotational disk instead. The way files "
 			+ "are processed needs to be different for each in order to get "
-			+ "good performance so you should ensure your choice is correct.")
+			+ "good performance so you should ensure your choice is correct. "
+			+ "This also affects the default thread count, see '--threads'.")
 		boolean ssd = false;
 
 		@Parameter(names = { "--threads" }, description =
