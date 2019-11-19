@@ -378,8 +378,8 @@ public final class ConcurrentCheckpointGenerator
 		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
 		
 		String remainingTime;
-		if(nodesPerSec > 0) {
-			long remainingNodes = totalNodes - finishedNodes;
+		if(nodesPerSec > 0f) {
+			int remainingNodes = totalNodes - finishedNodes;
 			float remainingSecs = (float)remainingNodes / nodesPerSec;
 			// DurationFormatUtils wants milliseconds so convert back to that.
 			// This also ensures that it won't include millis in the output
