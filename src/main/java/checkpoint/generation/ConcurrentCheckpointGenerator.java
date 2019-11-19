@@ -348,6 +348,16 @@ public final class ConcurrentCheckpointGenerator
 	private boolean needToOverwriteProgressLine = false;
 	private float lastPrintedPercentage = -1f;
 
+	/** Prints progress info consisting of:
+	 *  - percentage
+	 *  - nodes per second
+	 *  - estimated remaining time.
+	 *  
+	 *  If stdout is a terminal prints progress at every call and uses ANSI
+	 *  escape codes to print it at the same position on screen as the last
+	 *  call.
+	 *  If stdout is a file prints progress at most every 10% and always at
+	 *  100%. ANSI escape codes are not used then. */
 	private void printProgress(int finishedNodes, int totalNodes) {
 		// We want to remove our previous progress output so the new one can
 		// appear on the same line. To achieve that we thus use the following
