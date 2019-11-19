@@ -373,7 +373,7 @@ public final class ConcurrentCheckpointGenerator
 		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
 		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
 		
-		console.printf("Progress: %6.2f %% @ %.02f files/dirs per second.\n",
+		console.printf("Progress: %6.2f %% @ %.2f files/dirs per second.\n",
 			percentage, nodesPerSec);
 		progressLineAlreadyPrinted = true;
 	}
