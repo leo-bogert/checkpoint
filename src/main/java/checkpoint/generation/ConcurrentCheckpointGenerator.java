@@ -4,7 +4,9 @@ import static java.lang.Math.min;
 import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.io.Console;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -286,7 +288,18 @@ public final class ConcurrentCheckpointGenerator
 		
 		out.println("Working...");
 		executor.shutdown();
-		executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+		boolean finished = false;
+		while(true) {
+			// The weird structure of the loop ensures the progress is printed
+			// always:
+			// - at the start of the loop so the user quickly sees that progress
+			//   will be printed.
+			// - at the end of the loop so 100% will always be printed.
+			printProgress(checkpoint.getNodeCount(), nodeCount);
+			if(finished)
+				break;
+			finished = executor.awaitTermination(1, SECONDS);
+		}
 		
 		out.println("Work finished, checking results...");
 		for(Future<?> result : workResults) {
@@ -318,6 +331,40 @@ public final class ConcurrentCheckpointGenerator
 		out.println("Saving checkpoint to '" + outputDir + "'...");
 		checkpoint.save(outputDir);
 		out.println("Done.");
+	}
+
+	/** @see #printProgress(int, int) */
+	private final Console console = System.console();
+
+	/** @see  #printProgress() */
+	private boolean progressLineAlreadyPrinted = false;
+
+	/** Prints the progress if the output is attached to a terminal. */
+	private void printProgress(int finishedNodes, int totalNodes) {
+		// Use System.console() instead of System.out because it will be null
+		// if it has been redirected to a file, so we can detect that and not
+		// clutter the file with our ANSI escape codes.
+		if(console == null)
+			return;
+		
+		// We want to remove our previous progress output so the new one can
+		// appear on the same line. To achieve that we thus use the following
+		// ANSI escape sequence, which:
+		// - Moves the cursor up one line
+		// - Erases the whole line.
+		// - Moves the cursor to the beginning of it.
+		// Source: https://en.wikipedia.org/w/index.php?title=ANSI_escape_code
+		//         &oldid=923017881#Terminal_output_sequences
+		// Source: https://stackoverflow.com/a/35190285
+		if(progressLineAlreadyPrinted)
+			console.printf("\33[A\33[2K\r");
+		
+		float percentage = totalNodes > 0
+			? ((float)finishedNodes * 100) / (float)totalNodes
+			: 100f;
+		
+		console.printf("Progress: %6.2f%%\n", percentage);
+		progressLineAlreadyPrinted = true;
 	}
 
 }
