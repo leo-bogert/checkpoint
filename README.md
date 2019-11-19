@@ -27,7 +27,7 @@ Debian-based distribution.
 
 ```bash
 # Install runtime dependencies.
-apt install default-jre libcommons-codec-java libjcommander-java
+apt install default-jre libcommons-codec-java libcommons-lang-java libjcommander-java
 # Install dependencies for compiling from source.
 # You don't need to install the recommendations / suggestions of gradle.
 # TODO: I have not tested if the other packages work without recommendations.
