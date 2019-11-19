@@ -347,7 +347,7 @@ public final class ConcurrentCheckpointGenerator
 		// We want to remove our previous progress output so the new one can
 		// appear on the same line. To achieve that we thus use the following
 		// ANSI escape sequence, which:
-		// - Moves the cursor up one line
+		// - Moves the cursor up one line.
 		// - Erases the whole line.
 		// - Moves the cursor to the beginning of it.
 		// Source: https://en.wikipedia.org/w/index.php?title=ANSI_escape_code
@@ -360,7 +360,7 @@ public final class ConcurrentCheckpointGenerator
 			? ((float)finishedNodes * 100) / (float)totalNodes
 			: 100f;
 		
-		console.printf("Progress: %6.2f%%\n", percentage);
+		console.printf("Progress: %6.2f %%\n", percentage);
 		progressLineAlreadyPrinted = true;
 	}
 
