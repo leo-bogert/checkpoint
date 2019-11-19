@@ -333,10 +333,7 @@ public final class ConcurrentCheckpointGenerator
 		out.println("Done.");
 	}
 
-	/** @see #printProgress(int, int) */
 	private final Console console = System.console();
-
-	/** @see  #printProgress() */
 	private boolean progressLineAlreadyPrinted = false;
 
 	/** Prints the progress if the output is attached to a terminal. */
