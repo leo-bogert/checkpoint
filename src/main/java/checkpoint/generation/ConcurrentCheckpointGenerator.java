@@ -345,16 +345,10 @@ public final class ConcurrentCheckpointGenerator
 	}
 
 	private final Console console = System.console();
-	private boolean progressLineAlreadyPrinted = false;
+	private boolean needToOverwriteProgressLine = false;
+	private float lastPrintedPercentage = -1f;
 
-	/** Prints the progress if the output is attached to a terminal. */
 	private void printProgress(int finishedNodes, int totalNodes) {
-		// Use System.console() instead of System.out because it will be null
-		// if it has been redirected to a file, so we can detect that and not
-		// clutter the file with our ANSI escape codes.
-		if(console == null)
-			return;
-		
 		// We want to remove our previous progress output so the new one can
 		// appear on the same line. To achieve that we thus use the following
 		// ANSI escape sequence, which:
@@ -364,12 +358,35 @@ public final class ConcurrentCheckpointGenerator
 		// Source: https://en.wikipedia.org/w/index.php?title=ANSI_escape_code
 		//         &oldid=923017881#Terminal_output_sequences
 		// Source: https://stackoverflow.com/a/35190285
-		if(progressLineAlreadyPrinted)
-			console.printf("\33[A\33[2K\r");
+		if(needToOverwriteProgressLine) {
+			// System.console() will be null if the output is not a terminal but
+			// a file - which we hereby use to not print the ANSI control
+			// characters if it is a file to not clutter it.
+			if(console != null)
+				console.printf("\33[A\33[2K\r");
+		}
 		
 		float percentage = totalNodes > 0
 			? ((float)finishedNodes * 100) / (float)totalNodes
 			: 100f;
+		
+		// If stdout is a file this ensures we don't clutter it without constant
+		// progress printing by returning if we haven't done a 10% step.
+		if(console == null) {
+			if(lastPrintedPercentage < 0f) {
+				out.println("stdout is not a terminal, printing progress at "
+					+ "most every 10%.");
+				lastPrintedPercentage = 0f;
+			}
+			 
+			if((percentage - lastPrintedPercentage) < 10f
+					&& finishedNodes != totalNodes /* Always print at 100% */) {
+				
+				return;
+			}
+			
+			lastPrintedPercentage = percentage;
+		}
 		
 		long currentTime = currentTimeMillis();
 		// TODO: Use class StopWatch which thanks to our existing dependency
@@ -388,10 +405,22 @@ public final class ConcurrentCheckpointGenerator
 		} else
 			 remainingTime = "Unknown";
 		
-		console.printf("Progress: %6.2f %% @ %.2f files/dirs per second. "
-			+ "Estimated remaining time: %s\n",
-			percentage, nodesPerSec, remainingTime);
-		progressLineAlreadyPrinted = true;
+		String formatString =
+			"Progress: %6.2f %% @ %.2f files/dirs per second. "
+		   + "Estimated remaining time: %s\n";
+		
+		if(console != null) {
+			console.printf(
+				formatString, percentage, nodesPerSec, remainingTime);
+			needToOverwriteProgressLine = true;
+		} else {
+			// System.console() and System.out don't implement the same
+			// interface so we need to duplicate the function call code instead
+			// of assigning one of them to a variable and doing the function
+			// call upon it.
+			out.printf(
+				formatString, percentage, nodesPerSec, remainingTime);
+		}
 	}
 
 }
