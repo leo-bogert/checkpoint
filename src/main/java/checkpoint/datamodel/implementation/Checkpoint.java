@@ -1,6 +1,6 @@
 package checkpoint.datamodel.implementation;
 
-import static checkpoint.datamodel.implementation.JavaSHA256.sha256fromString;
+import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.lang.Math.min;
@@ -69,8 +69,11 @@ public final class Checkpoint implements ICheckpoint {
 	 *  - as a bonus is constant independent of system language configuration.
 	 *  
 	 *  "--zero-terminated" needs not be emulated since our Java code tracks the
-	 *  paths as separate objects each. */
-	private static final class PathComparator implements Comparator<Path> {
+	 *  paths as separate objects each.
+	 *  
+	 * TODO: Convert to standalone class now that it is also used by 
+	 * ConcurrentCheckpointGenerator */
+	public static final class PathComparator implements Comparator<Path> {
 		@Override public int compare(Path p1, Path p2) {
 			// The manpage of sort as of GNU coreutils 8.28 states:
 			//     Set LC_ALL=C to get the traditional sort order that uses
