@@ -1,6 +1,7 @@
 package checkpoint.generation;
 
 import static java.lang.Math.min;
+import static java.lang.System.currentTimeMillis;
 import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.Objects.requireNonNull;
@@ -17,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.implementation.Checkpoint;
@@ -58,6 +58,14 @@ public final class ConcurrentCheckpointGenerator
 	 *  This can be overriden by "--buffer" on the command line, which is
 	 *  passed into this variable as bytes. */
 	private final int readBufferBytes;
+
+	/** {@link System#currentTimeMillis()} when we started submitting the
+	 *  {@link INode}s to the worker threads. Used by
+	 *  {@link #printProgress(int, int)} to estimate the speed.
+	 *  The time for discovering the nodes using {@link NodeFinder} is
+	 *  intentionally not included because the progress percentage does not
+	 *  include it either. */
+	private long workStartedAtTime = 0;
 
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
@@ -283,6 +291,7 @@ public final class ConcurrentCheckpointGenerator
 		
 		out.println("Submitting work to threads...");
 		ArrayList<Future<?>> workResults = new ArrayList<>(threadCount);
+		workStartedAtTime = currentTimeMillis();
 		for(ArrayList<INode> batch : work)
 			workResults.add(executor.submit(new Worker(batch)));
 		
@@ -360,7 +369,12 @@ public final class ConcurrentCheckpointGenerator
 			? ((float)finishedNodes * 100) / (float)totalNodes
 			: 100f;
 		
-		console.printf("Progress: %6.2f %%\n", percentage);
+		long currentTime = currentTimeMillis();
+		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
+		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
+		
+		console.printf("Progress: %6.2f %% @ %.02f files/dirs per second.\n",
+			percentage, nodesPerSec);
 		progressLineAlreadyPrinted = true;
 	}
 
