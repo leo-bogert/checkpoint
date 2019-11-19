@@ -19,6 +19,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang.time.DurationFormatUtils;
+
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.implementation.Checkpoint;
 import checkpoint.datamodel.implementation.NodeFinder;
@@ -370,11 +372,28 @@ public final class ConcurrentCheckpointGenerator
 			: 100f;
 		
 		long currentTime = currentTimeMillis();
+		// TODO: Use class StopWatch which thanks to our existing dependency
+		// on Apache Java Commons Lang is available already.
 		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
 		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
 		
-		console.printf("Progress: %6.2f %% @ %.2f files/dirs per second.\n",
-			percentage, nodesPerSec);
+		String remainingTime;
+		if(nodesPerSec > 0) {
+			long remainingNodes = totalNodes - finishedNodes;
+			float remainingSecs = (float)remainingNodes / nodesPerSec;
+			// DurationFormatUtils wants milliseconds so convert back to that.
+			// This also ensures that it won't include millis in the output
+			// string because multiplying by 1000 causes the millis component
+			// to be zero and we tell it to ignore trailing zero time units.
+			long remainingMillis = (long)(remainingSecs * 1000f);
+			remainingTime = DurationFormatUtils.formatDurationWords(
+				remainingMillis, true, true);
+		} else
+			 remainingTime = "Unknown";
+		
+		console.printf("Progress: %6.2f %% @ %.2f files/dirs per second. "
+			+ "Estimated remaining time: %s\n",
+			percentage, nodesPerSec, remainingTime);
 		progressLineAlreadyPrinted = true;
 	}
 
