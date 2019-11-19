@@ -382,9 +382,6 @@ public final class ConcurrentCheckpointGenerator
 			int remainingNodes = totalNodes - finishedNodes;
 			float remainingSecs = (float)remainingNodes / nodesPerSec;
 			// DurationFormatUtils wants milliseconds so convert back to that.
-			// This also ensures that it won't include millis in the output
-			// string because multiplying by 1000 causes the millis component
-			// to be zero and we tell it to ignore trailing zero time units.
 			long remainingMillis = (long)(remainingSecs * 1000f);
 			remainingTime = DurationFormatUtils.formatDurationWords(
 				remainingMillis, true, true);
