@@ -102,6 +102,11 @@ public final class ConcurrentCheckpointGenerator
 			this.work = work;
 		}
 
+		// FIXME: Implement this:
+		/** WARNING: Must not use System.out / .err because it would collide
+		 *  with the ANSI escape codes to erase the current line which
+		 *  {@link ConcurrentCheckpointGenerator#printProgress(int, int)}
+		 *  will print! */
 		@Override public void run() {
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
