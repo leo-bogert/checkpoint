@@ -67,7 +67,7 @@ public final class ConcurrentCheckpointGenerator
 
 	/** {@link System#currentTimeMillis()} when we started submitting the
 	 *  {@link INode}s to the worker threads. Used by
-	 *  {@link #printProgress(int, int)} to estimate the speed.
+	 *  {@link #printProgress(long, long, int, int)} to estimate the speed.
 	 *  The time for discovering the nodes using {@link NodeFinder} is
 	 *  intentionally not included because the progress percentage does not
 	 *  include it either. */
@@ -117,8 +117,8 @@ public final class ConcurrentCheckpointGenerator
 
 		/** WARNING: Must not use System.out / .err because it would collide
 		 *  with the ANSI escape codes to erase the current line which
-		 *  {@link ConcurrentCheckpointGenerator#printProgress(int, int)}
-		 *  will print on the main non-worker thread concurrently! */
+		 *  {@link ConcurrentCheckpointGenerator#printProgress(long, long, int,
+		 *  int)} will print on the main non-worker thread concurrently! */
 		@Override public List<Failure> call() {
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
@@ -346,7 +346,17 @@ public final class ConcurrentCheckpointGenerator
 			// - at the start of the loop so the user quickly sees that progress
 			//   will be printed.
 			// - at the end of the loop so 100% will always be printed.
-			printProgress(checkpoint.getNodeCount(), nodeCount);
+			
+			// Synchronize so we get coherent values from the two calls upon
+			// checkpoint.
+			// TODO: Add a container class "Progress" to Checkpoint and return
+			// an object of it in a synchronized getter there so we don't mess
+			// with Checkpoint's synchronization here.
+			synchronized(checkpoint) {
+				printProgress(checkpoint.getNodeSize(), totalNodeSize,
+				              checkpoint.getNodeCount(), nodeCount);
+			}
+			
 			if(finished)
 				break;
 			finished = executor.awaitTermination(1, SECONDS);
@@ -410,7 +420,9 @@ public final class ConcurrentCheckpointGenerator
 	 *  call.
 	 *  If stdout is a file prints progress at most every 10% and always at
 	 *  100%. ANSI escape codes are not used then. */
-	private void printProgress(int finishedNodes, int totalNodes) {
+	private void printProgress(long finishedBytes, long totalBytes,
+			int finishedNodes, int totalNodes) {
+		
 		// We want to remove our previous progress output so the new one can
 		// appear on the same line. To achieve that we thus use the following
 		// ANSI escape sequence, which:
