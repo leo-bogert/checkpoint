@@ -315,7 +315,7 @@ public final class ConcurrentCheckpointGenerator
 		for(INode n : nodes)
 			totalNodeSize += n.getSize();
 		// TODO: Java Commons IO will soon receive a better version of
-		// fbyteCountToDisplaySize() unction which doesn't round down.
+		// function byteCountToDisplaySize() which doesn't round down.
 		out.println("Total size: " + byteCountToDisplaySize(totalNodeSize));
 		
 		out.println("Dividing into up to " + threadCount
