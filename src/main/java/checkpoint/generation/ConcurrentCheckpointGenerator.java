@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -96,15 +98,15 @@ public final class ConcurrentCheckpointGenerator
 
 	/** Used by our worker threads to pass failures to the main thread.
 	 *  This is necessary because we cannot use stdout/stderr on them, see
-	 *  the JavaDoc of {@link Worker#run()} */
+	 *  the JavaDoc of {@link Worker#call()} */
 	private static final class Failure {
 		Path        path;
 		IOException sha256Failure;
 		IOException timestampsFailure;
 	}
 
-	/** Our worker threads run these Runnables. */
-	private final class Worker implements Runnable {
+	/** Our worker threads run these Callables. */
+	private final class Worker implements Callable<List<Failure>> {
 
 		private final ArrayList<INode> work;
 
@@ -117,7 +119,7 @@ public final class ConcurrentCheckpointGenerator
 		 *  with the ANSI escape codes to erase the current line which
 		 *  {@link ConcurrentCheckpointGenerator#printProgress(int, int)}
 		 *  will print! */
-		@Override public void run() {
+		@Override public List<Failure> call() {
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
 			
@@ -128,7 +130,7 @@ public final class ConcurrentCheckpointGenerator
 			// We don't put this into a member variable intentionally:
 			// The loop which creates the Worker objects is single-threaded so
 			// allocating lots of memory may take longer there than having each
-			// Worker do it concurrently on their thread in run().
+			// Worker do it concurrently on their thread in call().
 			JavaSHA256Generator hasher
 				= new JavaSHA256Generator(readBufferBytes);
 			
@@ -162,7 +164,7 @@ public final class ConcurrentCheckpointGenerator
 						// would cause "(sha256sum failed!)" to be written to
 						// the output file, which would be wrong - it didn't
 						// fail, we just didn't try.
-						return;
+						return failures;
 					}
 				}
 				
@@ -194,6 +196,8 @@ public final class ConcurrentCheckpointGenerator
 				// This is thread-safe by contract of ICheckpoint.
 				checkpoint.addNode(node);
 			}
+			
+			return failures;
 		}
 	}
 
@@ -321,7 +325,8 @@ public final class ConcurrentCheckpointGenerator
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 		
 		out.println("Submitting work to threads...");
-		ArrayList<Future<?>> workResults = new ArrayList<>(threadCount);
+		ArrayList<Future<List<Failure>>> workResults
+			= new ArrayList<>(threadCount);
 		workStartedAtTime = currentTimeMillis();
 		for(ArrayList<INode> batch : work)
 			workResults.add(executor.submit(new Worker(batch)));
@@ -342,14 +347,9 @@ public final class ConcurrentCheckpointGenerator
 		}
 		
 		out.println("Work finished, checking results...");
-		for(Future<?> result : workResults) {
+		for(Future<List<Failure>> result : workResults) {
 			try {
-				// Returning null means success w.r.t. the submit() version we
-				// used.
-				if(result.get() != null) {
-					throw new RuntimeException("BUG: Worker thread failed! "
-						+ "Future<?>.get() value: " + result.get());
-				}
+				List<Failure> failures = requireNonNull(result.get());
 			} catch(ExecutionException e) {
 				throw new RuntimeException(
 					"BUG: Worker thread threw! Please report this!",
