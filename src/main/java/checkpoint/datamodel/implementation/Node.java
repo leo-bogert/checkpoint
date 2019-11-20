@@ -12,29 +12,38 @@ public final class Node implements INode {
 
 	private final Path        path;
 	private final boolean     isDirectory;
+	private final long        size;
 	private       ISHA256     sha256;
 	private       ITimestamps timestamps;
 
-	private Node(Path path, boolean isDirectory, ISHA256 sha256,
-			ITimestamps timestamps) {
+	private Node(Path path, boolean isDirectory, long size,
+			ISHA256 sha256, ITimestamps timestamps) {
 		
 		this.path        = requireNonNull(path);
 		this.isDirectory = isDirectory;
+		this.size        = size;
 		this.sha256      = sha256;
 		this.timestamps  = timestamps;
 		
-		if(isDirectory && sha256 != null)
+		if(isDirectory) {
+			if(sha256 != null || size != 0)
+				throw new IllegalArgumentException();
+		}
+		
+		if(size < 0)
 			throw new IllegalArgumentException();
 	}
 
-	public static Node constructNode(Path path, boolean isDirectory,
+	public static Node constructNode(Path path, boolean isDirectory, long size,
 			ISHA256 sha256, ITimestamps timestamps) {
 		
-		return new Node(path, isDirectory, sha256, timestamps);
+		return new Node(path, isDirectory, size, sha256, timestamps);
 	}
 
-	public static Node constructNode(Path path, boolean isDirectory) {
-		return new Node(path, isDirectory, null, null);
+	public static Node constructNode(Path path, boolean isDirectory,
+			long size) {
+		
+		return new Node(path, isDirectory, size, null, null);
 	}
 
 	@Override public Path getPath() {
@@ -44,6 +53,10 @@ public final class Node implements INode {
 
 	@Override public boolean isDirectory() {
 		return isDirectory;
+	}
+
+	@Override public long getSize() {
+		return size;
 	}
 
 	@Override public ISHA256 getHash() {
