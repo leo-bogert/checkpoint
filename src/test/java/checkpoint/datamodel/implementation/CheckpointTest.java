@@ -70,7 +70,7 @@ public final class CheckpointTest {
 
 	@Test public void testLoad() throws IOException, DecoderException {
 		String poorFilename = "This \n is \r\n bad \t due to the whitespace!\n";
-		Node n = constructNode(Paths.get(poorFilename), false,
+		Node n = constructNode(Paths.get(poorFilename), false, 123,
 			sha256fromString(someHash), someTimestamps);
 		Path testCheckpoint = tempDir.newFolder().toPath();
 		Checkpoint original = new Checkpoint();
