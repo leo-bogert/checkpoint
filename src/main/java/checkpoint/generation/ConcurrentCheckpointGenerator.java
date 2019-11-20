@@ -287,6 +287,9 @@ public final class ConcurrentCheckpointGenerator
 		return result;
 	}
 
+	// FIXME: Extract functions out of this so it gets smaller. Then add a
+	// try/finally block surrounding all calls to them and in the finally do
+	// cleanup such a specifically terminating the executor.
 	@Override public void run() throws InterruptedException, IOException {
 		out.println("Input:   " + inputDir);
 		out.println("Output:  " + outputDir);
