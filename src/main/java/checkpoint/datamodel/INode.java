@@ -40,7 +40,7 @@ public interface INode {
 
 	boolean isDirectory();
 
-	/** Returns the size of the file if available.
+	/** Returns the size of the file, in bytes, if available.
 	 *  Returns 0 for directories to ensure progress computation at
 	 *  {@link ConcurrentCheckpointGenerator} is trivial.
 	 * 
