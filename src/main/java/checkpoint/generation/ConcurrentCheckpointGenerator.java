@@ -131,10 +131,13 @@ public final class ConcurrentCheckpointGenerator
 			JavaSHA256Generator hasher
 				= new JavaSHA256Generator(readBufferBytes);
 			
+			LinkedList<Failure> failures = new LinkedList<>();
+			
 			for(INode node : work) {
 				// INode.getPath() is relative to the inputDir so we must
 				// prefix it with the inputDir.
 				Path pathOnDisk = inputDir.resolve(node.getPath());
+				Failure failure = null;
 				
 				if(!node.isDirectory()) {
 					try {
@@ -145,6 +148,9 @@ public final class ConcurrentCheckpointGenerator
 						// it at the default because we might be resuming an
 						// existing checkpoint where it wasn't null.
 						node.setHash(null);
+						failure = new Failure();
+						failure.path = node.getPath();
+						failure.sha256Failure = e;
 						
 						err.println("SHA256 computation failed for '"
 							+ node.getPath() + "': " + e);
@@ -172,9 +178,17 @@ public final class ConcurrentCheckpointGenerator
 					// Same as for the hash.
 					node.setTimestamps(null);
 					
+					if(failure == null) {
+						failure = new Failure();
+						failure.path = node.getPath();
+					}
+					failure.timestampsFailure = e;
 					err.println("Reading timestamps failed for '"
 						+ node.getPath() + "': " + e);
 				}
+				
+				if(failure != null)
+					failures.add(failure);
 				
 				// This is thread-safe by contract of ICheckpoint.
 				checkpoint.addNode(node);
