@@ -394,6 +394,9 @@ public final class ConcurrentCheckpointGenerator
 	 *  - nodes per second
 	 *  - estimated remaining time.
 	 *  
+	 *  TODO: Provide progress and speed in MiB, not files/dirs, once
+	 *  {@link NodeFinder} stores the node size in the nodes.
+	 *  
 	 *  If stdout is a terminal prints progress at every call and uses ANSI
 	 *  escape codes to print it at the same position on screen as the last
 	 *  call.
@@ -457,7 +460,7 @@ public final class ConcurrentCheckpointGenerator
 			 remainingTime = "Unknown";
 		
 		String formatString =
-			"Progress: %6.2f %% @ %.2f files/dirs per second. "
+			"Progress: %6.2f %% of files/dirs @ %.2f files/dirs per second. "
 		   + "Estimated remaining time: %s\n";
 		
 		if(console != null) {
