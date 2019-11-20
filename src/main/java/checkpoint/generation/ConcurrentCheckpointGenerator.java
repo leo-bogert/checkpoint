@@ -114,11 +114,10 @@ public final class ConcurrentCheckpointGenerator
 			this.work = work;
 		}
 
-		// FIXME: Implement this:
 		/** WARNING: Must not use System.out / .err because it would collide
 		 *  with the ANSI escape codes to erase the current line which
 		 *  {@link ConcurrentCheckpointGenerator#printProgress(int, int)}
-		 *  will print! */
+		 *  will print on the main non-worker thread concurrently! */
 		@Override public List<Failure> call() {
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
@@ -151,12 +150,10 @@ public final class ConcurrentCheckpointGenerator
 						// it at the default because we might be resuming an
 						// existing checkpoint where it wasn't null.
 						node.setHash(null);
+						
 						failure = new Failure();
 						failure.path = node.getPath();
 						failure.sha256Failure = e;
-						
-						err.println("SHA256 computation failed for '"
-							+ node.getPath() + "': " + e);
 					} catch(InterruptedException e) {
 						// Shutdown requested, exit thread.
 						// Return without adding the INode to the Checkpoint
@@ -186,8 +183,6 @@ public final class ConcurrentCheckpointGenerator
 						failure.path = node.getPath();
 					}
 					failure.timestampsFailure = e;
-					err.println("Reading timestamps failed for '"
-						+ node.getPath() + "': " + e);
 				}
 				
 				if(failure != null)
@@ -350,6 +345,20 @@ public final class ConcurrentCheckpointGenerator
 		for(Future<List<Failure>> result : workResults) {
 			try {
 				List<Failure> failures = requireNonNull(result.get());
+				for(Failure f : failures) {
+					if(f.sha256Failure != null) {
+						err.println("SHA256 computation failed for '"
+							+ f.path + "': " + f.sha256Failure);
+					}
+					if(f.timestampsFailure != null) {
+						err.println("Reading timestamps failed for '"
+							+ f.path + "': " + f.timestampsFailure);
+					}
+					if(f.sha256Failure == null && f.timestampsFailure == null) {
+						throw new NullPointerException(
+							"BUG: Empty Failure object! Please report this!");
+					}
+				}
 			} catch(ExecutionException e) {
 				throw new RuntimeException(
 					"BUG: Worker thread threw! Please report this!",
