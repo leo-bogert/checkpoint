@@ -347,8 +347,13 @@ public final class Checkpoint implements ICheckpoint {
 							dates.get("Modify"))
 					: null;
 				
+				// Not currently included in the file format. Once you implement
+				// that please remove the related TODO and documentation at the
+				// INode interface.
+				long size = 0;
+				
 				result.addNode(
-					constructNode(path, isDirectory, hash, timestamps));
+					constructNode(path, isDirectory, size, hash, timestamps));
 			}
 			
 			if(s.ioException() != null)
