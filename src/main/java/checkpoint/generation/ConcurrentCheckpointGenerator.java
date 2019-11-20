@@ -468,6 +468,11 @@ public final class ConcurrentCheckpointGenerator
 		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
 		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
 		
+		// Need to use double here because byte counts are easily billions.
+		double bytesPerSec = elapsedSecs > 0
+			? (double)finishedBytes / (double)elapsedSecs : 0d;
+		double mibPerSec   = bytesPerSec / (1024*1024);
+		
 		String remainingTime;
 		if(nodesPerSec > 0f) {
 			int remainingNodes = totalNodes - finishedNodes;
