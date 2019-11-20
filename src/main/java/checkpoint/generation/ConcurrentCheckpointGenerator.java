@@ -349,7 +349,7 @@ public final class ConcurrentCheckpointGenerator
 			
 			// Synchronize so we get coherent values from the two calls upon
 			// checkpoint.
-			// TODO: Add a container class "Progress" to Checkpoint and return
+			// TODO: Add a container class "Progress" to ICheckpoint and return
 			// an object of it in a synchronized getter there so we don't mess
 			// with Checkpoint's synchronization here.
 			synchronized(checkpoint) {
