@@ -93,6 +93,15 @@ public final class ConcurrentCheckpointGenerator
 		this.checkpoint = new Checkpoint();
 	}
 
+	/** Used by our worker threads to pass failures to the main thread.
+	 *  This is necessary because we cannot use stdout/stderr on them, see
+	 *  the JavaDoc of {@link Worker#run()} */
+	private static final class Failure {
+		Path        path;
+		IOException sha256Failure;
+		IOException timestampsFailure;
+	}
+
 	/** Our worker threads run these Runnables. */
 	private final class Worker implements Runnable {
 
