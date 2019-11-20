@@ -47,7 +47,9 @@ public interface INode {
 	 *  Returns 0 if the size is not available, which is the case if the
 	 *  checkpoint has been loaded from disk as our file format currently does
 	 *  not include it.
-	 *  TODO: Allow including this in the checkpoint file. */
+	 *  TODO: Allow including this in the checkpoint file. Adapt the JavaDoc of
+	 *  {@link ICheckpoint#getNodeSize()} then as well as all functions which
+	 *  use it. */
 	long getSize();
 
 	/** Returns null for directories.

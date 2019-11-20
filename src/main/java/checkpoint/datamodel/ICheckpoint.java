@@ -41,4 +41,10 @@ public interface ICheckpoint {
 
 	int getNodeCount();
 
+	/** Returns the sum of {@link INode#getSize()} of all contained nodes.
+	 *  Please notice that this will be 0 after loading a checkpoint from disk
+	 *  because we don't include it in the file format yet. A TODO for that
+	 *  exists at {@link INode#getSize()}. */
+	long getNodeSize();
+
 }
