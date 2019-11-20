@@ -71,7 +71,8 @@ public final class NodeFinder extends SimpleFileVisitor<Path>
 			BasicFileAttributes attrs) throws IOException {
 
 		if(isOnInputDirFilesystem(dir)) {
-			result.add(Node.constructNode(adjustPath(dir), true));
+			result.add(Node.constructNode(adjustPath(dir), true,
+					0 /* constructNode() wants size of 0 for directories! */));
 			return CONTINUE;
 		} else {
 			err.println("Ignoring different filesystem: " + dir);
@@ -91,7 +92,8 @@ public final class NodeFinder extends SimpleFileVisitor<Path>
 			// "find -mount", and thus by the Python/Bash implementations,
 			// perhaps do so here as well?
 			if(isOnInputDirFilesystem(file))
-				result.add(Node.constructNode(adjustPath(file), false));
+				result.add(
+					Node.constructNode(adjustPath(file), false, attrs.size()));
 			else
 				err.println("Ignoring file on different filesystem: " + file);
 		} else {
