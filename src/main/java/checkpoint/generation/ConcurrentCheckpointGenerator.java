@@ -6,6 +6,7 @@ import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.apache.commons.io.FileUtils.byteCountToDisplaySize;
 
 import java.io.Console;
 import java.io.IOException;
@@ -301,14 +302,21 @@ public final class ConcurrentCheckpointGenerator
 		// progress.
 		// FIXME: Save every 15 minutes.
 		
-		out.print("Finding input files and directories in '"
+		out.println("Finding input files and directories in '"
 			+ inputDir + "'... ");
 		// Convert to ArrayList since removeAndDivideWork() does shuffle() which
 		// needs a list which implements RandomAccess.
 		ArrayList<INode> nodes
 			= new ArrayList<INode>(new NodeFinder().findNodes(inputDir));
 		final int nodeCount = nodes.size();
-		out.println(nodeCount);
+		out.println("Total files/dirs: " + nodeCount);
+		
+		long totalNodeSize = 0;
+		for(INode n : nodes)
+			totalNodeSize += n.getSize();
+		// TODO: Java Commons IO will soon receive a better version of
+		// fbyteCountToDisplaySize() unction which doesn't round down.
+		out.println("Total size: " + byteCountToDisplaySize(totalNodeSize));
 		
 		out.println("Dividing into up to " + threadCount
 			+ " batches of work...");
