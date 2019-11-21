@@ -470,7 +470,7 @@ public final class ConcurrentCheckpointGenerator
 		
 		// Need to use double here because byte counts are easily billions.
 		double bytesPerSec = elapsedSecs > 0
-			? (double)finishedBytes / (double)elapsedSecs : 0d;
+			? (double)finishedBytes / elapsedSecs : 0;
 		double mibPerSec   = Math.scalb(bytesPerSec, -20);
 		
 		String remainingTime;
