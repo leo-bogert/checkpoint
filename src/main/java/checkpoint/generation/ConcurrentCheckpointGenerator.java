@@ -440,6 +440,11 @@ public final class ConcurrentCheckpointGenerator
 				console.printf("\33[A\33[2K\r");
 		}
 		
+		// Need to use double here because byte counts are easily billions.
+		double percentageOfBytes = totalBytes > 0
+			? ((double)finishedBytes / totalBytes) * 100
+			: 100;
+		
 		float percentage = totalNodes > 0
 			? ((float)finishedNodes * 100) / (float)totalNodes
 			: 100f;
@@ -468,7 +473,6 @@ public final class ConcurrentCheckpointGenerator
 		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
 		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
 		
-		// Need to use double here because byte counts are easily billions.
 		double bytesPerSec = elapsedSecs > 0
 			? (double)finishedBytes / elapsedSecs : 0;
 		double mibPerSec   = Math.scalb(bytesPerSec, -20);
