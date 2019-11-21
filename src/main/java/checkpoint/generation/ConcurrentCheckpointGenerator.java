@@ -446,8 +446,8 @@ public final class ConcurrentCheckpointGenerator
 			: 100;
 		
 		float percentage = totalNodes > 0
-			? ((float)finishedNodes * 100) / (float)totalNodes
-			: 100f;
+			? ((float)finishedNodes / totalNodes) * 100
+			: 100;
 		
 		// If stdout is a file this ensures we don't clutter it without constant
 		// progress printing by returning if we haven't done a 10% step.
