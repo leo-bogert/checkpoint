@@ -496,9 +496,9 @@ public final class ConcurrentCheckpointGenerator
 			 remainingTimeViaNodes = "Unknown";
 		
 		String formatString =
-			"Progress: %6.2f %% of total bytes @ %.1f MiB/s. "
-		   + "%6.2f %% of total files/dirs @ %.2f/s. "
-		   + "Estimated remaining time: %s via bytes, %s via files."
+			"Progress: %6.2f %% of bytes @ %.1f MiB/s. "
+		   + "%6.2f %% of files/dirs @ %.2f/s. "
+		   + "Estimated remaining time: %s via bytes, %s via files/dirs."
 		   + "\n";
 		
 		if(console != null) {
