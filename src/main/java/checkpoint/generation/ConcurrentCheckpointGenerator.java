@@ -405,7 +405,7 @@ public final class ConcurrentCheckpointGenerator
 
 	private final Console console = System.console();
 	private boolean needToOverwriteProgressLine = false;
-	private float lastPrintedPercentage = -1f;
+	private double lastPrintedPercentage = -1;
 
 	/** Prints progress info consisting of:
 	 *  - percentage
@@ -449,19 +449,19 @@ public final class ConcurrentCheckpointGenerator
 		// If stdout is a file this ensures we don't clutter it without constant
 		// progress printing by returning if we haven't done a 10% step.
 		if(console == null) {
-			if(lastPrintedPercentage < 0f) {
+			if(lastPrintedPercentage < 0) {
 				out.println("stdout is not a terminal, printing progress at "
 					+ "most every 10%.");
-				lastPrintedPercentage = 0f;
+				lastPrintedPercentage = 0;
 			}
-			 
-			if((percentage - lastPrintedPercentage) < 10f
+			
+			if((percentageOfBytes - lastPrintedPercentage) < 10
 					&& finishedNodes != totalNodes /* Always print at 100% */) {
 				
 				return;
 			}
 			
-			lastPrintedPercentage = percentage;
+			lastPrintedPercentage = percentageOfBytes;
 		}
 		
 		long currentTime = currentTimeMillis();
