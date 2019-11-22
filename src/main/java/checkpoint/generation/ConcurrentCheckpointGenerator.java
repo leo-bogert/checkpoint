@@ -485,15 +485,15 @@ public final class ConcurrentCheckpointGenerator
 		} else
 			 remainingTimeViaBytes = "Unknown";
 		
-		String remainingTime;
+		String remainingTimeViaNodes;
 		if(nodesPerSec > 0) {
 			int remainingNodes = totalNodes - finishedNodes;
 			float remainingSecs = (float)remainingNodes / nodesPerSec;
 			long remainingMillis = (long)(remainingSecs * 1000);
-			remainingTime = DurationFormatUtils.formatDurationWords(
+			remainingTimeViaNodes = DurationFormatUtils.formatDurationWords(
 				remainingMillis, true, true);
 		} else
-			 remainingTime = "Unknown";
+			 remainingTimeViaNodes = "Unknown";
 		
 		String formatString =
 			"Progress: %6.2f %% of total bytes @ %.1f MiB/s. "
@@ -504,7 +504,7 @@ public final class ConcurrentCheckpointGenerator
 		if(console != null) {
 			console.printf(
 				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
-				nodesPerSec, remainingTimeViaBytes, remainingTime);
+				nodesPerSec, remainingTimeViaBytes, remainingTimeViaNodes);
 			needToOverwriteProgressLine = true;
 		} else {
 			// System.console() and System.out don't implement the same
@@ -513,7 +513,7 @@ public final class ConcurrentCheckpointGenerator
 			// call upon it.
 			out.printf(
 				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
-				nodesPerSec, remainingTimeViaBytes, remainingTime);
+				nodesPerSec, remainingTimeViaBytes, remainingTimeViaNodes);
 		}
 	}
 
