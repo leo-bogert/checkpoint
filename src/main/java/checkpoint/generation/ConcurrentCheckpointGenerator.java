@@ -442,7 +442,7 @@ public final class ConcurrentCheckpointGenerator
 			? ((double)finishedBytes / totalBytes) * 100
 			: 100;
 		
-		float percentage = totalNodes > 0
+		float percentageOfNodes = totalNodes > 0
 			? ((float)finishedNodes / totalNodes) * 100
 			: 100;
 		
@@ -503,7 +503,7 @@ public final class ConcurrentCheckpointGenerator
 		
 		if(console != null) {
 			console.printf(
-				formatString, percentageOfBytes, mibPerSec, percentage,
+				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
 				nodesPerSec, remainingTimeViaBytes, remainingTime);
 			needToOverwriteProgressLine = true;
 		} else {
@@ -512,7 +512,7 @@ public final class ConcurrentCheckpointGenerator
 			// of assigning one of them to a variable and doing the function
 			// call upon it.
 			out.printf(
-				formatString, percentageOfBytes, mibPerSec, percentage,
+				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
 				nodesPerSec, remainingTimeViaBytes, remainingTime);
 		}
 	}
