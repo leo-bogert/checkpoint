@@ -456,7 +456,7 @@ public final class ConcurrentCheckpointGenerator
 			}
 			
 			if((percentageOfBytes - lastPrintedPercentage) < 10
-					&& finishedNodes != totalNodes /* Always print at 100% */) {
+					&& finishedNodes < totalNodes /* Always print at 100% */) {
 				
 				return;
 			}
