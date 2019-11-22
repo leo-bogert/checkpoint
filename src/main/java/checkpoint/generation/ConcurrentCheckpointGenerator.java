@@ -472,10 +472,21 @@ public final class ConcurrentCheckpointGenerator
 		// on Apache Java Commons Lang is available already.
 		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
 		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
-		
 		double bytesPerSec = elapsedSecs > 0
 			? (double)finishedBytes / elapsedSecs : 0;
 		double mibPerSec   = Math.scalb(bytesPerSec, -20);
+		
+		String remainingTimeViaBytes;
+		if(bytesPerSec > 0) {
+			long remainingBytes = totalBytes - finishedBytes;
+			double remainingSecs = (double)remainingBytes / bytesPerSec;
+			// DurationFormatUtils wants milliseconds so convert back to that.
+			// Long can hold millions of years in millis so casting is okay.
+			long remainingMillis = (long)(remainingSecs * 1000);
+			remainingTimeViaBytes = DurationFormatUtils.formatDurationWords(
+				remainingMillis, true, true);
+		} else
+			 remainingTimeViaBytes = "Unknown";
 		
 		String remainingTime;
 		if(nodesPerSec > 0f) {
