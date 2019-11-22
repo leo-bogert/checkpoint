@@ -480,8 +480,8 @@ public final class ConcurrentCheckpointGenerator
 			// DurationFormatUtils wants milliseconds so convert back to that.
 			// Long can hold millions of years in millis so casting is okay.
 			long remainingMillis = (long)(remainingSecs * 1000);
-			remainingTimeViaBytes = DurationFormatUtils.formatDurationWords(
-				remainingMillis, true, true);
+			remainingTimeViaBytes = DurationFormatUtils.formatDuration(
+				remainingMillis, "HH:mm:ss");
 		} else
 			 remainingTimeViaBytes = "Unknown";
 		
@@ -490,8 +490,8 @@ public final class ConcurrentCheckpointGenerator
 			int remainingNodes = totalNodes - finishedNodes;
 			float remainingSecs = (float)remainingNodes / nodesPerSec;
 			long remainingMillis = (long)(remainingSecs * 1000);
-			remainingTimeViaNodes = DurationFormatUtils.formatDurationWords(
-				remainingMillis, true, true);
+			remainingTimeViaNodes = DurationFormatUtils.formatDuration(
+				remainingMillis, "HH:mm:ss");
 		} else
 			 remainingTimeViaNodes = "Unknown";
 		
