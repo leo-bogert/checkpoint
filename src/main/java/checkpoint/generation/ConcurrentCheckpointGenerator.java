@@ -409,12 +409,9 @@ public final class ConcurrentCheckpointGenerator
 
 	/** Prints progress info consisting of:
 	 *  - percentage
-	 *  - nodes per second
+	 *  - speed
 	 *  - estimated remaining time.
-	 *  
-	 *  TODO: Provide progress and speed in MiB, not files/dirs, once
-	 *  {@link NodeFinder} stores the node size in the nodes.
-	 *  
+	 *    
 	 *  If stdout is a terminal prints progress at every call and uses ANSI
 	 *  escape codes to print it at the same position on screen as the last
 	 *  call.
@@ -499,12 +496,15 @@ public final class ConcurrentCheckpointGenerator
 			 remainingTime = "Unknown";
 		
 		String formatString =
-			"Progress: %6.2f %% of files/dirs @ %.2f files/dirs per second. "
-		   + "Estimated remaining time: %s\n";
+			"Progress: %6.2f %% of total bytes @ %.1f MiB/s. "
+		   + "%6.2f %% of total files/dirs @ %.2f/s. "
+		   + "Estimated remaining time: %s via bytes, %s via files."
+		   + "\n";
 		
 		if(console != null) {
 			console.printf(
-				formatString, percentage, nodesPerSec, remainingTime);
+				formatString, percentageOfBytes, mibPerSec, percentage,
+				nodesPerSec, remainingTimeViaBytes, remainingTime);
 			needToOverwriteProgressLine = true;
 		} else {
 			// System.console() and System.out don't implement the same
@@ -512,7 +512,8 @@ public final class ConcurrentCheckpointGenerator
 			// of assigning one of them to a variable and doing the function
 			// call upon it.
 			out.printf(
-				formatString, percentage, nodesPerSec, remainingTime);
+				formatString, percentageOfBytes, mibPerSec, percentage,
+				nodesPerSec, remainingTimeViaBytes, remainingTime);
 		}
 	}
 
