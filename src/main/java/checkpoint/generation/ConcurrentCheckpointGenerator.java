@@ -489,11 +489,10 @@ public final class ConcurrentCheckpointGenerator
 			 remainingTimeViaBytes = "Unknown";
 		
 		String remainingTime;
-		if(nodesPerSec > 0f) {
+		if(nodesPerSec > 0) {
 			int remainingNodes = totalNodes - finishedNodes;
 			float remainingSecs = (float)remainingNodes / nodesPerSec;
-			// DurationFormatUtils wants milliseconds so convert back to that.
-			long remainingMillis = (long)(remainingSecs * 1000f);
+			long remainingMillis = (long)(remainingSecs * 1000);
 			remainingTime = DurationFormatUtils.formatDurationWords(
 				remainingMillis, true, true);
 		} else
