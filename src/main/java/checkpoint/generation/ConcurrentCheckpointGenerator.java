@@ -497,7 +497,7 @@ public final class ConcurrentCheckpointGenerator
 		
 		String formatString =
 			"Progress: %6.2f %% of bytes @ %.1f MiB/s. "
-		   + "%6.2f %% of files/dirs @ %.2f/s. "
+		   + "%6.2f %% of files/dirs @ %.1f/s. "
 		   + "Estimated remaining time: %s via bytes, %s via files/dirs."
 		   + "\n";
 		
