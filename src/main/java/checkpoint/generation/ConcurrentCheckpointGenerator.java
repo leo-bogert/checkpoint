@@ -433,11 +433,10 @@ public final class ConcurrentCheckpointGenerator
 		//         &oldid=923017881#Terminal_output_sequences
 		// Source: https://stackoverflow.com/a/35190285
 		if(needToOverwriteProgressLine) {
-			// System.console() will be null if the output is not a terminal but
-			// a file - which we hereby use to not print the ANSI control
-			// characters if it is a file to not clutter it.
-			if(console != null)
-				console.printf("\33[A\33[2K\r");
+			// Guaranteed by code at the end of the function.
+			assert(console != null);
+			
+			console.printf("\33[A\33[2K\r");
 		}
 		
 		// Need to use double here because byte counts are easily billions.
@@ -525,6 +524,11 @@ public final class ConcurrentCheckpointGenerator
 			out.printf(
 				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
 				nodesPerSec, remainingTimeViaBytes, remainingTimeViaNodes);
+			
+			// Don't set needToOverwriteProgressLine because if console == null
+			// the output is a file and we don't want to clutter files with ANSI
+			// control characters which don't make sense towards tools for
+			// viewing text files.
 		}
 	}
 
