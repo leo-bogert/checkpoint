@@ -495,6 +495,14 @@ public final class ConcurrentCheckpointGenerator
 		} else
 			 remainingTimeViaNodes = "Unknown";
 		
+		// TODO: If we want to adjust the number of decimal digits in a smart
+		// fashion, e.g. have less for sufficiently large MiB/s and files/dirs
+		// per second, we likely have to use class DecimalFormat instead:
+		// At first glance setting a small "precision" value for printf() format
+		// strings would seem appropriate, but it would also cause it to quickly
+		// resort to using scientific notification, e.g. "123.45e6", which is
+		// not user-friendly.
+		// Recycle this TODO as documentation then.
 		String formatString =
 		    "Progress: %6.2f %% of bytes @ %.1f MiB/s. "
 		  + "%6.2f %% of files/dirs @ %.1f/s. "
