@@ -1,21 +1,29 @@
 package checkpoint.generation;
 
 import static java.lang.Math.min;
+import static java.lang.System.currentTimeMillis;
 import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.apache.commons.io.FileUtils.byteCountToDisplaySize;
 
+import java.io.Console;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.lang.time.DurationFormatUtils;
 
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.implementation.Checkpoint;
@@ -57,6 +65,14 @@ public final class ConcurrentCheckpointGenerator
 	 *  passed into this variable as bytes. */
 	private final int readBufferBytes;
 
+	/** {@link System#currentTimeMillis()} when we started submitting the
+	 *  {@link INode}s to the worker threads. Used by
+	 *  {@link #printProgress(long, long, int, int)} to estimate the speed.
+	 *  The time for discovering the nodes using {@link NodeFinder} is
+	 *  intentionally not included because the progress percentage does not
+	 *  include it either. */
+	private long workStartedAtTime = 0;
+
 
 	public ConcurrentCheckpointGenerator(Path inputDir, Path outputDir,
 			boolean solidStateDrive, Integer threads, int readBufferBytes) {
@@ -81,8 +97,17 @@ public final class ConcurrentCheckpointGenerator
 		this.checkpoint = new Checkpoint();
 	}
 
-	/** Our worker threads run these Runnables. */
-	private final class Worker implements Runnable {
+	/** Used by our worker threads to pass failures to the main thread.
+	 *  This is necessary because we cannot use stdout/stderr on them, see
+	 *  the JavaDoc of {@link Worker#call()} */
+	private static final class Failure {
+		Path        path;
+		IOException sha256Failure;
+		IOException timestampsFailure;
+	}
+
+	/** Our worker threads run these Callables. */
+	private final class Worker implements Callable<List<Failure>> {
 
 		private final ArrayList<INode> work;
 
@@ -90,7 +115,11 @@ public final class ConcurrentCheckpointGenerator
 			this.work = work;
 		}
 
-		@Override public void run() {
+		/** WARNING: Must not use System.out / .err because it would collide
+		 *  with the ANSI escape codes to erase the current line which
+		 *  {@link ConcurrentCheckpointGenerator#printProgress(long, long, int,
+		 *  int)} will print on the main non-worker thread concurrently! */
+		@Override public List<Failure> call() {
 			Thread.currentThread().setName(
 				"ConcurrentCheckpointGenerator.Worker");
 			
@@ -101,14 +130,17 @@ public final class ConcurrentCheckpointGenerator
 			// We don't put this into a member variable intentionally:
 			// The loop which creates the Worker objects is single-threaded so
 			// allocating lots of memory may take longer there than having each
-			// Worker do it concurrently on their thread in run().
+			// Worker do it concurrently on their thread in call().
 			JavaSHA256Generator hasher
 				= new JavaSHA256Generator(readBufferBytes);
+			
+			LinkedList<Failure> failures = new LinkedList<>();
 			
 			for(INode node : work) {
 				// INode.getPath() is relative to the inputDir so we must
 				// prefix it with the inputDir.
 				Path pathOnDisk = inputDir.resolve(node.getPath());
+				Failure failure = null;
 				
 				if(!node.isDirectory()) {
 					try {
@@ -120,8 +152,9 @@ public final class ConcurrentCheckpointGenerator
 						// existing checkpoint where it wasn't null.
 						node.setHash(null);
 						
-						err.println("SHA256 computation failed for '"
-							+ node.getPath() + "': " + e);
+						failure = new Failure();
+						failure.path = node.getPath();
+						failure.sha256Failure = e;
 					} catch(InterruptedException e) {
 						// Shutdown requested, exit thread.
 						// Return without adding the INode to the Checkpoint
@@ -129,7 +162,7 @@ public final class ConcurrentCheckpointGenerator
 						// would cause "(sha256sum failed!)" to be written to
 						// the output file, which would be wrong - it didn't
 						// fail, we just didn't try.
-						return;
+						return failures;
 					}
 				}
 				
@@ -146,13 +179,21 @@ public final class ConcurrentCheckpointGenerator
 					// Same as for the hash.
 					node.setTimestamps(null);
 					
-					err.println("Reading timestamps failed for '"
-						+ node.getPath() + "': " + e);
+					if(failure == null) {
+						failure = new Failure();
+						failure.path = node.getPath();
+					}
+					failure.timestampsFailure = e;
 				}
+				
+				if(failure != null)
+					failures.add(failure);
 				
 				// This is thread-safe by contract of ICheckpoint.
 				checkpoint.addNode(node);
 			}
+			
+			return failures;
 		}
 	}
 
@@ -247,6 +288,9 @@ public final class ConcurrentCheckpointGenerator
 		return result;
 	}
 
+	// FIXME: Extract functions out of this so it gets smaller. Then add a
+	// try/finally block surrounding all calls to them and in the finally do
+	// cleanup such a specifically terminating the executor.
 	@Override public void run() throws InterruptedException, IOException {
 		out.println("Input:   " + inputDir);
 		out.println("Output:  " + outputDir);
@@ -258,14 +302,21 @@ public final class ConcurrentCheckpointGenerator
 		// progress.
 		// FIXME: Save every 15 minutes.
 		
-		out.print("Finding input files and directories in '"
+		out.println("Finding input files and directories in '"
 			+ inputDir + "'... ");
 		// Convert to ArrayList since removeAndDivideWork() does shuffle() which
 		// needs a list which implements RandomAccess.
 		ArrayList<INode> nodes
 			= new ArrayList<INode>(new NodeFinder().findNodes(inputDir));
 		final int nodeCount = nodes.size();
-		out.println(nodeCount);
+		out.println("Total files/dirs: " + nodeCount);
+		
+		long totalNodeSize = 0;
+		for(INode n : nodes)
+			totalNodeSize += n.getSize();
+		// TODO: Java Commons IO will soon receive a better version of
+		// function byteCountToDisplaySize() which doesn't round down.
+		out.println("Total size: " + byteCountToDisplaySize(totalNodeSize));
 		
 		out.println("Dividing into up to " + threadCount
 			+ " batches of work...");
@@ -280,22 +331,57 @@ public final class ConcurrentCheckpointGenerator
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
 		
 		out.println("Submitting work to threads...");
-		ArrayList<Future<?>> workResults = new ArrayList<>(threadCount);
+		ArrayList<Future<List<Failure>>> workResults
+			= new ArrayList<>(threadCount);
+		workStartedAtTime = currentTimeMillis();
 		for(ArrayList<INode> batch : work)
 			workResults.add(executor.submit(new Worker(batch)));
 		
 		out.println("Working...");
 		executor.shutdown();
-		executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+		boolean finished = false;
+		while(true) {
+			// The weird structure of the loop ensures the progress is printed
+			// always:
+			// - at the start of the loop so the user quickly sees that progress
+			//   will be printed.
+			// - at the end of the loop so 100% will always be printed.
+			
+			// Synchronize so we get coherent values from the two calls upon
+			// checkpoint.
+			// FIXME: Add a container class "Progress" to ICheckpoint and return
+			// an object of it in a synchronized getter there so we don't mess
+			// with Checkpoint's synchronization here.
+			synchronized(checkpoint) {
+				printProgress(checkpoint.getNodeSize(), totalNodeSize,
+				              checkpoint.getNodeCount(), nodeCount);
+			}
+			
+			if(finished)
+				break;
+			finished = executor.awaitTermination(1, SECONDS);
+		}
 		
 		out.println("Work finished, checking results...");
-		for(Future<?> result : workResults) {
+		// FIXME: Sort the failures by their Path so the output is more
+		// readable. If e.g. many files failed in the same path then the user
+		// may notice more quickly that a whole directory was deleted.
+		for(Future<List<Failure>> result : workResults) {
 			try {
-				// Returning null means success w.r.t. the submit() version we
-				// used.
-				if(result.get() != null) {
-					throw new RuntimeException("BUG: Worker thread failed! "
-						+ "Future<?>.get() value: " + result.get());
+				List<Failure> failures = requireNonNull(result.get());
+				for(Failure f : failures) {
+					if(f.sha256Failure != null) {
+						err.println("SHA256 computation failed for '"
+							+ f.path + "': " + f.sha256Failure);
+					}
+					if(f.timestampsFailure != null) {
+						err.println("Reading timestamps failed for '"
+							+ f.path + "': " + f.timestampsFailure);
+					}
+					if(f.sha256Failure == null && f.timestampsFailure == null) {
+						throw new NullPointerException(
+							"BUG: Empty Failure object! Please report this!");
+					}
 				}
 			} catch(ExecutionException e) {
 				throw new RuntimeException(
@@ -318,6 +404,132 @@ public final class ConcurrentCheckpointGenerator
 		out.println("Saving checkpoint to '" + outputDir + "'...");
 		checkpoint.save(outputDir);
 		out.println("Done.");
+	}
+
+	private final Console console = System.console();
+	private boolean needToOverwriteProgressLine = false;
+	private double lastPrintedPercentage = -1;
+
+	/** Prints progress info consisting of:
+	 *  - percentage
+	 *  - speed
+	 *  - estimated remaining time.
+	 *    
+	 *  If stdout is a terminal prints progress at every call and uses ANSI
+	 *  escape codes to print it at the same position on screen as the last
+	 *  call.
+	 *  If stdout is a file prints progress at most every 10% and always at
+	 *  100%. ANSI escape codes are not used then. */
+	private void printProgress(long finishedBytes, long totalBytes,
+			int finishedNodes, int totalNodes) {
+		
+		// We want to remove our previous progress output so the new one can
+		// appear on the same line. To achieve that we thus use the following
+		// ANSI escape sequence, which:
+		// - Moves the cursor up one line.
+		// - Erases the whole line.
+		// - Moves the cursor to the beginning of it.
+		// Source: https://en.wikipedia.org/w/index.php?title=ANSI_escape_code
+		//         &oldid=923017881#Terminal_output_sequences
+		// Source: https://stackoverflow.com/a/35190285
+		if(needToOverwriteProgressLine) {
+			// Guaranteed by code at the end of the function.
+			assert(console != null);
+			
+			console.printf("\33[A\33[2K\r");
+		}
+		
+		// Need to use double here because byte counts are easily billions.
+		double percentageOfBytes = totalBytes > 0
+			? ((double)finishedBytes / totalBytes) * 100
+			: 100;
+		
+		float percentageOfNodes = totalNodes > 0
+			? ((float)finishedNodes / totalNodes) * 100
+			: 100;
+		
+		// If stdout is a file this ensures we don't clutter it without constant
+		// progress printing by returning if we haven't done a 10% step.
+		if(console == null) {
+			if(lastPrintedPercentage < 0) {
+				out.println("stdout is not a terminal, printing progress at "
+					+ "most every 10%.");
+				lastPrintedPercentage = 0;
+			}
+			
+			if((percentageOfBytes - lastPrintedPercentage) < 10
+					&& finishedNodes < totalNodes /* Always print at 100% */) {
+				
+				return;
+			}
+			
+			lastPrintedPercentage = percentageOfBytes;
+		}
+		
+		long currentTime = currentTimeMillis();
+		// TODO: Use class StopWatch which thanks to our existing dependency
+		// on Apache Java Commons Lang is available already.
+		float elapsedSecs = (float)(currentTime - workStartedAtTime) / 1000f;
+		float nodesPerSec = elapsedSecs > 0 ? finishedNodes / elapsedSecs : 0f;
+		double bytesPerSec = elapsedSecs > 0
+			? (double)finishedBytes / elapsedSecs : 0;
+		double mibPerSec   = Math.scalb(bytesPerSec, -20);
+		
+		String remainingTimeViaBytes;
+		if(bytesPerSec > 0) {
+			long remainingBytes = totalBytes - finishedBytes;
+			double remainingSecs = (double)remainingBytes / bytesPerSec;
+			// DurationFormatUtils wants milliseconds so convert back to that.
+			// Long can hold millions of years in millis so casting is okay.
+			long remainingMillis = (long)(remainingSecs * 1000);
+			remainingTimeViaBytes = DurationFormatUtils.formatDuration(
+				remainingMillis, "HH:mm:ss");
+		} else
+			 remainingTimeViaBytes = "Unknown";
+		
+		String remainingTimeViaNodes;
+		if(nodesPerSec > 0) {
+			int remainingNodes = totalNodes - finishedNodes;
+			float remainingSecs = (float)remainingNodes / nodesPerSec;
+			long remainingMillis = (long)(remainingSecs * 1000);
+			remainingTimeViaNodes = DurationFormatUtils.formatDuration(
+				remainingMillis, "HH:mm:ss");
+		} else
+			 remainingTimeViaNodes = "Unknown";
+		
+		// TODO: If we want to adjust the number of decimal digits in a smart
+		// fashion, e.g. have less for sufficiently large MiB/s and files/dirs
+		// per second, we likely have to use class DecimalFormat instead:
+		// At first glance setting a small "precision" value for printf() format
+		// strings would seem appropriate, but it would also cause it to quickly
+		// resort to using scientific notification, e.g. "123.45e6", which is
+		// not user-friendly.
+		// Recycle this TODO as documentation then.
+		String formatString =
+		    "Progress: %6.2f %% of bytes @ %.1f MiB/s. "
+		  + "%6.2f %% of files/dirs @ %.1f/s. "
+		  + "Estimated remaining time: %s via bytes, %s via files/dirs."
+		  + "\n";
+		
+		if(console != null) {
+			console.printf(
+				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
+				nodesPerSec, remainingTimeViaBytes, remainingTimeViaNodes);
+			needToOverwriteProgressLine = true;
+		} else {
+			// System.console() and System.out don't implement the same
+			// interface so we need to duplicate the function call code instead
+			// of assigning one of them to a variable and doing the function
+			// call upon it.
+			out.printf(
+				formatString, percentageOfBytes, mibPerSec, percentageOfNodes,
+				nodesPerSec, remainingTimeViaBytes, remainingTimeViaNodes);
+			
+			// Don't set needToOverwriteProgressLine because if console == null
+			// the output is a file and we don't want to clutter files with ANSI
+			// control characters which don't make sense towards tools for
+			// viewing text files.
+		}
 	}
 
 }

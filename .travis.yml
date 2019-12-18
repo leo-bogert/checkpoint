@@ -6,6 +6,8 @@ addons:
   apt:
     packages:
       - libcommons-codec-java
+      - libcommons-io-java
+      - libcommons-lang-java
       - libjcommander-java
       - junit4
       - python-psutil

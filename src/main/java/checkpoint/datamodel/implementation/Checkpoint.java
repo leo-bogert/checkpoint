@@ -109,6 +109,9 @@ public final class Checkpoint implements ICheckpoint {
 	/** @see ICheckpoint#isComplete() */
 	private boolean complete = false;
 
+	/** @see ICheckpoint#getNodeSize() */
+	private long nodeSize = 0;
+
 	/** Used by {@link #dateFormat} and {@link #load(Path)}. */
 	private static final String DATE_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss Z";
 	
@@ -167,6 +170,8 @@ public final class Checkpoint implements ICheckpoint {
 			throw new IllegalArgumentException(
 				"Bug, please report: INode already contained for path: " + key);
 		}
+		
+		nodeSize += n.getSize();
 	}
 
 	@Override public synchronized void save(Path checkpointDir)
@@ -347,8 +352,13 @@ public final class Checkpoint implements ICheckpoint {
 							dates.get("Modify"))
 					: null;
 				
+				// Not currently included in the file format. Once you implement
+				// that please process the related TODO and documentation at the
+				// INode interface and at ICheckpoint.getNodeSize().
+				long size = 0;
+				
 				result.addNode(
-					constructNode(path, isDirectory, hash, timestamps));
+					constructNode(path, isDirectory, size, hash, timestamps));
 			}
 			
 			if(s.ioException() != null)
@@ -381,6 +391,10 @@ public final class Checkpoint implements ICheckpoint {
 
 	@Override public synchronized int getNodeCount() {
 		return nodes.size();
+	}
+
+	@Override public synchronized long getNodeSize() {
+		return nodeSize;
 	}
 
 }

@@ -4,6 +4,8 @@ defaultTasks 'jar', 'test'
 
 dependencies {
 	implementation files('/usr/share/java/commons-codec.jar')
+	implementation files('/usr/share/java/commons-io.jar')
+	implementation files('/usr/share/java/commons-lang.jar')
 	implementation files('/usr/share/java/jcommander.jar')
 	testImplementation files('/usr/share/java/junit4.jar')
 }
