@@ -33,16 +33,71 @@ import checkpoint.datamodel.implementation.Timestamps;
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
-    /** A HDD typically only has 1 head so to avoid seeking we only run 1
-     *  thread.
-     *  Notice that this applies even to disks with multiple platters:
-     *  The ones I've disassembled with multiple heads, one for each platter,
-     *  could typically only move them all together, not separately.
-     *  I.e. they would be oriented in a parallel stack and moving them would
-     *  move the whole stack at once. */
+	/** Number of worker threads when the physical disk is a rotational disk.
+	 *  
+	 *  A HDD typically only has 1 head so to avoid seeking we only run 1
+	 *  thread.
+	 *  Notice that this applies even to disks with multiple platters:
+	 *  The ones I've disassembled with multiple heads, one for each platter,
+	 *  could typically only move them all together, not separately.
+	 *  I.e. they would be oriented in a parallel stack and moving them would
+	 *  move the whole stack at once. */
 	public static final int DEFAULT_THREAD_COUNT_HDD = 1;
-	/**  FIXME: Performance: Determine a reasonable value. */
-	public static final int DEFAULT_THREAD_COUNT_SSD = 1024;
+
+	/** Number of worker threads per CPU when the physical disk is a solid-state
+	 *  disk. I.e. the total thread count is this number multiplied by the
+	 *  number of CPUs.
+	 *  
+	 *  I've done 5 measurements of checkpointing a full Linux system with ~900k
+	 *  files of ~200 GB in total to determine the current value of this to be
+	 *  optimal.
+	 *  
+	 *  Beyond practical measurement it also makes sense from a theoretical
+	 *  point of view that it turned out to be precisely 2x the number of CPUs.
+	 *  To understand that consider the following:
+	 *  
+	 *  Each thread has two jobs which it does one after another:
+	 *  1) reading data from disk. This happens in background while the thread
+	 *     is sleeping,, i.e. not consuming CPU time, as the disk does it, not
+	 *     the CPU.
+	 *     So other threads can run in foreground meanwhile.
+	 *  2) hashing the read data with SHA256, which consumes CPU time actively
+	 *     in foreground.
+	 *  
+	 *  Thus, as reading can happen in background, we already have justification
+	 *  for using more threads than there are CPUs in the system:
+	 *  This ensures the hashing threads get data delivered fast enough while
+	 *  they run in foreground while the reading threads are waiting for data
+	 *  in the background.
+	 *  The question is how many more threads there should be for the background
+	 *  reading - too many would cause CPU overhead and excessive memory usage.
+	 *  
+	 *  To decide about this, consider the possible situations with regards to
+	 *  whether reading or hashing does more bytes per second in average:
+	 *  - If reading is slower than hashing, then we won't need more foreground
+	 *    hashing threads than background reading threads because they cannot be
+	 *    handed data fast enough to judge their greater amount.
+	 *  - If reading is faster than hashing then we don't need more background
+	 *    reading threads than there are hashing threads because the reading
+	 *    threads will finish early enough to satisfy all hashing threads.
+	 *  
+	 *  Since we cannot predict which situation arises in practice with the
+	 *  specific hardware and filesystem the optimal value is the middle ground
+	 *  between both.
+	 *  One situation wants "hashing threads <= reading threads", the other
+	 *  wants "hashing threads >= reading threads", so the middle ground is
+	 *  "==", i.e. having the same amount of both thread types.
+	 *  
+	 *  As our {@link Worker} thread implementation deals with both reading and
+	 *  writing in the same thread in an alternating fashion, and reading
+	 *  threads run in background and don't need CPU time, the resulting thread
+	 *  count we want to fully utilize each CPU is 2x the number of CPUs. */
+	public static final int DEFAULT_THREADS_PER_CPU_WITH_SSD = 2;
+
+	/** @see #DEFAULT_THREADS_PER_CPU_WITH_SSD */
+	public static final int DEFAULT_THREAD_COUNT_SSD =
+		  DEFAULT_THREADS_PER_CPU_WITH_SSD
+		* Runtime.getRuntime().availableProcessors();
 
 	private final Path       inputDir;
 	private final Path       outputDir;
