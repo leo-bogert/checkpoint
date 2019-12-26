@@ -92,7 +92,7 @@ public final class ConcurrentCheckpointGenerator
 	 *  count we want to fully utilize each CPU is 2x the number of CPUs. */
 	public static final int DEFAULT_THREADS_PER_CPU_WITH_SSD = 2;
 
-	/** @see #DEFAULT_THREADS_PER_CPU_WITH_SSD. */
+	/** @see #DEFAULT_THREADS_PER_CPU_WITH_SSD */
 	public static final int DEFAULT_THREAD_COUNT_SSD =
 		  DEFAULT_THREADS_PER_CPU_WITH_SSD
 		* Runtime.getRuntime().availableProcessors();
