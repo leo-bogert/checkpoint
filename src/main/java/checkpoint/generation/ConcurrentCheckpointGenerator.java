@@ -33,7 +33,9 @@ import checkpoint.datamodel.implementation.Timestamps;
 public final class ConcurrentCheckpointGenerator
 		implements ICheckpointGenerator {
 
-    /** A HDD typically only has 1 head so to avoid seeking we only run 1
+    /** Number of worker threads when the physical disk is a rotational disk.
+     *  
+     * A HDD typically only has 1 head so to avoid seeking we only run 1
      *  thread.
      *  Notice that this applies even to disks with multiple platters:
      *  The ones I've disassembled with multiple heads, one for each platter,
