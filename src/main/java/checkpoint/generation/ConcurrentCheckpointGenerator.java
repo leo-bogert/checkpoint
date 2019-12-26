@@ -42,7 +42,9 @@ public final class ConcurrentCheckpointGenerator
      *  move the whole stack at once. */
 	public static final int DEFAULT_THREAD_COUNT_HDD = 1;
 
-	/** Number of worker threads when the physical disk is a solid-state disk.
+	/** Number of worker threads per CPU when the physical disk is a solid-state
+	 *  disk. I.e. the total thread count is this number multiplied by the
+	 *  number of CPUs.
 	 *  
 	 *  I've done 5 measurements of checkpointing a full Linux system with ~900k
 	 *  files of ~200 GB in total to determine the current value of this to be
@@ -88,10 +90,12 @@ public final class ConcurrentCheckpointGenerator
 	 *  writing in the same thread in an alternating fashion, and reading
 	 *  threads run in background and don't need CPU time, the resulting thread
 	 *  count we want to fully utilize each CPU is 2x the number of CPUs. */
-	public static final int DEFAULT_THREAD_COUNT_SSD
-		= /* WARNING: When changing this, also adjust the documentation of
-		     checkpoint.ui.shell.CreateCommand.Options.threads */
-		  2 * Runtime.getRuntime().availableProcessors();
+	public static final int DEFAULT_THREADS_PER_CPU_WITH_SSD = 2;
+
+	/** @see #DEFAULT_THREADS_PER_CPU_WITH_SSD. */
+	public static final int DEFAULT_THREAD_COUNT_SSD =
+		  DEFAULT_THREADS_PER_CPU_WITH_SSD
+		* Runtime.getRuntime().availableProcessors();
 
 	private final Path       inputDir;
 	private final Path       outputDir;

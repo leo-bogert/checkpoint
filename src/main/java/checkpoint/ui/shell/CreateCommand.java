@@ -42,7 +42,9 @@ final class CreateCommand extends Command {
 			  "Number of threads to process files/directories with. "
 			+ "Must be at least 1. Default for rotational disks: "
 			+ ConcurrentCheckpointGenerator.DEFAULT_THREAD_COUNT_HDD + ". "
-			+ "If --ssd is used, default is 2x the number of CPUs. "
+			+ "If --ssd is used, default is "
+			+ ConcurrentCheckpointGenerator.DEFAULT_THREADS_PER_CPU_WITH_SSD
+			+ "x the number of CPUs. "
 			+ "For RAID1 on rotational disks set this to the number of disks. "
 			+ "For other RAID types which can read different data from "
 			+ "different disks in parallel set this to the number of disks "
