@@ -89,7 +89,9 @@ public final class ConcurrentCheckpointGenerator
 	 *  threads run in background and don't need CPU time, the resulting thread
 	 *  count we want to fully utilize each CPU is 2x the number of CPUs. */
 	public static final int DEFAULT_THREAD_COUNT_SSD
-		= 2 * Runtime.getRuntime().availableProcessors();
+		= /* WARNING: When changing this, also adjust the documentation of
+		     checkpoint.ui.shell.CreateCommand.Options.threads */
+		  2 * Runtime.getRuntime().availableProcessors();
 
 	private final Path       inputDir;
 	private final Path       outputDir;
