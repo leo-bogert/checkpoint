@@ -1,23 +1,29 @@
 package checkpoint.datamodel.implementation;
 
-import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
+import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
+import static java.util.Arrays.asList;
+import static java.util.Collections.sort;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Scanner;
 
 import org.apache.commons.codec.DecoderException;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import checkpoint.datamodel.implementation.Checkpoint.PathComparator;
 
 public final class CheckpointTest {
 
@@ -83,7 +89,34 @@ public final class CheckpointTest {
 			System.out.println();
 		}
 		*/
-		fail("FIXME: Implement to test w.r.t. the above lines");
+		
+		ArrayList<Path> sortedViaSort       = new ArrayList<>(toSort.length);
+		ArrayList<Path> sortedViaComparator = new ArrayList<>(toSort.length);
+		
+		ProcessBuilder pb = new ProcessBuilder("sort");
+		pb.environment().put("LC_ALL", "C");
+		Process sort = pb.start();
+		for(Path p : toSort) {
+			sort.getOutputStream().write(p.toString().getBytes(UTF_8));
+			sort.getOutputStream().write('\n');
+		}
+		sort.getOutputStream().close();
+		Scanner s = new Scanner(sort.getInputStream());
+		while(s.hasNextLine())
+			sortedViaSort.add(Paths.get(s.nextLine()));
+		s.close();
+		sort.waitFor();
+		assertEquals(0, sort.exitValue());
+		
+		assertEquals(toSort.length, sortedViaSort.size());
+		// Check if it has actually sorted things. I've encountered failure of
+		// this in practice!
+		assertNotEquals(asList(toSort), sortedViaSort);
+		
+		sortedViaComparator.addAll(asList(toSort));
+		sort(sortedViaComparator, new PathComparator());
+		
+		assertEquals(sortedViaSort, sortedViaComparator);
 	}
 
 	@Ignore("FIXME: Not implemented yet!")
