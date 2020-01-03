@@ -79,14 +79,16 @@ public final class Checkpoint implements ICheckpoint {
 			//     Set LC_ALL=C to get the traditional sort order that uses
 			//     native byte values.
 			// So converting the path strings to byte[] and sorting on that is
-			// likely the right thing to do.
+			// likely the right thing to do...
 			byte[] a = p1.toString().getBytes(UTF_8);
 			byte[] b = p2.toString().getBytes(UTF_8);
-			return compare(a, b);
+			// ...BUT: byte is signed but LC_ALL=C does unsigned comparison so
+			// we must do that too.
+			return compareUnsigned(a, b);
 		}
 
-		/** TODO: Java 9: Replace with Arrays.compare() */
-		private static int compare(byte[] a, byte[] b) {
+		/** TODO: Java 9: Replace with Arrays.compareUnsigned() */
+		private static int compareUnsigned(byte[] a, byte[] b) {
 			if(a == b)
 				return 0;
 			
@@ -99,8 +101,12 @@ public final class Checkpoint implements ICheckpoint {
 				}
 			}
 			
-			if(mismatch != -1)
-				return Byte.compare(a[mismatch], b[mismatch]);
+			if(mismatch != -1) {
+				// Same as Byte.toUnsignedInt() but compatible with Java 7.
+				int unsigned1 = a[mismatch] & 0xFF;
+				int unsigned2 = b[mismatch] & 0xFF;
+				return Integer.compare(unsigned1, unsigned2);
+			}
 			
 			return a.length - b.length;
 		}

@@ -1,22 +1,29 @@
 package checkpoint.datamodel.implementation;
 
-import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
+import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
+import static java.util.Arrays.asList;
+import static java.util.Collections.sort;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Scanner;
 
 import org.apache.commons.codec.DecoderException;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import checkpoint.datamodel.implementation.Checkpoint.PathComparator;
 
 public final class CheckpointTest {
 
@@ -30,6 +37,87 @@ public final class CheckpointTest {
 
 	@Rule
 	public final TemporaryFolder tempDir = new TemporaryFolder();
+
+	@Test public void testPathComparator()
+			throws IOException, InterruptedException {
+		
+		// Umlauts are a good test because of the following two aspects:
+		// 1) They consist of multiple bytes.
+		byte[] umlaut    = "Ä".getBytes(UTF_8);
+		byte[] nonUmlaut = "B".getBytes(UTF_8);
+		assertEquals(2, umlaut.length);
+		// 2) LC_ALL=C sorting, which PathComparator ought to do, is supposed to
+		// sort by the *unsigned* byte values - but the Java byte type is
+		// signed. And comparison of some umlaut values can thus go wrong
+		// because their signed value is negative:
+		assertTrue(umlaut[0] < 0);
+		// & 0xFF converts the signed byte to an unsigned integer.
+		// TODO: Java 8: Use Byte.toUnsignedInt() instead.
+		assertNotEquals(
+			Integer.compare((umlaut[0] & 0xFF), (nonUmlaut[0] & 0xFF)),
+			Byte.compare(umlaut[0], nonUmlaut[0]));
+		
+		// This test data is sorted in the reverse order it should be sorted to
+		// ensure everything has to be moved by the sorting code.
+		// TODO: Code quality: Also test with the example here:
+		// https://stackoverflow.com/questions/31938751/bash-how-does-sort-sort-paths
+		Path[] toSort = new Path[] {
+			Paths.get("/Ä"),
+			Paths.get("/C"),
+			Paths.get("/B"),
+			Paths.get("/A")};
+		
+		// Debug code to print the numeric values of the characters in the above
+		// test data.
+		/*
+		for(Path p : toSort) {
+			byte[] bytes = p.toString().getBytes(UTF_8);
+			
+			System.out.print(p.toString() + " unsigned: ");
+			for(byte b : bytes) {
+				int unsigned = b & 0xFF;
+				System.out.print(unsigned);
+				System.out.print(' ');
+			}
+			System.out.println();
+			
+			System.out.print(p.toString() + "   signed: ");
+			for(byte b : bytes) {
+				System.out.print(b);
+				System.out.print(' ');
+			}
+			System.out.println();
+		}
+		*/
+		
+		ArrayList<Path> sortedViaSort       = new ArrayList<>(toSort.length);
+		ArrayList<Path> sortedViaComparator = new ArrayList<>(toSort.length);
+		
+		ProcessBuilder pb = new ProcessBuilder("sort");
+		pb.environment().put("LC_ALL", "C");
+		Process sort = pb.start();
+		for(Path p : toSort) {
+			sort.getOutputStream().write(p.toString().getBytes(UTF_8));
+			sort.getOutputStream().write('\n');
+		}
+		sort.getOutputStream().close();
+		Scanner s = new Scanner(sort.getInputStream());
+		while(s.hasNextLine())
+			sortedViaSort.add(Paths.get(s.nextLine()));
+		s.close();
+		sort.waitFor();
+		assertEquals(0, sort.exitValue());
+		
+		assertEquals(toSort.length, sortedViaSort.size());
+		// Check if it has actually sorted things. I've encountered failure of
+		// this in practice!
+		assertNotEquals(asList(toSort), sortedViaSort);
+		
+		sortedViaComparator.addAll(asList(toSort));
+		sort(sortedViaComparator, new PathComparator());
+		
+		assertEquals(sortedViaSort, sortedViaComparator);
+	}
 
 	@Ignore("FIXME: Not implemented yet!")
 	@Test public void testAddNode() {
