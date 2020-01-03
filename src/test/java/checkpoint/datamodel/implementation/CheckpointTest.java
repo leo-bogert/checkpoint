@@ -51,6 +51,38 @@ public final class CheckpointTest {
 			Integer.compare((umlaut[0] & 0xFF), (nonUmlaut[0] & 0xFF)),
 			Byte.compare(umlaut[0], nonUmlaut[0]));
 		
+		// This test data is sorted in the reverse order it should be sorted to
+		// ensure everything has to be moved by the sorting code.
+		// TODO: Code quality: Also test with the example here:
+		// https://stackoverflow.com/questions/31938751/bash-how-does-sort-sort-paths
+		Path[] toSort = new Path[] {
+			Paths.get("/Ä"),
+			Paths.get("/C"),
+			Paths.get("/B"),
+			Paths.get("/A")};
+		
+		// Debug code to print the numeric values of the characters in the above
+		// test data.
+		/*
+		for(Path p : toSort) {
+			byte[] bytes = p.toString().getBytes(UTF_8);
+			
+			System.out.print(p.toString() + " unsigned: ");
+			for(byte b : bytes) {
+				int unsigned = b & 0xFF;
+				System.out.print(unsigned);
+				System.out.print(' ');
+			}
+			System.out.println();
+			
+			System.out.print(p.toString() + "   signed: ");
+			for(byte b : bytes) {
+				System.out.print(b);
+				System.out.print(' ');
+			}
+			System.out.println();
+		}
+		*/
 		fail("FIXME: Implement to test w.r.t. the above lines");
 	}
 
