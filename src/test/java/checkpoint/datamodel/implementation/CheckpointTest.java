@@ -3,6 +3,7 @@ package checkpoint.datamodel.implementation;
 import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.Files.readAllBytes;
 import static java.util.concurrent.TimeUnit.DAYS;
 import static org.junit.Assert.*;
@@ -30,6 +31,27 @@ public final class CheckpointTest {
 
 	@Rule
 	public final TemporaryFolder tempDir = new TemporaryFolder();
+
+	@Test public void testPathComparator()
+			throws IOException, InterruptedException {
+		
+		// Umlauts are a good test because of the following two aspects:
+		// 1) They consist of multiple bytes.
+		byte[] umlaut    = "Ä".getBytes(UTF_8);
+		byte[] nonUmlaut = "B".getBytes(UTF_8);
+		assertEquals(2, umlaut.length);
+		// 2) LC_ALL=C sorting, which PathComparator ought to do, is supposed to
+		// sort by the *unsigned* byte values - but the Java byte type is
+		// signed. And comparison of some umlaut values can thus go wrong
+		// because their signed value is negative:
+		assertTrue(umlaut[0] < 0);
+		// TODO: Java 8: Use Byte.toUnsignedInt() instead of & 0xFF.
+		assertNotEquals(
+			Integer.compare((umlaut[0] & 0xFF), (nonUmlaut[0] & 0xFF)),
+			Byte.compare(umlaut[0], nonUmlaut[0]));
+		
+		fail("FIXME: Implement to test w.r.t. the above lines");
+	}
 
 	@Ignore("FIXME: Not implemented yet!")
 	@Test public void testAddNode() {
