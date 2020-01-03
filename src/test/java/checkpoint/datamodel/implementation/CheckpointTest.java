@@ -45,7 +45,8 @@ public final class CheckpointTest {
 		// signed. And comparison of some umlaut values can thus go wrong
 		// because their signed value is negative:
 		assertTrue(umlaut[0] < 0);
-		// TODO: Java 8: Use Byte.toUnsignedInt() instead of & 0xFF.
+		// & 0xFF converts the signed byte to an unsigned integer.
+		// TODO: Java 8: Use Byte.toUnsignedInt() instead.
 		assertNotEquals(
 			Integer.compare((umlaut[0] & 0xFF), (nonUmlaut[0] & 0xFF)),
 			Byte.compare(umlaut[0], nonUmlaut[0]));
