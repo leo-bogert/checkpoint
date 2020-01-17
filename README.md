@@ -39,13 +39,13 @@ apt install git gnupg gradle junit4
 # FIXME: Remove the branch from these instructions once it has been merged to
 # branch master.
 git clone https://github.com/leo-bogert/checkpoint.git --branch java-implementation
+cd checkpoint
 # Optionally if you want to use a stable version of the Java implementation which has
 # been tested against the Python impl. check out the latest tag which indicates that:
 git tag --list
 git checkout tested-against-python-impl-2019-12-31
 # Download the key which the source code is signed with.
 gpg --recv-key '1517 3ECB BC72 0C9E F420  5805 B26B E43E 4B5E AD69'
-cd checkpoint
 # Verify the GnuPG signature of the latest commit.
 # If this fails the code has been tampered with!
 git verify-commit HEAD
