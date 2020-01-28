@@ -110,7 +110,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 					throw new InterruptedException();
 			}
 			
-			return new SHA256(md.digest());
+			return SHA256.construct(md.digest());
 		} finally {
 			channel.close();
 		}
