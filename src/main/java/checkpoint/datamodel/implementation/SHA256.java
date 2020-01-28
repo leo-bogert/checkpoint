@@ -15,7 +15,9 @@ public final class SHA256 implements ISHA256 {
 	private final byte[] sha256;
 
 	// FIXME: Make private and add factory function for JavaSHA256Generator to
-	// use instead
+	// use instead. clone() the byte[] there to prevent future external
+	// modifications of it - we cannot clone it here because
+	// constructForUnitTestOnly() callers require null to be valid as input.
 	public SHA256(byte[] sha256) {
 		this.sha256 = sha256;
 	}
