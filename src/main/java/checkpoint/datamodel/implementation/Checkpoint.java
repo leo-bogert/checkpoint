@@ -46,9 +46,10 @@ public final class Checkpoint implements ICheckpoint {
 	 *  
 	 *  WARNING: You must synchronize upon this Checkpoint when using this!
 	 * 
-	 *  FIXME: Code quality: Provide an explicit {@link Comparator} because
-	 *  {@link Path#compareTo(Path)}'s JavaDoc says the ordering is platform
-	 *  specific. 
+	 *  We explicitly set our own {@link Comparator} because the ordering of
+	 *  {@link Path#compareTo(Path)} is platform specific.
+	 *  The comparator we use will produce the same order on any system.
+	 *  
 	 *  FIXME: Performance: Replace with data structure which supports fast
 	 *  concurrent adding so our many generator threads can deal with the
 	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
