@@ -6,6 +6,7 @@ import checkpoint.generation.ISHA256Generator;
 
 /** Interface for storage classes for SHA256 hashes.
  *  Generation happens via {@link ISHA256Generator} instead.
+ *  Implementations of this must be immutable!
  *  
  *  Java does not support static abstract interface functions so there are
  *  commented-out functions which are also required to be implemented.

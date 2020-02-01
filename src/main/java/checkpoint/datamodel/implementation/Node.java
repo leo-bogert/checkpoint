@@ -60,8 +60,7 @@ public final class Node implements INode {
 	}
 
 	@Override public ISHA256 getHash() {
-		// FIXME: Decide and document considerations about mutability of ISHA256
-		// implementations and clone() if necessary.
+		// ISHA256 is immutable so we don't need to clone().
 		return sha256;
 	}
 
