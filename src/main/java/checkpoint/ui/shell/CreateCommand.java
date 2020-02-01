@@ -141,8 +141,14 @@ final class CreateCommand extends Command {
 		err.println(sb);
 		
 		err.println(
-			"Searches all files and directories in the INPUT_DIR and " +
+			"Searches almost all files and directories in the INPUT_DIR and " +
 			"writes a checkpoint for them to the OUTPUT_CHECKPOINT_DIR.");
+		err.println(
+			"'Almost all' means that non-regular files and files and " +
+			"directories on different mount points are excluded.");
+		err.println(
+			"Only exclusions due to different mounts will be printed on " +
+			"stderr.");
 	}
 
 }

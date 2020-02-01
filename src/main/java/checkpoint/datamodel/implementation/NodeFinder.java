@@ -99,6 +99,9 @@ public final class NodeFinder extends SimpleFileVisitor<Path>
 		} else {
 			// TODO: Log ignored special files somehow?
 			// The Python/Bash implementations didn't either.
+			// If this is implemented then CreateCommand.printUsage() needs to
+			// be adapted because it currently says that non-regular files which
+			// are excluded won't be printed.
 		}
 		
 		return CONTINUE;
