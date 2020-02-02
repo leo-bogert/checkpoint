@@ -49,4 +49,6 @@ public interface ICheckpoint {
 
 	int getHashingFailureCount();
 
+	int getTimestampingFailureCount();
+
 }

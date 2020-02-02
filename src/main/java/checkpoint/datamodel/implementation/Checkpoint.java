@@ -413,4 +413,13 @@ public final class Checkpoint implements ICheckpoint {
 		return count;
 	}
 
+	@Override public synchronized int getTimestampingFailureCount() {
+		int count = 0;
+		for(INode n : nodes.values()) {
+			if(n.getTimetamps() == null)
+				++count;
+		}
+		return count;
+	}
+
 }
