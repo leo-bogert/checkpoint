@@ -46,6 +46,9 @@ git tag --list
 git checkout tested-against-python-impl-2019-12-31
 # Download the key which the source code is signed with.
 gpg --recv-key '1517 3ECB BC72 0C9E F420  5805 B26B E43E 4B5E AD69'
+# If you already have the key you should refresh it before each git pull to ensure
+# GnuPG notices if it has been revoked:
+gpg --refresh-keys
 # Verify the GnuPG signature of the latest commit.
 # If this fails the code has been tampered with!
 git verify-commit HEAD
