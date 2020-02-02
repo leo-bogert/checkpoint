@@ -25,7 +25,7 @@ public final class Shell {
 	private static final Map<String, Command> commandMap
 		= Command.getCommandMap(commandClasses);
 
-	// FIXME: Replace args processing with JCommander, CreateCommand already
+	// TODO: Replace args processing with JCommander, CreateCommand already
 	// uses it and it seems like a nice library.
 	public static void main(String[] args) {
 		Command command;
