@@ -421,6 +421,9 @@ public final class ConcurrentCheckpointGenerator
 		// FIXME: Sort the failures by their Path so the output is more
 		// readable. If e.g. many files failed in the same path then the user
 		// may notice more quickly that a whole directory was deleted.
+		out.println("Notice: Alphabetic sorting of failures which may be "
+			+ "printed below will be implemented in a future release. Use e.g. "
+			+ "your shell's sort command meanwhile.");
 		for(Future<List<Failure>> result : workResults) {
 			try {
 				List<Failure> failures = requireNonNull(result.get());
