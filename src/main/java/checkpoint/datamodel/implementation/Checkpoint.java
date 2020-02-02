@@ -404,4 +404,13 @@ public final class Checkpoint implements ICheckpoint {
 		return nodeSize;
 	}
 
+	@Override public synchronized int getHashingFailureCount() {
+		int count = 0;
+		for(INode n : nodes.values()) {
+			if(!n.isDirectory() && n.getHash() == null)
+				++count;
+		}
+		return count;
+	}
+
 }

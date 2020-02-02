@@ -32,9 +32,10 @@ final class InspectCommand extends Command {
 			Checkpoint cp = Checkpoint.load(p);
 			out.println("Checkpoint loaded successfully.");
 			out.println("Number of nodes: " + cp.getNodeCount());
+			out.println("Hashing failed for: " + cp.getHashingFailureCount());
 			out.println("Is checkpoint complete: " + cp.isComplete());
 			// FIXME: Add more features:
-			// - print number of failed SHA256/Timestamps computations.
+			// - print number of failed Timestamps computations.
 			return 0;
 		} catch(InvalidPathException e) {
 			err.println("Invalid path: " + e.getMessage());
