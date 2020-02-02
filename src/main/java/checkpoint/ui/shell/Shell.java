@@ -28,19 +28,19 @@ public final class Shell {
 	// TODO: Replace args processing with JCommander, CreateCommand already
 	// uses it and it seems like a nice library.
 	public static void main(String[] args) {
-		Command command;
-		
-		if(args.length < 1 || (command = commandMap.get(args[0])) == null) {
-			printSyntax();
-			exit(1);
-			return; // Satisfy compiler
-		}
-		
-		// asList() doesn't support remove(0) so wrap it in an ArrayList.
-		List<String> commandArgs = new ArrayList<>(asList(args));
-		commandArgs.remove(0);
-		
-		try {
+		try { // Ensure we exit(1) upon any exception.
+			Command command;
+			
+			if(args.length < 1 || (command = commandMap.get(args[0])) == null) {
+				printSyntax();
+				exit(1);
+				return; // Satisfy compiler
+			}
+			
+			// asList() doesn't support remove(0) so wrap it in an ArrayList.
+			List<String> commandArgs = new ArrayList<>(asList(args));
+			commandArgs.remove(0);
+			
 			exit(command.run(commandArgs));
 		} catch(Throwable t) {
 			// Command.run() shouldn't throw so there was a serious problem,
