@@ -42,21 +42,19 @@ public final class Shell {
 		
 		try {
 			exit(command.run(commandArgs));
-		} catch(RuntimeException | Error e1) {
+		} catch(Throwable t) {
 			// Command.run() shouldn't throw so there was a serious problem,
 			// e.g. OutOfMemoryError.
 			// Thus:
 			// - tell the user
-			// - surround the printing with another try-block to ensure we can
-			//   exit(1) even if we get another OutOfMemoryError.
+			// - exit(1) in the finally{} to ensure we can exit(1) even if we
+			//   get another OutOfMemoryError.
 			//   TODO: Does java exit(1) if we just let it fly out and we thus
 			//   don't need to do this?
-			try {
-				err.println("Command failed fatally, please report this:");
-				e1.printStackTrace(err);
-			} finally {
-				exit(1);
-			}
+			err.println("Command failed fatally, please report this:");
+			t.printStackTrace(err);
+		} finally {
+			exit(1);
 		}
 	}
 
