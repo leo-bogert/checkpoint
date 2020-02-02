@@ -49,8 +49,6 @@ public final class Shell {
 			// - tell the user
 			// - exit(1) in the finally{} to ensure we can exit(1) even if we
 			//   get another OutOfMemoryError.
-			//   TODO: Does java exit(1) if we just let it fly out and we thus
-			//   don't need to do this?
 			err.println("Command failed fatally, please report this:");
 			t.printStackTrace(err);
 		} finally {
