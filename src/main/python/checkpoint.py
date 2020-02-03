@@ -399,6 +399,9 @@ def main():
 		checkpoint.compute()
 	checkpoint.write_to_disk(exclude_times=args.exclude_times)
 	
+	if checkpoint.abortion_requested:
+		return False
+	
 	return True
 
 if __name__ == "__main__":
