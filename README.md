@@ -1,4 +1,4 @@
-# checkpoint
+# checkpoint [![Build Status](https://travis-ci.com/leo-bogert/checkpoint.svg?branch=java-implementation)](https://travis-ci.com/leo-bogert/checkpoint)
 
 An incremental, recursive checksum script which also adds filedates to the listing. Designed for LARGE amounts of input files. It is resumable, which means it can continue computation where it was aborted without recomputing the existing checksums. Its output is suitable as input for diff. 
 
@@ -37,7 +37,7 @@ apt install git gnupg gradle junit4
 
 # Download the source code.
 # FIXME: Remove the branch from these instructions once it has been merged to
-# branch master.
+# branch master. Also change the branch of the "build|passing" image at the beginning.
 git clone https://github.com/leo-bogert/checkpoint.git --branch java-implementation
 cd checkpoint
 # Optionally if you want to use a stable version of the Java implementation which has
