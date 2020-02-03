@@ -29,8 +29,9 @@ public final class SHA256Test {
 	@Test public void testToBytes() throws DecoderException {
 		String hash = // All bytes = 0, the last = 1
 			"0000000000000000000000000000000000000000000000000000000000000001";
+		SHA256 sha = sha256fromString(hash);
 		
-		byte[] bytes = sha256fromString(hash).toBytes();
+		byte[] bytes = sha.toBytes();
 		assertEquals(256 / 8, bytes.length);
 		int allButLast = bytes.length - 1;
 		
@@ -38,6 +39,11 @@ public final class SHA256Test {
 			Arrays.copyOf(bytes, allButLast));
 		
 		assertEquals((byte)1, bytes[bytes.length - 1]);
+		
+		// Test if a clone() of the array is returned upon every call.
+		// This is critical because Java arrays cannot be immutable.
+		
+		assertNotSame(sha.toBytes(), sha.toBytes());
 	}
 
 	@Test public void testEquals() throws DecoderException {
