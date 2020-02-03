@@ -391,6 +391,7 @@ public final class ConcurrentCheckpointGenerator
 		workStartedAtTime = currentTimeMillis();
 		for(ArrayList<INode> batch : work)
 			workResults.add(executor.submit(new Worker(batch)));
+		work = null;
 		
 		out.println("Working...");
 		executor.shutdown();
@@ -450,6 +451,7 @@ public final class ConcurrentCheckpointGenerator
 					"BUG: Worker thread cancelled! Please report this!", e);
 			}
 		}
+		workResults = null;
 		
 		if(checkpoint.getNodeCount() != nodeCount) {
 			throw new RuntimeException(
