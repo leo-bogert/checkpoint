@@ -31,10 +31,14 @@ public final class SHA256Test {
 			"0000000000000000000000000000000000000000000000000000000000000001";
 		SHA256 sha = sha256fromString(hash);
 		
+		// Test basic equality of the returned array to what it should be.
+		
 		byte[] bytes = sha.toBytes();
 		assertEquals(256 / 8, bytes.length);
-		int allButLast = bytes.length - 1;
 		
+		// new byte[] defaults to all entries being 0, which matches our hash up
+		// to the last byte.
+		int allButLast = bytes.length - 1;
 		assertArrayEquals(new byte[allButLast],
 			Arrays.copyOf(bytes, allButLast));
 		
