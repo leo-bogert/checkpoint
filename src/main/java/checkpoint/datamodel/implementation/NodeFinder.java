@@ -75,7 +75,8 @@ public final class NodeFinder extends SimpleFileVisitor<Path>
 					0 /* constructNode() wants size of 0 for directories! */));
 			return CONTINUE;
 		} else {
-			err.println("Ignoring different filesystem: " + dir);
+			err.println("Ignoring whole dir, is on different filesystem: "
+				+ dir);
 			return SKIP_SUBTREE;
 		}
 	}
@@ -94,8 +95,10 @@ public final class NodeFinder extends SimpleFileVisitor<Path>
 			if(isOnInputDirFilesystem(file))
 				result.add(
 					Node.constructNode(adjustPath(file), false, attrs.size()));
-			else
-				err.println("Ignoring file on different filesystem: " + file);
+			else {
+				err.println("Ignoring single file, is on different filesystem "
+					+ "(likely via mount --bind SRC_FILE DST_FILE): " + file);
+			}
 		} else {
 			// TODO: Log ignored special files somehow?
 			// The Python/Bash implementations didn't either.
