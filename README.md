@@ -1,6 +1,15 @@
 # checkpoint [![Build Status](https://travis-ci.com/leo-bogert/checkpoint.svg?branch=java-implementation)](https://travis-ci.com/leo-bogert/checkpoint)
 
-An incremental, recursive checksum script which also adds filedates to the listing. Designed for LARGE amounts of input files. It is resumable, which means it can continue computation where it was aborted without recomputing the existing checksums. Its output is suitable as input for diff. 
+A fast, recursive checksum tool which in opposite to `sfv`, `sha256sum`, etc.
+is designed for **large** input directories, typically the whole `/` of a full
+Linux system.
+
+It produces human-readable output which can be diffed using e.g. `kdiff3`.
+It also adds file dates to the listing to ease the diffing and aid people who
+want to carfeully preserve their file timestamps.
+
+It is intended as a data-hoarder's insurance against filesystem bugs and broken
+hardware.
 
 ## Implementations
 
