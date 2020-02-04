@@ -4,12 +4,12 @@ A fast, recursive checksum tool which in opposite to `sfv`, `sha256sum`, etc.
 is designed for **large** input directories, typically the whole `/` of a full
 Linux system.
 
+It is intended as a data-hoarder's insurance against filesystem bugs and broken
+hardware.
+
 It produces human-readable output which can be diffed using e.g. `kdiff3`.
 It also adds file dates to the listing to ease the diffing and aid people who
 want to carfeully preserve their file timestamps.
-
-It is intended as a data-hoarder's insurance against filesystem bugs and broken
-hardware.
 
 ## Implementations
 
