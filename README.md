@@ -42,7 +42,7 @@ apt install libjcommander-java
 # Install dependencies for compiling from source.
 # You don't need to install the recommendations / suggestions of gradle.
 # TODO: I have not tested if the other packages work without recommendations.
-apt install git gnupg gradle junit4
+apt install git gnupg default-jdk gradle junit4
 
 # Download the source code.
 # FIXME: Remove the branch from these instructions once it has been merged to
