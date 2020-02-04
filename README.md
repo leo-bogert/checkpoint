@@ -1,6 +1,15 @@
-# checkpoint
+# checkpoint [![Build Status](https://travis-ci.com/leo-bogert/checkpoint.svg?branch=java-implementation)](https://travis-ci.com/leo-bogert/checkpoint)
 
-An incremental, recursive checksum script which also adds filedates to the listing. Designed for LARGE amounts of input files. It is resumable, which means it can continue computation where it was aborted without recomputing the existing checksums. Its output is suitable as input for diff. 
+A fast, recursive checksum tool which in opposite to `sfv`, `sha256sum`, etc.
+is designed for **large** input directories, typically the whole `/` of a full
+Linux system.
+
+It is intended as a data-hoarder's insurance against filesystem bugs and broken
+hardware.
+
+It produces human-readable output which can be diffed using e.g. `kdiff3`.
+It also adds file dates to the listing to ease the diffing and aid people who
+want to carfeully preserve their file timestamps.
 
 ## Implementations
 
@@ -37,7 +46,7 @@ apt install git gnupg gradle junit4
 
 # Download the source code.
 # FIXME: Remove the branch from these instructions once it has been merged to
-# branch master.
+# branch master. Also change the branch of the "build|passing" image at the beginning.
 git clone https://github.com/leo-bogert/checkpoint.git --branch java-implementation
 cd checkpoint
 # Optionally if you want to use a stable version of the Java implementation which has
@@ -46,6 +55,9 @@ git tag --list
 git checkout tested-against-python-impl-2019-12-31
 # Download the key which the source code is signed with.
 gpg --recv-key '1517 3ECB BC72 0C9E F420  5805 B26B E43E 4B5E AD69'
+# If you already have the key you should refresh it before each git pull to ensure
+# GnuPG notices if it has been revoked:
+gpg --refresh-keys
 # Verify the GnuPG signature of the latest commit.
 # If this fails the code has been tampered with!
 git verify-commit HEAD
@@ -58,7 +70,7 @@ gradle --no-daemon clean jar test
 # (JARs are *not* executable without a wrapper on Ubuntu, it would try to run
 # their contents as if they were a shell script, which causes random things to
 # happen!)
-java -jar build/libs/checkpoint.jar
+java -jar build/libs/checkpoint.jar ARGUMENTS_FOR_CHECKPOINT...
 ```
 
 ### Python implementation

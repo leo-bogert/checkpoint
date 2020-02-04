@@ -47,4 +47,8 @@ public interface ICheckpoint {
 	 *  exists at {@link INode#getSize()}. */
 	long getNodeSize();
 
+	int getHashingFailureCount();
+
+	int getTimestampingFailureCount();
+
 }

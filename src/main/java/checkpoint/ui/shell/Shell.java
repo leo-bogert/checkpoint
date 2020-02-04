@@ -25,36 +25,33 @@ public final class Shell {
 	private static final Map<String, Command> commandMap
 		= Command.getCommandMap(commandClasses);
 
-	// FIXME: Replace args processing with JCommander, CreateCommand already
+	// TODO: Replace args processing with JCommander, CreateCommand already
 	// uses it and it seems like a nice library.
 	public static void main(String[] args) {
-		Command command;
-		
-		if(args.length < 1 || (command = commandMap.get(args[0])) == null) {
-			printSyntax();
-			exit(1);
-			return; // Satisfy compiler
-		}
-		
-		// asList() doesn't support remove(0) so wrap it in an ArrayList.
-		List<String> commandArgs = new ArrayList<>(asList(args));
-		commandArgs.remove(0);
-		
-		try {
+		try { // Ensure we exit(1) upon any exception.
+			Command command;
+			
+			if(args.length < 1 || (command = commandMap.get(args[0])) == null) {
+				printSyntax();
+				exit(1);
+				return; // Satisfy compiler
+			}
+			
+			// asList() doesn't support remove(0) so wrap it in an ArrayList.
+			List<String> commandArgs = new ArrayList<>(asList(args));
+			commandArgs.remove(0);
+			
 			exit(command.run(commandArgs));
-		} catch(RuntimeException | Error e1) {
+		} catch(Throwable t) {
 			// Command.run() shouldn't throw so there was a serious problem,
 			// e.g. OutOfMemoryError.
 			// Thus:
 			// - tell the user
-			// - surround the printing with another try-catch-block to ensure we
-			//   can exit(1) even if we get another OutOfMemoryError.
-			//   TODO: Does java exit(1) if we just let it fly out and we thus
-			//   don't need to do this?
-			try {
-				err.println("Command failed fatally, please report this:");
-				e1.printStackTrace(err);
-			} catch(RuntimeException | Error e2) {}
+			// - exit(1) in the finally{} to ensure we can exit(1) even if we
+			//   get another OutOfMemoryError.
+			err.println("Command failed fatally, please report this:");
+			t.printStackTrace(err);
+		} finally {
 			exit(1);
 		}
 	}

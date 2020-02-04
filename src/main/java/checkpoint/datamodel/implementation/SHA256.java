@@ -14,14 +14,19 @@ public final class SHA256 implements ISHA256 {
 
 	private final byte[] sha256;
 
-	// FIXME: Make private and add factory function for JavaSHA256Generator to
-	// use instead
-	public SHA256(byte[] sha256) {
-		this.sha256 = sha256;
+	private SHA256(byte[] sha256) {
+		// Allow null because callers of constructForUnitTestOnly() need it.
+		// clone() to be safe from future external modifications.
+		this.sha256 = sha256 != null ? sha256.clone() : null;
 	}
 
+	/** Allows the input to be null and thus must only be used in tests. */
 	static SHA256 constructForUnitTestOnly(byte[] sha256) {
 		return new SHA256(sha256);
+	}
+
+	public static SHA256 construct(byte[] sha256) {
+		return new SHA256(requireNonNull(sha256));
 	}
 
 	@Override public String toString() {

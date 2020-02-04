@@ -391,6 +391,7 @@ public final class ConcurrentCheckpointGenerator
 		workStartedAtTime = currentTimeMillis();
 		for(ArrayList<INode> batch : work)
 			workResults.add(executor.submit(new Worker(batch)));
+		work = null;
 		
 		out.println("Working...");
 		executor.shutdown();
@@ -421,6 +422,9 @@ public final class ConcurrentCheckpointGenerator
 		// FIXME: Sort the failures by their Path so the output is more
 		// readable. If e.g. many files failed in the same path then the user
 		// may notice more quickly that a whole directory was deleted.
+		out.println("Notice: Alphabetic sorting of failures which may be "
+			+ "printed below will be implemented in a future release. Use e.g. "
+			+ "your shell's sort command meanwhile.");
 		for(Future<List<Failure>> result : workResults) {
 			try {
 				List<Failure> failures = requireNonNull(result.get());
@@ -447,6 +451,7 @@ public final class ConcurrentCheckpointGenerator
 					"BUG: Worker thread cancelled! Please report this!", e);
 			}
 		}
+		workResults = null;
 		
 		if(checkpoint.getNodeCount() != nodeCount) {
 			throw new RuntimeException(

@@ -13,7 +13,6 @@ import java.security.NoSuchAlgorithmException;
 import checkpoint.datamodel.implementation.NodeFinder;
 import checkpoint.datamodel.implementation.SHA256;
 
-// FIXME: Trim visibility after SHA256 doesn't need to access it anymore.
 /** Implements {@link ISHA256Generator} using Java's default SHA256
  *  implementation.
  *  
@@ -110,7 +109,7 @@ public final class JavaSHA256Generator implements ISHA256Generator {
 					throw new InterruptedException();
 			}
 			
-			return new SHA256(md.digest());
+			return SHA256.construct(md.digest());
 		} finally {
 			channel.close();
 		}

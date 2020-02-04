@@ -1,7 +1,7 @@
 package checkpoint.datamodel.implementation;
 
-import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Node.constructNode;
+import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
 import static java.lang.Math.min;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -35,6 +35,7 @@ import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.ISHA256;
 import checkpoint.datamodel.ITimestamps;
+import checkpoint.generation.ConcurrentCheckpointGenerator;
 
 public final class Checkpoint implements ICheckpoint {
 
@@ -46,12 +47,20 @@ public final class Checkpoint implements ICheckpoint {
 	 *  
 	 *  WARNING: You must synchronize upon this Checkpoint when using this!
 	 * 
-	 *  FIXME: Code quality: Provide an explicit {@link Comparator} because
-	 *  {@link Path#compareTo(Path)}'s JavaDoc says the ordering is platform
-	 *  specific. 
+	 *  We explicitly set our own {@link Comparator} because the ordering of
+	 *  {@link Path#compareTo(Path)} is platform specific.
+	 *  The comparator we use will produce the same order on any system.
+	 *  
 	 *  FIXME: Performance: Replace with data structure which supports fast
 	 *  concurrent adding so our many generator threads can deal with the
-	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}? */
+	 *  sorting in parallel. Perhaps {@link ConcurrentSkipListMap}?
+	 *  Do first investigate if size() is constant-time:
+	 *  If it is not then we cannot use that map class here because the
+	 *  {@link ConcurrentCheckpointGenerator} will call our
+	 *  {@link #getNodeCount()} every second to print progress to stdout.
+	 *  A workaround may be to use a different data structure to keep track of
+	 *  the count, which we will need anyway due to {@link #getNodeSize()}
+	 *  already being tracked separately. */
 	private final TreeMap<Path, INode> nodes
 		= new TreeMap<>(new PathComparator());
 
@@ -401,6 +410,24 @@ public final class Checkpoint implements ICheckpoint {
 
 	@Override public synchronized long getNodeSize() {
 		return nodeSize;
+	}
+
+	@Override public synchronized int getHashingFailureCount() {
+		int count = 0;
+		for(INode n : nodes.values()) {
+			if(!n.isDirectory() && n.getHash() == null)
+				++count;
+		}
+		return count;
+	}
+
+	@Override public synchronized int getTimestampingFailureCount() {
+		int count = 0;
+		for(INode n : nodes.values()) {
+			if(n.getTimetamps() == null)
+				++count;
+		}
+		return count;
 	}
 
 }
