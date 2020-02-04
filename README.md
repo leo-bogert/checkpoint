@@ -61,7 +61,7 @@ gradle --no-daemon clean jar test
 # (JARs are *not* executable without a wrapper on Ubuntu, it would try to run
 # their contents as if they were a shell script, which causes random things to
 # happen!)
-java -jar build/libs/checkpoint.jar
+java -jar build/libs/checkpoint.jar ARGUMENTS_FOR_CHECKPOINT...
 ```
 
 ### Python implementation
