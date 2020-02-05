@@ -1,0 +1,51 @@
+language: java
+# Disabling sudo routes the build to Docker instead of a VM which is faster.
+sudo: false
+
+addons:
+  apt:
+    packages:
+      - libcommons-codec-java
+      - libcommons-io-java
+      - libcommons-lang-java
+      - libjcommander-java
+      - junit4
+      - python-psutil
+
+matrix:
+  include:
+    - jdk: openjdk7
+      dist: trusty # Java 7 is only available there.
+    - jdk: openjdk8
+    - jdk: openjdk9
+    - jdk: openjdk10
+    - jdk: openjdk11
+    - jdk: openjdk12
+    # Gradle doesn't work there yet.
+    # - jdk: openjdk13
+
+script:
+  - set -o errexit
+  - gradle clean test jar
+  
+  # Create checkpoints of the Checkpoint source code, using the Java version.
+  # Both with "--ssd" and without because the codepaths are quite different.
+  - TEST_INPUT="$TRAVIS_BUILD_DIR"
+  - TEST_OUTPUT_JAVA_1="$(mktemp --directory)"
+  - TEST_OUTPUT_JAVA_2="$(mktemp --directory)"
+  - JAR="build/libs/checkpoint.jar"
+  - java -jar "$JAR" create --ssd "$TEST_INPUT" "$TEST_OUTPUT_JAVA_1"
+  - java -jar "$JAR" create       "$TEST_INPUT" "$TEST_OUTPUT_JAVA_2"
+  
+  # ... and create a checkpoint of the same dir using the Python version.
+  - TEST_OUTPUT_PY="$(mktemp --directory)"
+  - src/main/python/checkpoint.py "$TEST_INPUT" "$TEST_OUTPUT_PY"
+  
+  # ... and test if the checkpoints are non-empty and equal.
+  - test -s "$TEST_OUTPUT_JAVA_1/checkpoint.txt"
+  - test -s "$TEST_OUTPUT_JAVA_2/checkpoint.txt"
+  - test -s "$TEST_OUTPUT_PY/checkpoint.txt"
+  - cmp "$TEST_OUTPUT_JAVA_1/checkpoint.txt" "$TEST_OUTPUT_PY/checkpoint.txt"
+  - cmp "$TEST_OUTPUT_JAVA_2/checkpoint.txt" "$TEST_OUTPUT_PY/checkpoint.txt"
+  
+  - sha256sum -b "$JAR"
