@@ -1,4 +1,4 @@
-# checkpoint [![Build Status](https://travis-ci.com/leo-bogert/checkpoint.svg?branch=java-implementation)](https://travis-ci.com/leo-bogert/checkpoint)
+# checkpoint [![Build Status](https://travis-ci.com/leo-bogert/checkpoint.svg?branch=master)](https://travis-ci.com/leo-bogert/checkpoint)
 
 A fast, recursive checksum tool which in opposite to `sfv`, `sha256sum`, etc.
 is designed for **large** input directories, typically the whole `/` of a full
@@ -45,9 +45,7 @@ apt install libjcommander-java
 apt install git gnupg default-jdk gradle junit4
 
 # Download the source code.
-# FIXME: Remove the branch from these instructions once it has been merged to
-# branch master. Also change the branch of the "build|passing" image at the beginning.
-git clone https://github.com/leo-bogert/checkpoint.git --branch java-implementation
+git clone https://github.com/leo-bogert/checkpoint.git
 cd checkpoint
 # Optionally if you want to use a stable version of the Java implementation which has
 # been tested against the Python impl. check out the latest tag which indicates that:
