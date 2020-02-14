@@ -28,9 +28,10 @@ public final class CheckCommand extends Command {
 		err.println(sb);
 		
 		err.println(
-			"Compares the given checkpoint of an old copy of your data against "
-		  + "the other given checkpoint of a new copy of your data to validate "
-		  + "the integrity of your files, in terms of the following checks:");
+			"Compares the given checkpoint of an old copy of your data " +
+			"against the other given checkpoint of a new copy of your data " +
+			"to validate the integrity of your files, in terms of the " +
+			"following checks:");
 		err.println("FIXME: Listing the checks not implemented yet!");
 	}
 
