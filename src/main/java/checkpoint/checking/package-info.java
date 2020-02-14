@@ -1,6 +1,6 @@
-/** Contains code to implement the "checkpoint check" shell command which
- *  compares two checkpoints against each other and uses that to check the
- *  integrity of your files.  
+/** Contains code to implement the {@link checkpoint.ui.shell.CheckCommand}
+ *  shell command which compares two checkpoints against each other and uses
+ *  that to check the integrity of your files.    
  *  For example it will alert you of files of which the checksum has changed but
  *  the file timestamps did not - which indicates disk failure.
  *  
