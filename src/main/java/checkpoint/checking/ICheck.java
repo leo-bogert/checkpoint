@@ -5,7 +5,7 @@ import checkpoint.datamodel.INode;
 import checkpoint.ui.shell.CheckCommand;
 
 /** Implementations of this power the {@link CheckCommand} shell command which
- *  compares two checkpoints against each to check the integrity of your
+ *  compares two checkpoints against each other to check the integrity of your
  *  files.  
  *  For example one ICheck implementation will alert you of files of which the
  *  checksum has changed but the file timestamps did not - which indicates disk
