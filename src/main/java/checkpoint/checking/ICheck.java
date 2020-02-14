@@ -4,6 +4,17 @@ import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.ui.shell.CheckCommand;
 
+/** Implementations of this power the {@link CheckCommand} shell command which
+ *  compares two checkpoints against each to check the integrity of your
+ *  files.  
+ *  For example one ICheck implementation will alert you of files of which the
+ *  checksum has changed but the file timestamps did not - which indicates disk
+ *  failure.
+ *  
+ *  A typical usecase is to run the CheckCommand with the two input checkpoints
+ *  being:
+ *  - one of a backup of your data.
+ *  - one of the current state of your system. */
 interface ICheck {
 
 	/** Applies the check upon the given {@link INode} of the old
@@ -23,7 +34,7 @@ interface ICheck {
 	 *  with false failures such as e.g.: "File deleted which should not have
 	 *  been deleted!".  
 	 *  But when doing that consider to ignore matching hashes on very small
-	 *  files to avoid bogus matches for e.g. empty files.*/
+	 *  files to avoid bogus matches for e.g. empty files. */
 	void apply(ICheckpoint oldCheckpoint, ICheckpoint newCheckpoint,
 		INode oldNodeAtCheck) throws CheckFailedException;
 
