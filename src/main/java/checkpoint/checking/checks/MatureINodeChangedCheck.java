@@ -12,8 +12,9 @@ import checkpoint.datamodel.INode;
  *  
  *  In more precise words this means:  
  *  Checks only "mature" {@link INode}s.  
- *  Those are such where {@link INode#getTimetamps()} indicates that it has not
- *  changed for a "long" time, where "long" defaults to
+ *  Those are such where {@link INode#getTimetamps()} as compared to
+ *  {@link ICheckpoint#getDateEstimate()} of the given old checkpoint indicates
+ *  that they have not changed for a "long" time, where "long" defaults to
  *  {@link #DEFAULT_MATURE_TIME_IN_MONTHS} and may be specified by the user.  
  *  FIXME: Implement configurability.  
  *  Reports failure if the hash or timestamps of a mature INode indicate that it
