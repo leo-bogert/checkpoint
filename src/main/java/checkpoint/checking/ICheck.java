@@ -4,9 +4,10 @@ import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.ui.shell.CheckCommand;
 
-/** Implementations of this power the {@link CheckCommand} shell command which
- *  compares two checkpoints against each other to check the integrity of your
- *  files.  
+/** Implementations of this, which are contained in the sub-package
+ *  {@link checkpoint.checking.checks}, power the {@link CheckCommand} shell
+ *  command which compares two checkpoints against each other to check the
+ *  integrity of your files.  
  *  For example one ICheck implementation will alert you of files of which the
  *  checksum has changed but the file timestamps did not - which indicates disk
  *  failure.
@@ -15,7 +16,7 @@ import checkpoint.ui.shell.CheckCommand;
  *  being:
  *  - one of a backup of your data.
  *  - one of the current state of your system. */
-interface ICheck {
+public interface ICheck {
 
 	/** Applies the check upon the given {@link INode} of the old
 	 *  {@link ICheckpoint}, in comparison to the new {@link ICheckpoint}.
