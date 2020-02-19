@@ -69,4 +69,9 @@ public abstract class ITimestamps {
 	/** Null if it has been filtered out of the {@link Checkpoint}. */
 	public abstract Date getModificationTime();
 
+	/** Gets the maximum {@link Date#getTime()} of all non-null values of the
+	 *  other getters.  
+	 *  If all are null returns {@link Long#MIN_VALUE}. */
+	public abstract long getLatestTime();
+
 }

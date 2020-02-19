@@ -1,5 +1,6 @@
 package checkpoint.datamodel.implementation;
 
+import static java.lang.Math.max;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
@@ -63,6 +64,14 @@ public final class Timestamps extends ITimestamps {
 	@Override public Date getModificationTime() {
 		// We don't store the Date object because Date is not immutable.
 		return mtime != null ? new Date(mtime.toMillis()) : null;
+	}
+
+	@Override public long getLatestTime() {
+		long latest = Long.MIN_VALUE;
+		if(atime != null) latest =             atime.toMillis() ;
+		if(ctime != null) latest = max(latest, ctime.toMillis());
+		if(mtime != null) latest = max(latest, mtime.toMillis());
+		return latest;
 	}
 
 }

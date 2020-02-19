@@ -2,6 +2,7 @@ package checkpoint.datamodel;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Date;
 
 import checkpoint.datamodel.implementation.Node;
 
@@ -38,6 +39,12 @@ public interface ICheckpoint {
 
 	/** @see #setCompleteFlag(boolean) */
 	boolean isComplete();
+
+	/** Returns the highest {@link Date} found in the
+	 *  {@link INode#getTimetamps()} of all contained {@link INode}s.  
+	 *  If no dates or no nodes are contained a Date with Unix time of 
+	 *  {@link Long#MIN_VALUE} is returned. */
+	Date getDateEstimate();
 
 	int getNodeCount();
 

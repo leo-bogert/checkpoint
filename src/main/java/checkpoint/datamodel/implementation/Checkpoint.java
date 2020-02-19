@@ -3,6 +3,7 @@ package checkpoint.datamodel.implementation;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
@@ -402,6 +403,13 @@ public final class Checkpoint implements ICheckpoint {
 
 	@Override public synchronized boolean isComplete() {
 		return complete;
+	}
+
+	@Override public synchronized Date getDateEstimate() {
+		long latest = Long.MIN_VALUE;
+		for(INode n : nodes.values())
+			latest = max(latest, n.getTimetamps().getLatestTime());
+		return new Date(latest);
 	}
 
 	@Override public synchronized int getNodeCount() {
