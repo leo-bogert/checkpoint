@@ -16,8 +16,10 @@ import checkpoint.datamodel.INode;
  *  changed for a "long" time, where "long" defaults to
  *  {@link #DEFAULT_MATURE_TIME_IN_MONTHS} and may be specified by the user.  
  *  FIXME: Implement configurability.  
- *  Reports failure if the hash of a mature INode indicates that it has changed
- *  in the new checkpoint, or if the INode was deleted. */
+ *  Reports failure if the hash or timestamps of a mature INode indicate that it
+ *  has changed in the new checkpoint, or if the INode was deleted.  
+ *  The timestamps are checked in addition to the hash to ensure mature files
+ *  cannot wrongly become immature by resetting their timestamps by accident. */
 public final class MatureINodeChangedCheck implements ICheck {
 
 	public static final int DEFAULT_MATURE_TIME_IN_MONTHS = 3;
