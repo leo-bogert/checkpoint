@@ -31,6 +31,8 @@ final class InspectCommand extends Command {
 			Path p = Paths.get(args.get(0));
 			Checkpoint cp = Checkpoint.load(p);
 			out.println("Checkpoint loaded successfully.");
+			out.println("Date estimate (latest contained timestamp): "
+				+ cp.getDateEstimate());
 			out.println("Number of nodes: " + cp.getNodeCount());
 			out.println("Hashing failed for: " + cp.getHashingFailureCount());
 			out.println("Timestamping failed for: "
