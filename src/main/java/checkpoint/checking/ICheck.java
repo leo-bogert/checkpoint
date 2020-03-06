@@ -1,5 +1,11 @@
 package checkpoint.checking;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
+import java.util.List;
+
+import checkpoint.checking.checks.*;
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.ui.shell.CheckCommand;
@@ -17,6 +23,17 @@ import checkpoint.ui.shell.CheckCommand;
  *  - one of a backup of your data.
  *  - one of the current state of your system. */
 public interface ICheck {
+
+	/** NOTICE: You MUST add any implementations of this interface to this list
+	 *  to ensure {@link CheckRunner} will use them!
+	 *  TODO: Determine them automatically instead. As of 2020-02-14 Java
+	 *  reflection does not seem capable of this, a library would be needed. */
+	public static final List<Class<? extends ICheck>> IMPLEMENTATIONS
+		= unmodifiableList(asList( /* Unmodifiable for safety */
+			HashCheck.class,
+			ImportantDirChangedCheck.class,
+			MatureINodeChangedCheck.class,
+			TimestampPreservationCheck.class));
 
 	/** Applies the check upon the given {@link INode} of the old
 	 *  {@link ICheckpoint}, in comparison to the new {@link ICheckpoint}.
