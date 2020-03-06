@@ -10,13 +10,17 @@ import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.ui.shell.CheckCommand;
 
-/** Implementations of this, which are contained in the sub-package
- *  {@link checkpoint.checking.checks}, power the {@link CheckCommand} shell
- *  command which compares two checkpoints against each other to check the
- *  integrity of your files.  
- *  For example one ICheck implementation will alert you of files of which the
- *  checksum has changed but the file timestamps did not - which indicates disk
- *  failure.
+/** Implementations of this compare two checkpoints against each other to check
+ *  the integrity of your files and directories.  
+ *  For example {@link HashCheck} will alert you of files of which the checksum
+ *  has changed but the file timestamps did not - which indicates disk failure.
+ *  
+ *  NOTICE: Implementations must be registered at {@value #IMPLEMENTATIONS} to
+ *  be used!
+ *  
+ *  They shall be contained in the package {@link checkpoint.checking.checks}.
+ *  They are run by the {@link CheckRunner} to power the {@link CheckCommand}
+ *  shell command.
  *  
  *  A typical usecase is to run the CheckCommand with the two input checkpoints
  *  being:
