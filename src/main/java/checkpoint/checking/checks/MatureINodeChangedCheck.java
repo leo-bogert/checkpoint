@@ -20,7 +20,9 @@ import checkpoint.datamodel.INode;
  *  Reports failure if the hash or timestamps of a mature INode indicate that it
  *  has changed in the new checkpoint, or if the INode was deleted.  
  *  The timestamps are checked in addition to the hash to ensure mature files
- *  cannot wrongly become immature by resetting their timestamps by accident. */
+ *  cannot wrongly become immature by resetting their timestamps by accident.  
+ *  Also helping you with preservation of your files' timestamps is a design
+ *  goal of checkpoint. */
 public final class MatureINodeChangedCheck implements ICheck {
 
 	public static final int DEFAULT_MATURE_TIME_IN_MONTHS = 3;
