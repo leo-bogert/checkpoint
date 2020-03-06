@@ -37,6 +37,11 @@ public final class CheckCommand extends Command {
 
 	@Override int run(List<String> args) {
 		err.println("FIXME: Not implemented yet!");
+		
+		// FIXME: Print checkpoint.getDateEstimate() for the given old
+		// checkpoint as it is heuristically detected, not stored in the file,
+		// and determines the behavior of MatureINodeChangedCheck.
+		
 		// FIXME: Return 0 once implemented.
 		return 1;
 	}
