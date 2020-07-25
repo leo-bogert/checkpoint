@@ -19,6 +19,7 @@ public final class Shell {
 	private static final List<Class<? extends Command>> commandClasses = asList(
 		CheckFsFeaturesCommand.class,
 		CreateCommand.class,
+		FilterCommand.class,
 		InspectCommand.class,
 		RewriteCommand.class);
 
