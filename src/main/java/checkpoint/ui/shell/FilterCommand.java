@@ -1,8 +1,11 @@
 package checkpoint.ui.shell;
 
+import static java.lang.System.err;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 final class FilterCommand extends Command {
 
@@ -43,6 +46,21 @@ final class FilterCommand extends Command {
 	@Override int run(List<String> args) {
 		// FIXME: Implement
 		return 1;
+	}
+
+	private static void printUsage(JCommander jc) {
+		// TODO: As of 2019-11-11 with JCommander 1.71 JCommander.usage()
+		// will print to stdout, not stderr, which is bad. So we fix that by
+		// using the version which consumes a StringBuilder and printing on our
+		// own. Try again in some years, file a bug if it still is wrong then.
+		StringBuilder sb = new StringBuilder();
+		jc.usage(sb);
+		err.println(sb);
+		
+		err.println(
+		    "Loads a checkpoint from INPUT_CHECKPOINT_DIR, applies the "
+		  + "specified filters to it, and saves it to OUTPUT_CHECKPOINT_DIR if "
+		  + "given or INPUT_CHECKPOINT_DIR otherwise.");
 	}
 
 }
