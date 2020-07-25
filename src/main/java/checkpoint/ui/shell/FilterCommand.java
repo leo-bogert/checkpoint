@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
 final class FilterCommand extends Command {
 
 	@Override String getShortSyntax() {
@@ -44,6 +45,20 @@ final class FilterCommand extends Command {
 	}
 
 	@Override int run(List<String> args) {
+		Options o = new Options();
+		JCommander jc = new JCommander();
+		jc.addObject(o);
+		jc.setProgramName(getCommandName());
+		try {
+			jc.parse(args.toArray(new String[args.size()]));
+			o.validate();
+			args = null; // Prevent accidental usage instead of Options.args
+		} catch(ParameterException | IllegalArgumentException e) {
+			err.println(e.getMessage());
+			err.println();
+			printUsage(jc);
+			return 1;
+		}
 		// FIXME: Implement
 		return 1;
 	}
