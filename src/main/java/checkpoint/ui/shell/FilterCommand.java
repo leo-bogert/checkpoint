@@ -16,14 +16,13 @@ final class FilterCommand extends Command {
 		    "Can be a combination of the letters 'a', 'b', 'c', 'm' without "
 		  + "any separators to remove the atime, btime and so on. "
 		  + "Example: '--remove-timestamps bc'.")
-		String removeTimestamps;
+		String removeTimestamps = ""; // Default is non-null to simplify code.
 
 		@Parameter(description = "INPUT_CHECKPOINT_DIR [OUTPUT_CHECKPOINT_DIR]")
 		List<String> args = new ArrayList<>(2);
 
 		void validate() throws IllegalArgumentException {
-			if(removeTimestamps != null &&
-			  !removeTimestamps.matches("[abcm]{1,4}")) {
+			if(!removeTimestamps.matches("[abcm]{1,4}")) {
 				throw new IllegalArgumentException(
 					"Invalid argument for --remove-timestamps: '"
 					+ removeTimestamps + "'");
