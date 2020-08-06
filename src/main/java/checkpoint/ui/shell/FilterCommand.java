@@ -102,7 +102,10 @@ final class FilterCommand extends Command {
 			}
 		}
 		
-		out.println("Remove timestamps: " + timestampFilter);
+		if(!o.removeTimestamps.isEmpty()) {
+			// Print from what we've parsed to ease spotting bugs.
+			out.println("Remove timestamps: " + timestampFilter);
+		}
 		
 		try {
 			out.print("Loading checkpoint... ");
