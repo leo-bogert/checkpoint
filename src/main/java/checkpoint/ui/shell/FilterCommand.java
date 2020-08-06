@@ -1,13 +1,18 @@
 package checkpoint.ui.shell;
 
 import static java.lang.System.err;
+import static java.lang.System.out;
 
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+
 final class FilterCommand extends Command {
 
 	@Override String getShortSyntax() {
@@ -59,6 +64,25 @@ final class FilterCommand extends Command {
 			printUsage(jc);
 			return 1;
 		}
+		
+		// TODO: Use IStringConverterFactory of JCommander instead of manually
+		// processing paths.
+		Path input;
+		Path output;
+		try {
+			input = Paths.get(o.args.get(0));
+			output = o.args.size() >= 2
+				? Paths.get(o.args.get(1))
+				: input;
+		} catch(InvalidPathException e) {
+			err.println("Invalid path: " + e.getMessage());
+			return 1;
+		}
+
+		out.println("Input:  " + input.toAbsolutePath());
+		out.println("Output: " + output.toAbsolutePath());
+		out.println("Remove timestamps: " + o.removeTimestamps);
+		
 		// FIXME: Implement
 		return 1;
 	}
