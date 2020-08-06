@@ -1,5 +1,9 @@
 package checkpoint.datamodel.implementation;
 
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.AccessTime;
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.BirthTime;
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.ModificationTime;
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.StatusChangeTime;
 import static checkpoint.datamodel.implementation.Node.constructNode;
 import static checkpoint.datamodel.implementation.SHA256.sha256fromString;
 import static checkpoint.datamodel.implementation.Timestamps.timestampsFromDates;
@@ -22,6 +26,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Scanner;
 import java.util.StringTokenizer;
@@ -35,6 +40,7 @@ import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
 import checkpoint.datamodel.ISHA256;
 import checkpoint.datamodel.ITimestamps;
+import checkpoint.datamodel.ITimestamps.TimestampTypes;
 import checkpoint.generation.ConcurrentCheckpointGenerator;
 
 public final class Checkpoint implements ICheckpoint {
@@ -189,8 +195,14 @@ public final class Checkpoint implements ICheckpoint {
 		nodeSize += n.getSize();
 	}
 
-	@Override public synchronized void save(Path checkpointDir)
+	@Override public void save(Path checkpointDir)
 			throws IOException {
+		
+		save(checkpointDir, EnumSet.noneOf(TimestampTypes.class));
+	}
+
+	@Override public synchronized void save(Path checkpointDir,
+			EnumSet<TimestampTypes> timestampsFilter) throws IOException {
 		
 		// FIXME: The creation of the dir and setting of its permissions likely
 		// is not safe against race conditions caused by malicious processes

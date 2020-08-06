@@ -2,7 +2,9 @@ package checkpoint.datamodel;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.EnumSet;
 
+import checkpoint.datamodel.ITimestamps.TimestampTypes;
 import checkpoint.datamodel.implementation.Node;
 
 /** All functions are safe to be called concurrently both with regards to
@@ -21,6 +23,10 @@ public interface ICheckpoint {
 	void addNode(INode n) throws IllegalArgumentException;
 
 	void save(Path checkpointDir) throws IOException;
+
+	/** Will exclude the given {@link TimestampTypes} when saving. */
+	void save(Path checkpointDir, EnumSet<TimestampTypes> timestampsFilter)
+		throws IOException;
 
 	// Java does not support static abstract interface methods, so the following
 	// is required but commented out:
