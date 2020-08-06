@@ -1,5 +1,9 @@
 package checkpoint.ui.shell;
 
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.AccessTime;
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.BirthTime;
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.ModificationTime;
+import static checkpoint.datamodel.ITimestamps.TimestampTypes.StatusChangeTime;
 import static java.lang.System.err;
 import static java.lang.System.out;
 
@@ -7,11 +11,14 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+
+import checkpoint.datamodel.ITimestamps.TimestampTypes;
 
 final class FilterCommand extends Command {
 
@@ -81,7 +88,19 @@ final class FilterCommand extends Command {
 
 		out.println("Input:  " + input.toAbsolutePath());
 		out.println("Output: " + output.toAbsolutePath());
-		out.println("Remove timestamps: " + o.removeTimestamps);
+		
+		EnumSet<TimestampTypes> timestampFilter
+			= EnumSet.noneOf(TimestampTypes.class);
+		for(char c : o.removeTimestamps.toCharArray()) {
+			switch(c) {
+				case 'a': timestampFilter.add(AccessTime);       break;
+				case 'b': timestampFilter.add(BirthTime);        break;
+				case 'c': timestampFilter.add(StatusChangeTime); break;
+				case 'm': timestampFilter.add(ModificationTime); break;
+			}
+		}
+		
+		out.println("Remove timestamps: " + timestampFilter);
 		
 		// FIXME: Implement
 		return 1;
