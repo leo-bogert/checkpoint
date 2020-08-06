@@ -20,8 +20,7 @@ public final class Shell {
 		CheckFsFeaturesCommand.class,
 		CreateCommand.class,
 		FilterCommand.class,
-		InspectCommand.class,
-		RewriteCommand.class);
+		InspectCommand.class);
 
 	private static final Map<String, Command> commandMap
 		= Command.getCommandMap(commandClasses);
