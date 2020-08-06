@@ -7,6 +7,7 @@ import static checkpoint.datamodel.ITimestamps.TimestampTypes.StatusChangeTime;
 import static java.lang.System.err;
 import static java.lang.System.out;
 
+import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,6 +20,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 import checkpoint.datamodel.ITimestamps.TimestampTypes;
+import checkpoint.datamodel.implementation.Checkpoint;
 
 final class FilterCommand extends Command {
 
@@ -102,8 +104,21 @@ final class FilterCommand extends Command {
 		
 		out.println("Remove timestamps: " + timestampFilter);
 		
-		// FIXME: Implement
-		return 1;
+		try {
+			out.print("Loading checkpoint... ");
+			Checkpoint cp = Checkpoint.load(input);
+			out.println("OK");
+			
+			out.print("Saving checkpoint... ");
+			cp.save(output, timestampFilter);
+			out.println("OK");
+			
+			return 0;
+		} catch(IOException e) {
+			err.println("FAILED:");
+			err.println(e);
+			return 1;
+		}
 	}
 
 	private static void printUsage(JCommander jc) {
