@@ -1,5 +1,6 @@
 package checkpoint.datamodel;
 
+import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,7 +30,7 @@ public abstract class ITimestamps {
 	/** All timestamps which could be supported by {@link ITimestamps}
 	 *  implementations.  
 	 *  To be used in an {@link EnumSet} for filtering purposes, see
-	 *  {@link ICheckpoint#save(java.nio.file.Path, EnumSet)}. */
+	 *  {@link ICheckpoint#save(Path, EnumSet)}. */
 	public static enum TimestampTypes {
 		AccessTime,
 		BirthTime,
