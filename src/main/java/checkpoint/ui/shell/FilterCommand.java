@@ -40,7 +40,7 @@ final class FilterCommand extends Command {
 		List<String> args = new ArrayList<>(2);
 
 		void validate() throws IllegalArgumentException {
-			if(!removeTimestamps.matches("[abcm]{1,4}")) {
+			if(!removeTimestamps.matches("[abcm]{0,4}")) {
 				throw new IllegalArgumentException(
 					"Invalid argument for --remove-timestamps: '"
 					+ removeTimestamps + "'");
