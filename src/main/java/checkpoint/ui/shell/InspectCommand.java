@@ -14,7 +14,7 @@ import checkpoint.datamodel.implementation.Checkpoint;
 final class InspectCommand extends Command {
 
 	@Override String getShortSyntax() {
-		return '\t' + getCommandName() + " CHECKPOINT";
+		return '\t' + getCommandName() + " INPUT_CHECKPOINT_DIR";
 	}
 
 	@Override int run(List<String> args) {
