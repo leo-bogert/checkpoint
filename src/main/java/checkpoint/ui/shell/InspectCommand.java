@@ -42,7 +42,7 @@ final class InspectCommand extends Command {
 			return 1;
 		} catch(IOException e) {
 			err.println("Checkpoint cannot be loaded:");
-			e.printStackTrace(err);
+			err.println(e);
 			return 1;
 		}
 	}
