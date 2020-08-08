@@ -259,9 +259,7 @@ public final class Checkpoint implements ICheckpoint {
 					if(!timestampsFilter.contains(BirthTime)) {
 						w.write("\tBirth: ");
 						Date btime = t.getBirthTime();
-						// btime is currently not supported and will always be
-						// null, see ITimestamps.
-						w.write(btime == null ? "-" : dateFormat.format(btime));
+						w.write(btime != null ? dateFormat.format(btime) : "-");
 					}
 					
 					if(!timestampsFilter.contains(AccessTime)) {
