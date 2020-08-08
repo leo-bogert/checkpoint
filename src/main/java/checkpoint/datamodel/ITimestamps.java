@@ -6,8 +6,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.EnumSet;
 
-import checkpoint.datamodel.implementation.Checkpoint;
-
 /** Filesystem timestamps of a file/directory.
  *  Implementations of this must be immutable!
  * 
@@ -46,13 +44,13 @@ public abstract class ITimestamps {
 	*/
 
 	/** Any of the given {@link Date} objects may be null if it has been
-	 *  filtered out of the {@link Checkpoint}. */
+	 *  filtered out of the {@link ICheckpoint}. */
 	/*
 	public abstract static ITimestamps timestampsFromDates(
 			Date atime, Date ctime, Date mtime);
 	*/
 
-	/** Null if it has been filtered out of the {@link Checkpoint}.
+	/** Null if it has been filtered out of the {@link ICheckpoint}.
 	 *  
 	 *  We support including the access time in checkpoints even though
 	 *  generating one will access all files because the access time is a
@@ -76,10 +74,10 @@ public abstract class ITimestamps {
 		return null;
 	}
 
-	/** Null if it has been filtered out of the {@link Checkpoint}. */
+	/** Null if it has been filtered out of the {@link ICheckpoint}. */
 	public abstract Date getStatusChangeTime();
 
-	/** Null if it has been filtered out of the {@link Checkpoint}. */
+	/** Null if it has been filtered out of the {@link ICheckpoint}. */
 	public abstract Date getModificationTime();
 
 }
