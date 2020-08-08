@@ -14,7 +14,7 @@ import checkpoint.datamodel.implementation.Checkpoint;
 final class InspectCommand extends Command {
 
 	@Override String getShortSyntax() {
-		return '\t' + getCommandName() + " CHECKPOINT";
+		return '\t' + getCommandName() + " INPUT_CHECKPOINT_DIR";
 	}
 
 	@Override int run(List<String> args) {
@@ -42,7 +42,7 @@ final class InspectCommand extends Command {
 			return 1;
 		} catch(IOException e) {
 			err.println("Checkpoint cannot be loaded:");
-			e.printStackTrace(err);
+			err.println(e);
 			return 1;
 		}
 	}

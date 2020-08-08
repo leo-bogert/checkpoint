@@ -19,8 +19,8 @@ public final class Shell {
 	private static final List<Class<? extends Command>> commandClasses = asList(
 		CheckFsFeaturesCommand.class,
 		CreateCommand.class,
-		InspectCommand.class,
-		RewriteCommand.class);
+		FilterCommand.class,
+		InspectCommand.class);
 
 	private static final Map<String, Command> commandMap
 		= Command.getCommandMap(commandClasses);
