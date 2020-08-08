@@ -112,7 +112,7 @@ final class FilterCommand extends Command {
 			Checkpoint cp = Checkpoint.load(input);
 			out.println("OK");
 			
-			out.print("Saving checkpoint... ");
+			out.print("Saving checkpoint...  ");
 			cp.save(output, timestampFilter);
 			out.println("OK");
 			
