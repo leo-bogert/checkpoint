@@ -50,7 +50,7 @@ cd checkpoint
 # Optionally if you want to use a stable version of the Java implementation which has
 # been tested with a 200 GB filesystem check out the latest tag which indicates that:
 git tag --list
-git checkout tested-against-last-tag-2020-02-04
+git checkout tested-against-last-tag-2020-08-08
 # Download the key which the source code is signed with.
 gpg --recv-key '1517 3ECB BC72 0C9E F420  5805 B26B E43E 4B5E AD69'
 # If you already have the key you should refresh it before each git pull to ensure
