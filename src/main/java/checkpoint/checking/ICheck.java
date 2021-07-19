@@ -33,7 +33,7 @@ public interface ICheck {
 	 *  TODO: Determine them automatically instead. As of 2020-02-14 Java
 	 *  reflection does not seem capable of this, a library would be needed. */
 	public static final List<Class<? extends ICheck>> IMPLEMENTATIONS
-		= unmodifiableList(asList( /* Unmodifiable for safety */
+		= unmodifiableList(asList(
 			HashCheck.class,
 			ImportantDirChangedCheck.class,
 			MatureINodeChangedCheck.class,
