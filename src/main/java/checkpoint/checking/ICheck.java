@@ -15,17 +15,17 @@ import checkpoint.ui.shell.CheckCommand;
  *  For example {@link HashCheck} will alert you of files of which the checksum
  *  has changed but the file timestamps did not - which indicates disk failure.
  *  
+ *  A typical usecase is to run the {@link CheckCommand} shell command with the
+ *  two input checkpoints being:
+ *  - one of a backup of your data.
+ *  - one of the current state of your system.
+ *  
  *  NOTICE: Implementations must be registered at {@link #IMPLEMENTATIONS} to
  *  be used!
  *  
  *  They shall be contained in the package {@link checkpoint.checking.checks}.
  *  They are run by the {@link CheckRunner} to power the {@link CheckCommand}
- *  shell command.
- *  
- *  A typical usecase is to run the CheckCommand with the two input checkpoints
- *  being:
- *  - one of a backup of your data.
- *  - one of the current state of your system. */
+ *  shell command. */
 public interface ICheck {
 
 	/** NOTICE: You MUST add any implementations of this interface to this list
