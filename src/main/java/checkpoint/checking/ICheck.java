@@ -15,7 +15,7 @@ import checkpoint.ui.shell.CheckCommand;
  *  For example {@link HashCheck} will alert you of files of which the checksum
  *  has changed but the file timestamps did not - which indicates disk failure.
  *  
- *  NOTICE: Implementations must be registered at {@value #IMPLEMENTATIONS} to
+ *  NOTICE: Implementations must be registered at {@link #IMPLEMENTATIONS} to
  *  be used!
  *  
  *  They shall be contained in the package {@link checkpoint.checking.checks}.
