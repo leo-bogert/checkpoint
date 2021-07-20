@@ -60,11 +60,13 @@ public interface ICheckpoint {
 	 *  Implementations should enforce this by containing:
 	 *      assert(Thread.holdsLock(this));
 	 *  
-	 *  TODO: Java 8: Replace with a function which consumes an object which
-	 *  implements a functional interface (see JavaDoc of package
-	 *  java.util.function) and apply the object's functional method upon the
-	 *  map inside of this function instead of having the caller iterate over
-	 *  the map. Then this function can synchronize on its own. */
+	 *  TODO: Java 8: Eliminate the need of callers accessing the map contents
+	 *  directly by replacing this with a function which receives a
+	 *  caller-defined function object and applies that function to the contents
+	 *  of the map.
+	 *  By doing so external synchronization won't be required anymore as the
+	 *  map isn't revealed to the outside.
+	 *  See JavaDoc of package "java.util.function". */
 	SortedMap<Path, INode> getNodes();
 
 	int getHashingFailureCount();
