@@ -11,8 +11,8 @@ import checkpoint.ui.shell.CheckCommand;
  *  TODO: Performance: Multi-threading: As the checks operate on read-only
  *  data (= the input checkpoints) we could easily run them in parallel.
  *  Work-units could be coarsely or finely granular: We could run each check
- *  class in a thread, or we could even change all check classes to considering
- *  each {@link INode} being checked as a work-unit to run in parallel.  
+ *  class in a thread, or we could even consider each {@link INode} being
+ *  checked as a work-unit to run in parallel.  
  *  Add a class ConcurrentCheckRunner to do so, use
  *  {@link ConcurrentCheckpointGenerator} as inspiration. */
 public final class CheckRunner {
