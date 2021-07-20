@@ -14,7 +14,15 @@ import checkpoint.ui.shell.CheckCommand;
  *  class in a thread, or we could even consider each {@link INode} being
  *  checked as a work-unit to run in parallel.  
  *  Add a class ConcurrentCheckRunner to do so, use
- *  {@link ConcurrentCheckpointGenerator} as inspiration. */
+ *  {@link ConcurrentCheckpointGenerator} as inspiration.  
+ *  Notice that we might need a new implementation of {@link ICheckpoint} then:
+ *  The current one, {@link Checkpoint}, is mutable and thus contains lots of
+ *  synchronization. An immutable implementation wouldn't need any sync at
+ *  all. Introduce a new interface IImmutableCheckpoint to extend ICheckpoint
+ *  then.  
+ *  Alternatively just copy all of its data out into a Map<Path, INode>, it
+ *  provides the getter {@link ICheckpoint#getNodes()} to access its internal
+ *  map of that type already anyway. */
 public final class CheckRunner {
 
 	private final ICheckpoint oldCheckpoint;
