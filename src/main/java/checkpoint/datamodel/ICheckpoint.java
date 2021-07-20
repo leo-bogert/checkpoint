@@ -3,6 +3,7 @@ package checkpoint.datamodel;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Date;
+import java.util.SortedMap;
 
 import checkpoint.datamodel.implementation.Node;
 
@@ -53,6 +54,18 @@ public interface ICheckpoint {
 	 *  because we don't include it in the file format yet. A TODO for that
 	 *  exists at {@link INode#getSize()}. */
 	long getNodeSize();
+
+	/** NOTICE: You MUST synchronize on this ICheckpoint object while accessing
+	 *  the returned map!
+	 *  Implementations should enforce this by containing:
+	 *      assert(Thread.holdsLock(this));
+	 *  
+	 *  TODO: Java 8: Replace with a function which consumes an object which
+	 *  implements a functional interface (see JavaDoc of package
+	 *  java.util.function) and apply the object's functional method upon the
+	 *  map inside of this function instead of having the caller iterate over
+	 *  the map. Then this function can synchronize on its own. */
+	SortedMap<Path, INode> getNodes();
 
 	int getHashingFailureCount();
 

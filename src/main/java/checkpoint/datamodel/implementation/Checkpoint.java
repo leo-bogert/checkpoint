@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.SortedMap;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
@@ -418,6 +419,11 @@ public final class Checkpoint implements ICheckpoint {
 
 	@Override public synchronized long getNodeSize() {
 		return nodeSize;
+	}
+
+	@Override public SortedMap<Path, INode> getNodes() {
+		assert(Thread.holdsLock(this));
+		return nodes;
 	}
 
 	@Override public synchronized int getHashingFailureCount() {
