@@ -10,7 +10,11 @@ import checkpoint.datamodel.INode;
  *  their {@link INode#getTimetamps()} did change.  
  *  This indicates that something destroyed your file timestamps for no good
  *  reasons, such as copying a filesystem without the `--archive` argument to
- *  `cp`. */
+ *  `cp`.
+ *  
+ *  FIXME: We could also check timestamp preservation of directories by checking
+ *  if the set of contained files/dirs changed. If it did not change then there
+ *  is no reason for the directory timestamp to have changed. */
 public final class TimestampPreservationCheck implements ICheck {
 
 	@Override public void apply(
