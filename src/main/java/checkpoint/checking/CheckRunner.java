@@ -2,6 +2,7 @@ package checkpoint.checking;
 
 import checkpoint.datamodel.ICheckpoint;
 import checkpoint.datamodel.INode;
+import checkpoint.datamodel.implementation.Checkpoint;
 import checkpoint.generation.ConcurrentCheckpointGenerator;
 import checkpoint.ui.shell.CheckCommand;
 
