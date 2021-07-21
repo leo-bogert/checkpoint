@@ -12,6 +12,8 @@ import checkpoint.datamodel.INode;
  *  reasons, such as copying a filesystem without the `--archive` argument to
  *  `cp`.
  *  
+ *  FIXME: Rename to `FileTimestampPreservationCheck` to reflect that it does
+ *  not check directories.  
  *  FIXME: We could also check timestamp preservation of directories by checking
  *  if the set of contained files/dirs changed. If it did not change then there
  *  is no reason for the directory timestamp to have changed. */
