@@ -14,7 +14,9 @@ import java.util.Map;
  *  {@link #getCommandName()} uses the class name to automatically compute the
  *  command name. The case needs not to be lower/upper, it will be ignored.
  *  If you want the name to be different from the class name then override
- *  {@link #getCommandName()}. */
+ *  {@link #getCommandName()}.
+ *  
+ *  TODO: Move child classes to package `checkpoint.ui.shell.commands`. */
 abstract class Command {
 
 	String getCommandName() {
