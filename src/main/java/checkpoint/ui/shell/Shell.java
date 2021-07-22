@@ -10,12 +10,19 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import checkpoint.checking.ICheck;
+
 /** The terminal user interface. */
 public final class Shell {
 
 	/** To add a new shell {@link Command} all you need to do is to add its
 	 *  class to this list. The following code will automatically construct an
-	 *  object of it and register its name for usage. */
+	 *  object of it and register its name for usage.
+	 *  
+	 *  TODO: Move to {@link Command}, call it IMPLEMENTATIONS there, wrap it
+	 *  in unmodifiableList().  
+	 *  Document it similar to {@link ICheck#IMPLEMENTATIONS}, also mention it
+	 *  at the class-level JavaDoc like at ICheck. */
 	private static final List<Class<? extends Command>> commandClasses = asList(
 		CheckCommand.class,
 		CheckFsFeaturesCommand.class,
