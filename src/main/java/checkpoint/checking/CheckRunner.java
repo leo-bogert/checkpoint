@@ -36,7 +36,7 @@ public final class CheckRunner {
 
 	/** Returns true if all {@link ICheck}s succeeded, false if any of them
 	 *  indicated failure. */
-	public boolean run() {
+	public boolean run() throws InterruptedException {
 		throw new UnsupportedOperationException("FIXME: Not implemented yet!");
 	}
 
