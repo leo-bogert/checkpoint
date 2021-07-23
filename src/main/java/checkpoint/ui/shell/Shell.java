@@ -12,7 +12,20 @@ import java.util.TreeMap;
 
 import checkpoint.checking.ICheck;
 
-/** The terminal user interface. */
+/** The terminal user interface.
+ * 
+ *  FIXME: CreateCommand and CheckCommand support obeying
+ *  {@link Thread#interrupt()} because they might take a very long time to
+ *  execute.  
+ *  Check if CTRL+C actually does interrupt their threads.  
+ *  If not, register a SIGINT handler and deploy InterruptedException on our
+ *  own to support graceful shutdown of these operations.  
+ *  Notice: Some brief web searching shows that CTRL+C will just kill the JVM
+ *  by default, so a SIGINT handler is probably necessary.  
+ *  **EDIT:** A shutdown hook will likely be easier to add. The open question is
+ *  if the JVM will give the hook infinite time to wait for it to terminate
+ *  other threads, or if the JVM is killed after a short delay.
+ *  Test that. */
 public final class Shell {
 
 	/** To add a new shell {@link Command} all you need to do is to add its
