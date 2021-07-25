@@ -5,7 +5,7 @@ package checkpoint.checking;
 @SuppressWarnings("serial")
 public final class CheckFailedException extends Exception {
 
-	CheckFailedException(String message) {
+	public CheckFailedException(String message) {
 		// TODO: Performance: Check if omitting the stack trace by using this
 		// appropriate super constructor yields any noticeable benefit for
 		// checkpoints with many failed checks:
