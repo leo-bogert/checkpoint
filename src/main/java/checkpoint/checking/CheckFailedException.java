@@ -1,5 +1,7 @@
 package checkpoint.checking;
 
+import static java.util.Objects.requireNonNull;
+
 import checkpoint.datamodel.INode;
 
 /** Thrown when an {@link ICheck} fails.  
@@ -20,7 +22,7 @@ public final class CheckFailedException extends Exception {
 		// may still run even if we tell the above constructor that the
 		// stack trace is not writable - I did not check in detail what runs
 		// that code path.
-		super(message);
+		super(requireNonNull(message));
 	}
 
 }
